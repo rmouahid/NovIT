@@ -1,5 +1,3 @@
-import sys
-
 from loguru import logger
 from mcp.server import Server
 from mcp.server.stdio import stdio_server
@@ -8,6 +6,7 @@ from mcp.types import (
     Tool,
 )
 
+from config.settings import get_settings
 from src.mcp.errors import NovitError
 from src.mcp.handlers import (
     handle_get_by_domain,
@@ -15,6 +14,7 @@ from src.mcp.handlers import (
     handle_get_profile,
     handle_search,
 )
+from src.mcp.logging_config import configure_logging
 from src.mcp.schemas import (
     GetByDomainInput,
     GetNewsInput,
@@ -22,8 +22,12 @@ from src.mcp.schemas import (
     SearchInput,
 )
 
-logger.remove()
-logger.add(sys.stderr, level="INFO", format="{time} | {level} | {message}")
+_settings = get_settings()
+configure_logging(
+    log_level=_settings.log_level,
+    log_dir=_settings.log_dir,
+    is_production=_settings.is_production,
+)
 
 app = Server("novit")
 
