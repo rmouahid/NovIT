@@ -14,6 +14,7 @@ from src.mcp.handlers import (
     handle_get_profile,
     handle_search,
 )
+from src.mcp.health import get_cache_health, get_health, get_sources_health
 from src.mcp.logging_config import configure_logging
 from src.mcp.schemas import (
     GetByDomainInput,
@@ -118,6 +119,21 @@ TOOLS: list[Tool] = [
             "required": ["profil"],
         },
     ),
+    Tool(
+        name="novit_health",
+        description="Retourne l'état de santé du serveur NovIT (uptime, cache, sources).",
+        inputSchema={
+            "type": "object",
+            "properties": {
+                "detail": {
+                    "type": "string",
+                    "enum": ["global", "sources", "cache"],
+                    "default": "global",
+                    "description": "Niveau de détail du rapport",
+                }
+            },
+        },
+    ),
 ]
 
 
@@ -138,6 +154,17 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
             result = await handle_get_by_domain(GetByDomainInput(**arguments))
         elif name == "novit_get_profile":
             result = await handle_get_profile(GetProfileInput(**arguments))
+        elif name == "novit_health":
+            detail = arguments.get("detail", "global")
+            if detail == "sources":
+                sources = await get_sources_health()
+                result = "\n".join(f"- {'✅' if s.available else '❌'} {s.name}" for s in sources) or "Aucune source enregistrée."
+            elif detail == "cache":
+                stats = await get_cache_health()
+                result = "\n".join(f"- {k}: {v}" for k, v in stats.items())
+            else:
+                report = await get_health()
+                result = report.to_text()
         else:
             result = f"Outil inconnu : {name}"
         return [TextContent(type="text", text=result)]
