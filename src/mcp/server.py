@@ -17,6 +17,7 @@ from src.mcp.handlers import (
 from src.mcp.daily import build_daily_summary
 from src.mcp.trends import detect_trends
 from src.mcp.onboarding import start_novit
+from src.mcp.profile_selector import get_current_profile, select_profile
 from src.mcp.unusual import get_unusual
 from src.mcp.dig import dig_url
 from src.mcp.related import find_related
@@ -126,6 +127,17 @@ TOOLS: list[Tool] = [
         },
     ),
     Tool(
+        name="novit_set_profile",
+        description="Change le profil actif NovIT (ETUDIANT ou INGENIEUR) et le persiste.",
+        inputSchema={
+            "type": "object",
+            "properties": {
+                "profil": {"type": "string", "enum": ["ETUDIANT", "INGENIEUR"], "description": "Profil à activer"},
+            },
+            "required": ["profil"],
+        },
+    ),
+    Tool(
         name="novit_start",
         description="Initialise NovIT : sélection du profil, menu de bienvenue personnalisé.",
         inputSchema={
@@ -227,6 +239,8 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
             result = await handle_get_by_domain(GetByDomainInput(**arguments))
         elif name == "novit_get_profile":
             result = await handle_get_profile(GetProfileInput(**arguments))
+        elif name == "novit_set_profile":
+            result = await select_profile(arguments.get("profil", ""))
         elif name == "novit_start":
             result = await start_novit(profil=arguments.get("profil"))
         elif name == "novit_unusual":
