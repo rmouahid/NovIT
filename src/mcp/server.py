@@ -15,6 +15,7 @@ from src.mcp.handlers import (
     handle_search,
 )
 from src.mcp.dig import dig_url
+from src.mcp.related import find_related
 from src.mcp.health import get_cache_health, get_health, get_sources_health
 from src.mcp.logging_config import configure_logging
 from src.mcp.schemas import (
@@ -121,6 +122,19 @@ TOOLS: list[Tool] = [
         },
     ),
     Tool(
+        name="novit_related",
+        description="Trouve des articles similaires à un article donné (par URL ou titre).",
+        inputSchema={
+            "type": "object",
+            "properties": {
+                "url": {"type": "string", "description": "URL de l'article de référence"},
+                "title": {"type": "string", "description": "Titre de l'article (utilisé si URL absente)"},
+                "domaines": {"type": "array", "items": {"type": "string"}, "description": "Domaines de l'article"},
+                "top_k": {"type": "integer", "default": 5, "description": "Nombre d'articles similaires à retourner"},
+            },
+        },
+    ),
+    Tool(
         name="novit_dig",
         description="Récupère et extrait le contenu complet d'un article à partir de son URL.",
         inputSchema={
@@ -166,6 +180,13 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
             result = await handle_get_by_domain(GetByDomainInput(**arguments))
         elif name == "novit_get_profile":
             result = await handle_get_profile(GetProfileInput(**arguments))
+        elif name == "novit_related":
+            result = await find_related(
+                url=arguments.get("url", ""),
+                title=arguments.get("title", ""),
+                domains=arguments.get("domaines", []),
+                top_k=arguments.get("top_k", 5),
+            )
         elif name == "novit_dig":
             result = await dig_url(arguments.get("url", ""))
         elif name == "novit_health":
