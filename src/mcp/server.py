@@ -16,6 +16,7 @@ from src.mcp.handlers import (
 )
 from src.mcp.daily import build_daily_summary
 from src.mcp.trends import detect_trends
+from src.mcp.domain_selector import list_domains, set_domains
 from src.mcp.onboarding import start_novit
 from src.mcp.profile_selector import get_current_profile, select_profile
 from src.mcp.unusual import get_unusual
@@ -124,6 +125,22 @@ TOOLS: list[Tool] = [
                 }
             },
             "required": ["profil"],
+        },
+    ),
+    Tool(
+        name="novit_set_domains",
+        description="Définit les domaines actifs pour la session NovIT (ia, securite, dev, ingenierie, reglementation, formation).",
+        inputSchema={
+            "type": "object",
+            "properties": {
+                "domaines": {
+                    "oneOf": [
+                        {"type": "string", "description": "Ex: 'ia, securite' ou 'tout'"},
+                        {"type": "array", "items": {"type": "string"}},
+                    ]
+                },
+            },
+            "required": ["domaines"],
         },
     ),
     Tool(
@@ -239,6 +256,9 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
             result = await handle_get_by_domain(GetByDomainInput(**arguments))
         elif name == "novit_get_profile":
             result = await handle_get_profile(GetProfileInput(**arguments))
+        elif name == "novit_set_domains":
+            raw = arguments.get("domaines", "tout")
+            result = await set_domains(raw)
         elif name == "novit_set_profile":
             result = await select_profile(arguments.get("profil", ""))
         elif name == "novit_start":
