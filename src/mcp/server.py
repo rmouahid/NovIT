@@ -15,6 +15,7 @@ from src.mcp.handlers import (
     handle_search,
 )
 from src.mcp.daily import build_daily_summary
+from src.mcp.trends import detect_trends
 from src.mcp.dig import dig_url
 from src.mcp.related import find_related
 from src.mcp.health import get_cache_health, get_health, get_sources_health
@@ -123,6 +124,17 @@ TOOLS: list[Tool] = [
         },
     ),
     Tool(
+        name="novit_trends",
+        description="Détecte les sujets tendance et les thèmes en montée rapide sur les 7 derniers jours.",
+        inputSchema={
+            "type": "object",
+            "properties": {
+                "days": {"type": "integer", "default": 7, "description": "Fenêtre d'analyse en jours"},
+                "top_k": {"type": "integer", "default": 10, "description": "Nombre de tendances à afficher"},
+            },
+        },
+    ),
+    Tool(
         name="novit_daily",
         description="Génère le résumé de veille quotidien NovIT, groupé par domaine.",
         inputSchema={
@@ -193,6 +205,11 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
             result = await handle_get_by_domain(GetByDomainInput(**arguments))
         elif name == "novit_get_profile":
             result = await handle_get_profile(GetProfileInput(**arguments))
+        elif name == "novit_trends":
+            result = await detect_trends(
+                days=arguments.get("days", 7),
+                top_k=arguments.get("top_k", 10),
+            )
         elif name == "novit_daily":
             from src.profiles.profile import get_profile as _gp
             _profile = _gp(arguments.get("profil", "ETUDIANT"))
