@@ -14,6 +14,7 @@ from src.mcp.handlers import (
     handle_get_profile,
     handle_search,
 )
+from src.mcp.dig import dig_url
 from src.mcp.health import get_cache_health, get_health, get_sources_health
 from src.mcp.logging_config import configure_logging
 from src.mcp.schemas import (
@@ -120,6 +121,17 @@ TOOLS: list[Tool] = [
         },
     ),
     Tool(
+        name="novit_dig",
+        description="Récupère et extrait le contenu complet d'un article à partir de son URL.",
+        inputSchema={
+            "type": "object",
+            "properties": {
+                "url": {"type": "string", "description": "URL de l'article à lire"}
+            },
+            "required": ["url"],
+        },
+    ),
+    Tool(
         name="novit_health",
         description="Retourne l'état de santé du serveur NovIT (uptime, cache, sources).",
         inputSchema={
@@ -154,6 +166,8 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
             result = await handle_get_by_domain(GetByDomainInput(**arguments))
         elif name == "novit_get_profile":
             result = await handle_get_profile(GetProfileInput(**arguments))
+        elif name == "novit_dig":
+            result = await dig_url(arguments.get("url", ""))
         elif name == "novit_health":
             detail = arguments.get("detail", "global")
             if detail == "sources":
