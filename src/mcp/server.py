@@ -14,6 +14,7 @@ from src.mcp.handlers import (
     handle_get_profile,
     handle_search,
 )
+from src.mcp.daily import build_daily_summary
 from src.mcp.dig import dig_url
 from src.mcp.related import find_related
 from src.mcp.health import get_cache_health, get_health, get_sources_health
@@ -122,6 +123,18 @@ TOOLS: list[Tool] = [
         },
     ),
     Tool(
+        name="novit_daily",
+        description="Génère le résumé de veille quotidien NovIT, groupé par domaine.",
+        inputSchema={
+            "type": "object",
+            "properties": {
+                "profil": {"type": "string", "enum": ["ETUDIANT", "INGENIEUR"]},
+                "domaines": {"type": "array", "items": {"type": "string"}},
+            },
+            "required": ["profil"],
+        },
+    ),
+    Tool(
         name="novit_related",
         description="Trouve des articles similaires à un article donné (par URL ou titre).",
         inputSchema={
@@ -180,6 +193,10 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
             result = await handle_get_by_domain(GetByDomainInput(**arguments))
         elif name == "novit_get_profile":
             result = await handle_get_profile(GetProfileInput(**arguments))
+        elif name == "novit_daily":
+            from src.profiles.profile import get_profile as _gp
+            _profile = _gp(arguments.get("profil", "ETUDIANT"))
+            result = await build_daily_summary(_profile, domaines=arguments.get("domaines"))
         elif name == "novit_related":
             result = await find_related(
                 url=arguments.get("url", ""),
