@@ -16,6 +16,7 @@ from src.mcp.handlers import (
 )
 from src.mcp.daily import build_daily_summary
 from src.mcp.trends import detect_trends
+from src.mcp.unusual import get_unusual
 from src.mcp.dig import dig_url
 from src.mcp.related import find_related
 from src.mcp.health import get_cache_health, get_health, get_sources_health
@@ -124,6 +125,16 @@ TOOLS: list[Tool] = [
         },
     ),
     Tool(
+        name="novit_unusual",
+        description="Découvrez des articles insolites et hors des sentiers battus (profil ETUDIANT).",
+        inputSchema={
+            "type": "object",
+            "properties": {
+                "count": {"type": "integer", "default": 3, "description": "Nombre d'articles insolites (1-5)"},
+            },
+        },
+    ),
+    Tool(
         name="novit_trends",
         description="Détecte les sujets tendance et les thèmes en montée rapide sur les 7 derniers jours.",
         inputSchema={
@@ -205,6 +216,8 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
             result = await handle_get_by_domain(GetByDomainInput(**arguments))
         elif name == "novit_get_profile":
             result = await handle_get_profile(GetProfileInput(**arguments))
+        elif name == "novit_unusual":
+            result = await get_unusual(count=arguments.get("count", 3))
         elif name == "novit_trends":
             result = await detect_trends(
                 days=arguments.get("days", 7),
