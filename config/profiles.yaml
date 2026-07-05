@@ -1,0 +1,44 @@
+profiles:
+  ETUDIANT:
+    label: "Étudiant en informatique"
+    description: "Ton pédagogique, vulgarisation, découvertes, enthousiasme"
+    sources_prioritaires:
+      - hacker_news
+      - dev_to
+      - freecodecamp
+      - arxiv
+      - the_verge
+      - techcrunch
+    domaines_favoris:
+      - ia
+      - dev
+      - formation
+    domaines_secondaires:
+      - ingenierie
+      - securite
+    niveau_detail: court
+    score_min: 0.3
+    nb_articles_defaut: 10
+
+  INGENIEUR:
+    label: "Ingénieur logiciel"
+    description: "Ton professionnel, concis, technique, précis"
+    sources_prioritaires:
+      - github_trending
+      - cve_nvd
+      - anssi_cert
+      - netflix_tech
+      - google_eng
+      - meta_eng
+      - the_new_stack
+      - papers_with_code
+    domaines_favoris:
+      - securite
+      - ingenierie
+      - ia
+      - dev
+    domaines_secondaires:
+      - reglementation
+    niveau_detail: detaille
+    score_min: 0.4
+    nb_articles_defaut: 15
