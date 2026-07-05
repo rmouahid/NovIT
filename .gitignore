@@ -112,3 +112,6 @@ Thumbs.db
 .vscode/
 *.swp
 *.swo
+
+# Préférences utilisateur NovIT
+.novit_prefs.json
