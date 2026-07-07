@@ -9,6 +9,11 @@ Merci de vouloir contribuer à NovIT ! Ce guide explique comment soumettre des b
 1. **Lisez le [README](README.md)** pour comprendre le projet.
 2. **Cherchez dans les [issues](https://github.com/LePhyX/NovIT/issues)** si votre sujet n'existe pas déjà.
 3. Pour les changements importants, **ouvrez d'abord une issue** pour en discuter.
+4. Ce projet suit un [Code de conduite](CODE_OF_CONDUCT.md) — merci de le respecter dans tous
+   les échanges (issues, PR, discussions).
+
+Pour les rôles (mainteneur/reviewer/contributeur) et le processus de release, voir
+[GOVERNANCE.md](GOVERNANCE.md).
 
 ---
 

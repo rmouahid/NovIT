@@ -163,7 +163,7 @@ ruff check src/ tests/
 - [Exemples de requêtes](docs/EXAMPLES.md) (par profil, question → réponse attendue)
 - [Guide de prompting](docs/PROMPTING_GUIDE.md)
 - [Architecture](docs/ARCHITECTURE.md) · [Décisions d'architecture (ADR)](docs/ADR/)
-- [Guide de contribution](CONTRIBUTING.md)
+- [Guide de contribution](CONTRIBUTING.md) · [Gouvernance](GOVERNANCE.md) · [Code de conduite](CODE_OF_CONDUCT.md)
 - [Roadmap](docs/ROADMAP.md)
 - [Changelog](CHANGELOG.md)
 
