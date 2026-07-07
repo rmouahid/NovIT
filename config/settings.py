@@ -46,6 +46,11 @@ class Settings(BaseSettings):
         default=0.0, ge=0.0, le=1.0, validation_alias="SENTRY_TRACES_SAMPLE_RATE"
     )
 
+    # Clés API externes (rotatives — voir docs/SECRET_ROTATION.md).
+    # Pas de préfixe NOVIT_ : ce sont les noms des clés côté fournisseur.
+    nvd_api_key: str = Field(default="", validation_alias="NVD_API_KEY")
+    github_token: str = Field(default="", validation_alias="GITHUB_TOKEN")
+
     @field_validator("log_level", mode="before")
     @classmethod
     def normalize_log_level(cls, v: str) -> str:
@@ -64,3 +69,15 @@ class Settings(BaseSettings):
 def get_settings() -> Settings:
     """Retourne l'instance de configuration (singleton mis en cache)."""
     return Settings()
+
+
+def reload_settings() -> Settings:
+    """Invalide le cache de configuration et relit .env/l'environnement.
+
+    Permet de faire tourner une clé API (NVD_API_KEY, GITHUB_TOKEN...) sans
+    redémarrer le serveur : mettre à jour .env (ou la variable d'env), puis
+    appeler reload_settings(). Les prochains appels aux scrapers concernés
+    liront la nouvelle valeur — voir docs/SECRET_ROTATION.md.
+    """
+    get_settings.cache_clear()
+    return get_settings()

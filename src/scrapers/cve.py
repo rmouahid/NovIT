@@ -1,10 +1,10 @@
-import os
 from datetime import UTC, datetime, timedelta
 
 import feedparser
 import httpx
 from loguru import logger
 
+from config.settings import get_settings
 from src.scrapers.base import Article, BaseScraper
 
 NVD_API_URL = "https://services.nvd.nist.gov/rest/json/cves/2.0"
@@ -39,7 +39,6 @@ class CVEScraper(BaseScraper):
     def __init__(self, min_cvss: float = 7.0, days_back: int = 7):
         self.min_cvss = min_cvss
         self.days_back = days_back
-        self._api_key = os.getenv("NVD_API_KEY", "")
 
     async def fetch(self) -> list[Article]:
         since = datetime.now(tz=UTC) - timedelta(days=self.days_back)
@@ -52,9 +51,13 @@ class CVEScraper(BaseScraper):
             "cvssV3Severity": "HIGH",
             "resultsPerPage": 50,
         }
+        # Lue à chaque appel (pas mise en cache sur l'instance) : une rotation
+        # de NVD_API_KEY + reload_settings() prend effet dès le prochain fetch(),
+        # sans redémarrage du serveur. Voir docs/SECRET_ROTATION.md.
         headers = {}
-        if self._api_key:
-            headers["apiKey"] = self._api_key
+        api_key = get_settings().nvd_api_key
+        if api_key:
+            headers["apiKey"] = api_key
 
         logger.debug(f"[{self.name}] Requête NVD API (CVSS >= {self.min_cvss})")
 
