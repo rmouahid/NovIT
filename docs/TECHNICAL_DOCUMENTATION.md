@@ -173,6 +173,16 @@ breaker (`circuit_breaker.py`) et le monitoring (`monitoring.py`) existent et so
 indépendamment, mais ne sont pas encore appelés depuis `health.py`/`ScraperManager` — c'est une
 dette connue, pas un bug caché.
 
+### Monitoring d'erreurs (Sentry)
+
+Optionnel, désactivé par défaut. Renseigner `SENTRY_DSN` dans `.env` (voir `.env.example`)
+pour l'activer — sans DSN, `init_sentry()` (`src/mcp/sentry_config.py`) ne fait rien, aucun
+appel réseau. Toute exception non gérée dans `call_tool()` (`src/mcp/server.py`) est envoyée
+avec un contexte enrichi : nom de l'outil MCP, profil et domaine (tags `mcp_tool`,
+`novit_profil`, `novit_domaine`), arguments complets en contexte. `NOVIT_ENV` détermine
+l'environnement Sentry (`development`/`staging`/`production`). `SENTRY_TRACES_SAMPLE_RATE`
+(0.0 par défaut) contrôle le tracing de performance, indépendant de la capture d'erreurs.
+
 ### Erreurs NovIT
 
 Chaque erreur applicative est un `NovitError(code, message)` (`src/mcp/errors.py`), converti en

@@ -20,6 +20,9 @@ cachetools>=5.3.0
 # Logging
 loguru>=0.7.0
 
+# Monitoring d'erreurs (optionnel — actif seulement si SENTRY_DSN est défini)
+sentry-sdk>=2.5.0
+
 # Stockage
 aiosqlite>=0.20.0
 

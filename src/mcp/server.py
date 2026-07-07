@@ -28,6 +28,7 @@ from src.mcp.schemas import (
     GetProfileInput,
     SearchInput,
 )
+from src.mcp.sentry_config import capture_tool_error, init_sentry
 from src.mcp.trends import detect_trends
 from src.mcp.unusual import get_unusual
 
@@ -36,6 +37,11 @@ configure_logging(
     log_level=_settings.log_level,
     log_dir=_settings.log_dir,
     is_production=_settings.is_production,
+)
+init_sentry(
+    dsn=_settings.sentry_dsn,
+    environment=_settings.env,
+    traces_sample_rate=_settings.sentry_traces_sample_rate,
 )
 
 app = Server("novit")
@@ -343,6 +349,7 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
         return [TextContent(type="text", text=e.to_mcp_error())]
     except Exception as e:
         logger.exception(f"Erreur inattendue dans {name}")
+        capture_tool_error(e, tool_name=name, arguments=arguments)
         return [TextContent(type="text", text=f"Erreur interne NovIT : {e}")]
 
 

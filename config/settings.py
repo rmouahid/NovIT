@@ -39,6 +39,13 @@ class Settings(BaseSettings):
     # Profil par défaut
     default_profile: Literal["ETUDIANT", "INGENIEUR"] = "ETUDIANT"
 
+    # Monitoring d'erreurs (Sentry) — désactivé si sentry_dsn est vide.
+    # Pas de préfixe NOVIT_ : convention Sentry standard, cf. .env.example.
+    sentry_dsn: str = Field(default="", validation_alias="SENTRY_DSN")
+    sentry_traces_sample_rate: float = Field(
+        default=0.0, ge=0.0, le=1.0, validation_alias="SENTRY_TRACES_SAMPLE_RATE"
+    )
+
     @field_validator("log_level", mode="before")
     @classmethod
     def normalize_log_level(cls, v: str) -> str:
