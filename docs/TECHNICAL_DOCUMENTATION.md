@@ -84,7 +84,8 @@ class BaseScraper(ABC):
 | `storage.py` | `ArticleStore` : persistance SQLite async (`aiosqlite`), rétention configurable, recherche plein texte `LIKE`. |
 | `tagger.py` | `DomainTagger` : enrichit `article.domains` par mots-clés (`config/domains.yaml`), sans jamais écraser les tags déjà posés par le scraper. |
 | `queue.py`, `rate_limiter.py` | File d'attente de scraping à 3 niveaux de priorité, limiteur de débit par source. |
-| `_template.py` | Squelette à copier pour ajouter une nouvelle source. |
+| `_template.py` | Squelette à copier pour ajouter une nouvelle source dans le dépôt. |
+| `plugins.py` | `discover_plugin_scrapers()` : charge dynamiquement des scrapers `BaseScraper` déposés dans `NOVIT_PLUGINS_DIR` (`plugins/`, non versionné), sans modifier le dépôt. Voir [PLUGINS.md](PLUGINS.md). |
 
 ### `src/profiles/` — Filtrage et scoring
 

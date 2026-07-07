@@ -161,6 +161,7 @@ ruff check src/ tests/
 - [Guide d'installation complet](docs/INSTALLATION_GUIDE.md)
 - [Documentation technique](docs/TECHNICAL_DOCUMENTATION.md) (modules, outils MCP, débogage)
 - [Exemples de requêtes](docs/EXAMPLES.md) (par profil, question → réponse attendue)
+- [Système de plugins de scrapers](docs/PLUGINS.md) (ajouter une source sans toucher au dépôt)
 - [Guide de prompting](docs/PROMPTING_GUIDE.md)
 - [Architecture](docs/ARCHITECTURE.md) · [Décisions d'architecture (ADR)](docs/ADR/)
 - [Guide de contribution](CONTRIBUTING.md) · [Gouvernance](GOVERNANCE.md) · [Code de conduite](CODE_OF_CONDUCT.md)

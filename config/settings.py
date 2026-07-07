@@ -36,6 +36,9 @@ class Settings(BaseSettings):
     user_agent: str = "NovIT/0.1.0 (veille technologique MCP)"
     retention_days: int = Field(default=7, ge=1)
 
+    # Dossier de scrapers plugin (voir docs/PLUGINS.md) — vide/inexistant = aucun plugin chargé.
+    plugins_dir: str = "plugins"
+
     # Profil par défaut
     default_profile: Literal["ETUDIANT", "INGENIEUR"] = "ETUDIANT"
 

@@ -1,7 +1,8 @@
 # Ajouter une nouvelle source — NovIT
 
-Deux cas selon le type de source : **flux RSS standard** (le cas le plus courant) ou
-**API/format propre** (nécessite un scraper dédié).
+Trois cas selon le type de source et si vous contribuez au dépôt : **flux RSS standard** (le
+cas le plus courant), **API/format propre** (nécessite un scraper dédié, contribué au dépôt),
+ou **plugin externe** (sans toucher au dépôt — voir [PLUGINS.md](PLUGINS.md)).
 
 ---
 
@@ -108,3 +109,12 @@ pytest tests/test_integration.py -v
       en nécessite une.
 - [ ] Enregistré dans `ScraperManager._build_all_scrapers()` (cas 2 uniquement).
 - [ ] `black`, `isort`, `ruff` passent (`pre-commit run --all-files`).
+
+---
+
+## Cas 3 — Plugin externe (sans contribuer au dépôt)
+
+Même contrat `BaseScraper` que le Cas 2, mais déposé dans un dossier local
+(`NOVIT_PLUGINS_DIR`, `plugins/` par défaut) plutôt que dans `src/scrapers/` — chargé
+dynamiquement, sans PR ni modification du dépôt NovIT. Voir le guide complet :
+[PLUGINS.md](PLUGINS.md).

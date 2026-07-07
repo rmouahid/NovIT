@@ -4,12 +4,14 @@ from datetime import UTC, datetime
 
 from loguru import logger
 
+from config.settings import get_settings
 from src.scrapers.ai_blogs import build_ai_scrapers
 from src.scrapers.base import Article, BaseScraper
 from src.scrapers.cve import ANSSIScraper, CVEScraper
 from src.scrapers.eng_blogs import build_eng_scrapers
 from src.scrapers.github_trending import GitHubTrendingScraper
 from src.scrapers.hacker_news import HackerNewsScraper
+from src.scrapers.plugins import discover_plugin_scrapers
 from src.scrapers.regulation import build_regulation_scrapers
 from src.scrapers.rss import build_rss_scrapers
 from src.scrapers.training import build_training_scrapers
@@ -65,6 +67,7 @@ class ScraperManager:
         scrapers.extend(build_eng_scrapers())
         scrapers.extend(build_regulation_scrapers())
         scrapers.extend(build_training_scrapers())
+        scrapers.extend(discover_plugin_scrapers(get_settings().plugins_dir))
         return scrapers
 
     def reload_sources(self) -> int:
