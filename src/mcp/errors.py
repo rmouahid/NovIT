@@ -16,7 +16,7 @@ class NovitError(Exception):
     def __init__(self, code: NovitErrorCode, message: str):
         self.code = code
         self.message = message
-        super().__init__(f"[{code}] {message}")
+        super().__init__(f"[{code.value}] {message}")
 
     def to_mcp_error(self) -> str:
-        return f"Erreur NovIT [{self.code}] : {self.message}"
+        return f"Erreur NovIT [{self.code.value}] : {self.message}"
