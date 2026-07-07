@@ -1,7 +1,6 @@
 from src.profiles.preferences import prefs_store
 from src.profiles.profile import get_profile
 
-
 _CHANGE_CONFIRM = {
     "ETUDIANT": "✅ Profil **ETUDIANT** activé — ton pédagogique, sources accessibles, top 3 articles.\nDis-moi ce que tu veux explorer !",
     "INGENIEUR": "✅ Profil **INGENIEUR** activé — ton professionnel, sources techniques, jusqu'à 10 articles.\nQuel domaine aujourd'hui ?",
@@ -25,7 +24,7 @@ async def select_profile(profil: str) -> str:
             "Profils disponibles : **ETUDIANT** et **INGENIEUR**"
         )
 
-    profile = get_profile(profil)
+    get_profile(profil)  # valide que le profil existe
     await prefs_store.update(profil=profil)
 
     return _CHANGE_CONFIRM[profil]
@@ -40,7 +39,13 @@ async def get_current_profile() -> str:
     profile = get_profile(prefs.profil)
     return _CURRENT_PROFILE.format(
         profil=prefs.profil,
-        domaines=", ".join(profile.domaines_favoris) if profile.domaines_favoris else "tous",
+        domaines=(
+            ", ".join(profile.domaines_favoris) if profile.domaines_favoris else "tous"
+        ),
         score_min=profile.score_min,
-        sources=", ".join(profile.sources_prioritaires[:4]) if profile.sources_prioritaires else "toutes",
+        sources=(
+            ", ".join(profile.sources_prioritaires[:4])
+            if profile.sources_prioritaires
+            else "toutes"
+        ),
     )

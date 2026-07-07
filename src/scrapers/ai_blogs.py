@@ -1,12 +1,13 @@
 """Scrapers pour les blogs IA : Anthropic, OpenAI, DeepMind, arXiv, Papers With Code."""
 
-import httpx
+from datetime import UTC, datetime
+
 import feedparser
-from datetime import datetime, timezone
+import httpx
 from loguru import logger
 
 from src.scrapers.base import Article, BaseScraper
-from src.scrapers.rss import RssSource, RssScraper
+from src.scrapers.rss import RssScraper, RssSource
 
 AI_RSS_SOURCES = [
     RssSource(
@@ -71,20 +72,28 @@ class ArxivScraper(BaseScraper):
 
         for entry in feed.entries:
             try:
-                published_at = datetime(*entry.published_parsed[:6], tzinfo=timezone.utc) if hasattr(entry, "published_parsed") and entry.published_parsed else datetime.now(tz=timezone.utc)
-                authors = ", ".join(a.get("name", "") for a in entry.get("authors", [])[:3])
+                published_at = (
+                    datetime(*entry.published_parsed[:6], tzinfo=UTC)
+                    if hasattr(entry, "published_parsed") and entry.published_parsed
+                    else datetime.now(tz=UTC)
+                )
+                authors = ", ".join(
+                    a.get("name", "") for a in entry.get("authors", [])[:3]
+                )
                 summary = f"**Auteurs :** {authors}\n\n{entry.get('summary', '')[:400]}"
-                articles.append(Article(
-                    title=entry.get("title", "").replace("\n", " ").strip(),
-                    url=entry.get("link", ""),
-                    summary=summary,
-                    published_at=published_at,
-                    source=self.name,
-                    domains=["ia"],
-                    profiles=["INGENIEUR"],
-                    score=0.7,
-                    extra={"categories": self.categories},
-                ))
+                articles.append(
+                    Article(
+                        title=entry.get("title", "").replace("\n", " ").strip(),
+                        url=entry.get("link", ""),
+                        summary=summary,
+                        published_at=published_at,
+                        source=self.name,
+                        domains=["ia"],
+                        profiles=["INGENIEUR"],
+                        score=0.7,
+                        extra={"categories": self.categories},
+                    )
+                )
             except Exception as e:
                 logger.warning(f"[{self.name}] Erreur entry : {e}")
 

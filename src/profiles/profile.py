@@ -99,5 +99,7 @@ def get_profile(name: str) -> Profile:
         _profiles = load_profiles()
     profile = _profiles.get(name.upper())
     if not profile:
-        raise ValueError(f"Profil inconnu : '{name}'. Disponibles : {list(_profiles.keys())}")
+        raise ValueError(
+            f"Profil inconnu : '{name}'. Disponibles : {list(_profiles.keys())}"
+        )
     return profile

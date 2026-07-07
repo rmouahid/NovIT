@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import httpx
 from loguru import logger
@@ -9,18 +9,63 @@ HN_API = "https://hacker-news.firebaseio.com/v0"
 HN_ITEM_URL = "https://news.ycombinator.com/item?id={id}"
 
 DOMAIN_KEYWORDS: dict[str, list[str]] = {
-    "ia": ["ai", "llm", "machine learning", "gpt", "claude", "openai", "neural", "deep learning", "ml"],
-    "securite": ["security", "vulnerability", "cve", "exploit", "malware", "breach", "hack"],
-    "dev": ["javascript", "python", "rust", "golang", "typescript", "framework", "library", "api"],
-    "ingenierie": ["distributed", "kubernetes", "postgres", "architecture", "scalability", "microservices"],
-    "reglementation": ["gdpr", "regulation", "compliance", "law", "policy", "eu ai act"],
+    "ia": [
+        "ai",
+        "llm",
+        "machine learning",
+        "gpt",
+        "claude",
+        "openai",
+        "neural",
+        "deep learning",
+        "ml",
+    ],
+    "securite": [
+        "security",
+        "vulnerability",
+        "cve",
+        "exploit",
+        "malware",
+        "breach",
+        "hack",
+    ],
+    "dev": [
+        "javascript",
+        "python",
+        "rust",
+        "golang",
+        "typescript",
+        "framework",
+        "library",
+        "api",
+    ],
+    "ingenierie": [
+        "distributed",
+        "kubernetes",
+        "postgres",
+        "architecture",
+        "scalability",
+        "microservices",
+    ],
+    "reglementation": [
+        "gdpr",
+        "regulation",
+        "compliance",
+        "law",
+        "policy",
+        "eu ai act",
+    ],
     "formation": ["tutorial", "course", "learn", "beginner", "guide", "how to"],
 }
 
 
 def _tag_domains(text: str) -> list[str]:
     text_lower = text.lower()
-    return [domain for domain, keywords in DOMAIN_KEYWORDS.items() if any(kw in text_lower for kw in keywords)]
+    return [
+        domain
+        for domain, keywords in DOMAIN_KEYWORDS.items()
+        if any(kw in text_lower for kw in keywords)
+    ]
 
 
 class HackerNewsScraper(BaseScraper):
@@ -70,7 +115,7 @@ class HackerNewsScraper(BaseScraper):
         title = item["title"]
         url = item.get("url") or HN_ITEM_URL.format(id=item["id"])
         summary = f"Score HN : {item.get('score', 0)} points · {item.get('descendants', 0)} commentaires"
-        published_at = datetime.fromtimestamp(item.get("time", 0), tz=timezone.utc)
+        published_at = datetime.fromtimestamp(item.get("time", 0), tz=UTC)
         tagged_domains = _tag_domains(title)
 
         return Article(

@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 from src.profiles.profile import Profile
@@ -12,10 +12,11 @@ class RequestContext:
     Regroupe les métadonnées de session (profil, domaines actifs, langue)
     pour enrichir les réponses sans que l'utilisateur ait à les répéter.
     """
+
     profile: Profile | None = None
     active_domains: list[str] = field(default_factory=list)
     langue: str = "fr"
-    generated_at: datetime = field(default_factory=lambda: datetime.now(tz=timezone.utc))
+    generated_at: datetime = field(default_factory=lambda: datetime.now(tz=UTC))
     session_id: str = "default"
     debug: bool = False
 

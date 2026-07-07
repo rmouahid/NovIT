@@ -36,7 +36,9 @@ class RateLimiter:
         """Appelé quand une erreur 429 est reçue. Retourne le délai de backoff."""
         self._backoff_count[domain] += 1
         backoff = min(2 ** self._backoff_count[domain], 300)
-        logger.warning(f"[rate_limiter] 429 sur {domain} — backoff {backoff}s (tentative #{self._backoff_count[domain]})")
+        logger.warning(
+            f"[rate_limiter] 429 sur {domain} — backoff {backoff}s (tentative #{self._backoff_count[domain]})"
+        )
         return backoff
 
     def on_success(self, domain: str) -> None:
@@ -48,8 +50,8 @@ class RateLimiter:
 rate_limiter = RateLimiter(default_delay=1.0)
 
 # Délais spécifiques par source (respectant les politiques robots.txt)
-rate_limiter.set_delay("hacker-news.firebaseio.com", 0.2)   # API officielle, tolérant
-rate_limiter.set_delay("github.com", 2.0)                   # Scraping HTML, prudent
-rate_limiter.set_delay("services.nvd.nist.gov", 6.0)        # NVD sans clé API = 1 req/6s
-rate_limiter.set_delay("export.arxiv.org", 3.0)             # arXiv recommande 3s min
-rate_limiter.set_delay("api.github.com", 0.5)               # GitHub API avec token = 5000 req/h
+rate_limiter.set_delay("hacker-news.firebaseio.com", 0.2)  # API officielle, tolérant
+rate_limiter.set_delay("github.com", 2.0)  # Scraping HTML, prudent
+rate_limiter.set_delay("services.nvd.nist.gov", 6.0)  # NVD sans clé API = 1 req/6s
+rate_limiter.set_delay("export.arxiv.org", 3.0)  # arXiv recommande 3s min
+rate_limiter.set_delay("api.github.com", 0.5)  # GitHub API avec token = 5000 req/h

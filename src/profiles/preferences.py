@@ -35,9 +35,17 @@ class PreferencesStore:
         try:
             with self._path.open(encoding="utf-8") as f:
                 data = json.load(f)
-            return UserPreferences(**{k: v for k, v in data.items() if k in UserPreferences.__dataclass_fields__})
+            return UserPreferences(
+                **{
+                    k: v
+                    for k, v in data.items()
+                    if k in UserPreferences.__dataclass_fields__
+                }
+            )
         except Exception as e:
-            logger.warning(f"[prefs] Erreur lecture préférences : {e} — réinitialisation")
+            logger.warning(
+                f"[prefs] Erreur lecture préférences : {e} — réinitialisation"
+            )
             return UserPreferences()
 
     def save(self, prefs: UserPreferences) -> None:

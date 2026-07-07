@@ -1,16 +1,66 @@
 import re
 from collections import Counter
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from src.scrapers.base import Article
 from src.scrapers.storage import store
 
 _STOP_WORDS = {
-    "the", "a", "an", "of", "in", "on", "to", "for", "and", "or", "is", "with",
-    "de", "le", "la", "les", "un", "une", "des", "du", "en", "et", "ou", "que",
-    "how", "why", "what", "when", "new", "this", "that", "are", "has", "have",
-    "from", "by", "at", "as", "it", "its", "be", "was", "been", "will", "can",
-    "using", "use", "your", "more", "about", "into", "get", "all", "but", "not",
+    "the",
+    "a",
+    "an",
+    "of",
+    "in",
+    "on",
+    "to",
+    "for",
+    "and",
+    "or",
+    "is",
+    "with",
+    "de",
+    "le",
+    "la",
+    "les",
+    "un",
+    "une",
+    "des",
+    "du",
+    "en",
+    "et",
+    "ou",
+    "que",
+    "how",
+    "why",
+    "what",
+    "when",
+    "new",
+    "this",
+    "that",
+    "are",
+    "has",
+    "have",
+    "from",
+    "by",
+    "at",
+    "as",
+    "it",
+    "its",
+    "be",
+    "was",
+    "been",
+    "will",
+    "can",
+    "using",
+    "use",
+    "your",
+    "more",
+    "about",
+    "into",
+    "get",
+    "all",
+    "but",
+    "not",
 }
 
 _MIN_WORD_LENGTH = 4
@@ -22,7 +72,7 @@ def _extract_keywords(title: str) -> list[str]:
 
 
 def _count_keywords_by_window(articles: list[Article], days: int) -> Counter:
-    cutoff = datetime.now(tz=timezone.utc) - timedelta(days=days)
+    cutoff = datetime.now(tz=UTC) - timedelta(days=days)
     recent = [a for a in articles if a.published_at and a.published_at > cutoff]
     counter: Counter = Counter()
     for article in recent:
@@ -45,7 +95,9 @@ async def detect_trends(days: int = 7, top_k: int = 10, min_count: int = 3) -> s
     count_24h = _count_keywords_by_window(all_articles, days=1)
 
     # Termes avec au moins min_count occurrences sur la période
-    trending = [(term, count) for term, count in count_7d.most_common(50) if count >= min_count]
+    trending = [
+        (term, count) for term, count in count_7d.most_common(50) if count >= min_count
+    ]
 
     if not trending:
         return f"Aucune tendance significative détectée sur les {days} derniers jours (seuil : {min_count} occurrences)."
@@ -59,7 +111,7 @@ async def detect_trends(days: int = 7, top_k: int = 10, min_count: int = 3) -> s
             rising.append((term, count_recent, ratio))
     rising.sort(key=lambda x: x[2], reverse=True)
 
-    now = datetime.now(tz=timezone.utc)
+    now = datetime.now(tz=UTC)
     lines = [
         f"# Tendances NovIT — {days} derniers jours",
         f"_Analysé à {now.strftime('%H:%M')} UTC · {len(all_articles)} articles_\n",
@@ -72,6 +124,8 @@ async def detect_trends(days: int = 7, top_k: int = 10, min_count: int = 3) -> s
     if rising:
         lines.append("\n## 🚀 En montée rapide (dernières 24h)")
         for term, count_24h_val, ratio in rising[:5]:
-            lines.append(f"- **{term}** — {count_24h_val}× aujourd'hui (×{ratio:.1f} vs moyenne)")
+            lines.append(
+                f"- **{term}** — {count_24h_val}× aujourd'hui (×{ratio:.1f} vs moyenne)"
+            )
 
     return "\n".join(lines)

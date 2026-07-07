@@ -2,8 +2,6 @@ import time
 from dataclasses import dataclass, field
 from typing import Any
 
-from src.scrapers.base import Article
-
 
 @dataclass
 class DebugInfo:
@@ -11,6 +9,7 @@ class DebugInfo:
 
     Collecté pendant l'exécution, affiché en pied de réponse si debug=True.
     """
+
     tool_name: str
     started_at: float = field(default_factory=time.monotonic)
     sources_consulted: list[str] = field(default_factory=list)
@@ -34,7 +33,9 @@ class DebugInfo:
             lines.append("- ✅ Réponse depuis le cache")
         else:
             if self.sources_consulted:
-                lines.append(f"- Sources consultées : {', '.join(self.sources_consulted)}")
+                lines.append(
+                    f"- Sources consultées : {', '.join(self.sources_consulted)}"
+                )
             lines.append(
                 f"- Articles : {self.articles_before_filter} bruts → {self.articles_after_filter} après filtrage"
             )

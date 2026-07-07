@@ -1,11 +1,12 @@
 """Scrapers formation/certifications : freeCodeCamp, Roadmap.sh, Stack Overflow Survey."""
 
+from datetime import datetime
+
 import httpx
-from datetime import datetime, timezone
 from loguru import logger
 
 from src.scrapers.base import Article, BaseScraper
-from src.scrapers.rss import RssSource, RssScraper
+from src.scrapers.rss import RssScraper, RssSource
 
 TRAINING_RSS_SOURCES = [
     RssSource(
@@ -17,7 +18,9 @@ TRAINING_RSS_SOURCES = [
     ),
 ]
 
-ROADMAP_RELEASES_URL = "https://api.github.com/repos/kamranahmedse/developer-roadmap/releases"
+ROADMAP_RELEASES_URL = (
+    "https://api.github.com/repos/kamranahmedse/developer-roadmap/releases"
+)
 
 
 class RoadmapScraper(BaseScraper):
@@ -42,16 +45,18 @@ class RoadmapScraper(BaseScraper):
                 published_at = datetime.fromisoformat(
                     release["published_at"].replace("Z", "+00:00")
                 )
-                articles.append(Article(
-                    title=f"Roadmap.sh — {release['name'] or release['tag_name']}",
-                    url=release["html_url"],
-                    summary=release.get("body", "")[:400],
-                    published_at=published_at,
-                    source=self.name,
-                    domains=self.domains,
-                    profiles=self.profiles,
-                    score=0.65,
-                ))
+                articles.append(
+                    Article(
+                        title=f"Roadmap.sh — {release['name'] or release['tag_name']}",
+                        url=release["html_url"],
+                        summary=release.get("body", "")[:400],
+                        published_at=published_at,
+                        source=self.name,
+                        domains=self.domains,
+                        profiles=self.profiles,
+                        score=0.65,
+                    )
+                )
             except Exception as e:
                 logger.warning(f"[{self.name}] Erreur release : {e}")
 

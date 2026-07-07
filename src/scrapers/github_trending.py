@@ -1,5 +1,5 @@
 import random
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import httpx
 from bs4 import BeautifulSoup
@@ -47,7 +47,9 @@ class GitHubTrendingScraper(BaseScraper):
 
         headers = {"User-Agent": random.choice(USER_AGENTS)}
 
-        logger.debug(f"[{self.name}] Scraping {url} (lang={self.language or 'all'}, period={self.period})")
+        logger.debug(
+            f"[{self.name}] Scraping {url} (lang={self.language or 'all'}, period={self.period})"
+        )
 
         async with httpx.AsyncClient(timeout=15, follow_redirects=True) as client:
             r = await client.get(url, params=params, headers=headers)
@@ -60,7 +62,7 @@ class GitHubTrendingScraper(BaseScraper):
     def _parse(self, html: str) -> list[Article]:
         soup = BeautifulSoup(html, "lxml")
         articles: list[Article] = []
-        now = datetime.now(tz=timezone.utc)
+        now = datetime.now(tz=UTC)
 
         for repo_box in soup.select("article.Box-row"):
             try:
@@ -68,7 +70,9 @@ class GitHubTrendingScraper(BaseScraper):
                 if not name_tag:
                     continue
 
-                full_name = name_tag.get_text(strip=True).replace("\n", "").replace(" ", "")
+                full_name = (
+                    name_tag.get_text(strip=True).replace("\n", "").replace(" ", "")
+                )
                 url = f"https://github.com{name_tag['href']}"
 
                 desc_tag = repo_box.select_one("p")
@@ -78,17 +82,28 @@ class GitHubTrendingScraper(BaseScraper):
                 language = lang_tag.get_text(strip=True) if lang_tag else ""
 
                 stars_tag = repo_box.select_one("a[href*='stargazers']")
-                stars_text = stars_tag.get_text(strip=True).replace(",", "").replace("k", "000") if stars_tag else "0"
+                stars_text = (
+                    stars_tag.get_text(strip=True).replace(",", "").replace("k", "000")
+                    if stars_tag
+                    else "0"
+                )
                 try:
                     stars = int(stars_text)
                 except ValueError:
                     stars = 0
 
-                today_stars_tag = repo_box.select_one("span.d-inline-block.float-sm-right")
-                today_stars = today_stars_tag.get_text(strip=True) if today_stars_tag else ""
+                today_stars_tag = repo_box.select_one(
+                    "span.d-inline-block.float-sm-right"
+                )
+                today_stars = (
+                    today_stars_tag.get_text(strip=True) if today_stars_tag else ""
+                )
 
                 domains = LANGUAGE_DOMAIN_MAP.get(language.lower(), ["dev"])
-                if any(kw in description.lower() for kw in ["ai", "llm", "machine learning", "neural"]):
+                if any(
+                    kw in description.lower()
+                    for kw in ["ai", "llm", "machine learning", "neural"]
+                ):
                     if "ia" not in domains:
                         domains.append("ia")
 
@@ -100,17 +115,19 @@ class GitHubTrendingScraper(BaseScraper):
                 if description:
                     summary += f"\n{description}"
 
-                articles.append(Article(
-                    title=full_name,
-                    url=url,
-                    summary=summary,
-                    published_at=now,
-                    source=self.name,
-                    domains=domains,
-                    profiles=self.profiles,
-                    score=min(stars / 10000, 1.0),
-                    extra={"stars": stars, "language": language},
-                ))
+                articles.append(
+                    Article(
+                        title=full_name,
+                        url=url,
+                        summary=summary,
+                        published_at=now,
+                        source=self.name,
+                        domains=domains,
+                        profiles=self.profiles,
+                        score=min(stars / 10000, 1.0),
+                        extra={"stars": stars, "language": language},
+                    )
+                )
             except Exception as e:
                 logger.warning(f"[{self.name}] Erreur parsing repo : {e}")
 

@@ -4,7 +4,9 @@ from pathlib import Path
 from loguru import logger
 
 
-def configure_logging(log_level: str = "INFO", log_dir: str = "", is_production: bool = False) -> None:
+def configure_logging(
+    log_level: str = "INFO", log_dir: str = "", is_production: bool = False
+) -> None:
     """Configure loguru selon l'environnement.
 
     En stdio MCP, les logs vont sur stderr uniquement —

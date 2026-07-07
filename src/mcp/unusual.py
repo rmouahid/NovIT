@@ -3,7 +3,13 @@ import random
 from src.scrapers.base import Article
 from src.scrapers.storage import store
 
-_UNUSUAL_SOURCES = {"arxiv", "papers_with_code", "mit_tech_review", "roadmap_sh", "w3c_news"}
+_UNUSUAL_SOURCES = {
+    "arxiv",
+    "papers_with_code",
+    "mit_tech_review",
+    "roadmap_sh",
+    "w3c_news",
+}
 _AVOID_DOMAINS = {"securite"}
 
 
@@ -45,12 +51,17 @@ async def get_unusual(count: int = 3) -> str:
     pool = scored[:30]
     selected = random.sample(pool, min(count, len(pool)))
 
-    lines = ["# 💡 Nouveautés insolites NovIT", "_Des articles hors des sentiers battus…_\n"]
+    lines = [
+        "# 💡 Nouveautés insolites NovIT",
+        "_Des articles hors des sentiers battus…_\n",
+    ]
     for i, article in enumerate(selected, 1):
         pub = article.published_at.strftime("%d/%m") if article.published_at else ""
         domains = ", ".join(article.domains) if article.domains else "—"
         lines.append(f"### {i}. {article.title}")
-        lines.append(f"🔗 {article.url}  · 📰 {article.source} · 📅 {pub} · 🏷 {domains}")
+        lines.append(
+            f"🔗 {article.url}  · 📰 {article.source} · 📅 {pub} · 🏷 {domains}"
+        )
         if article.summary:
             lines.append(f"\n_{article.summary[:200]}_")
         lines.append("")

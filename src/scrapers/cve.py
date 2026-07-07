@@ -1,5 +1,5 @@
 import os
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import feedparser
 import httpx
@@ -42,9 +42,9 @@ class CVEScraper(BaseScraper):
         self._api_key = os.getenv("NVD_API_KEY", "")
 
     async def fetch(self) -> list[Article]:
-        since = datetime.now(tz=timezone.utc) - timedelta(days=self.days_back)
+        since = datetime.now(tz=UTC) - timedelta(days=self.days_back)
         pub_start = since.strftime("%Y-%m-%dT%H:%M:%S.000")
-        pub_end = datetime.now(tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.000")
+        pub_end = datetime.now(tz=UTC).strftime("%Y-%m-%dT%H:%M:%S.000")
 
         params = {
             "pubStartDate": pub_start,
@@ -97,7 +97,7 @@ class CVEScraper(BaseScraper):
         try:
             published_at = datetime.fromisoformat(published_str.replace("Z", "+00:00"))
         except (ValueError, AttributeError):
-            published_at = datetime.now(tz=timezone.utc)
+            published_at = datetime.now(tz=UTC)
 
         summary = f"🔴 CVSS {cvss_score} ({severity}) — {desc_en[:300]}"
 
@@ -136,18 +136,24 @@ class ANSSIScraper(BaseScraper):
 
         for entry in feed.entries:
             try:
-                published_at = datetime(*entry.published_parsed[:6], tzinfo=timezone.utc) if hasattr(entry, "published_parsed") and entry.published_parsed else datetime.now(tz=timezone.utc)
-                articles.append(Article(
-                    title=entry.get("title", ""),
-                    url=entry.get("link", ""),
-                    summary=entry.get("summary", "")[:500],
-                    published_at=published_at,
-                    source=self.name,
-                    domains=["securite"],
-                    profiles=["INGENIEUR"],
-                    score=0.8,
-                    extra={"feed": "cert-fr"},
-                ))
+                published_at = (
+                    datetime(*entry.published_parsed[:6], tzinfo=UTC)
+                    if hasattr(entry, "published_parsed") and entry.published_parsed
+                    else datetime.now(tz=UTC)
+                )
+                articles.append(
+                    Article(
+                        title=entry.get("title", ""),
+                        url=entry.get("link", ""),
+                        summary=entry.get("summary", "")[:500],
+                        published_at=published_at,
+                        source=self.name,
+                        domains=["securite"],
+                        profiles=["INGENIEUR"],
+                        score=0.8,
+                        extra={"feed": "cert-fr"},
+                    )
+                )
             except Exception as e:
                 logger.warning(f"[{self.name}] Erreur entry RSS : {e}")
 

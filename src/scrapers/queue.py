@@ -1,27 +1,29 @@
 import asyncio
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import IntEnum
 
 from loguru import logger
 
 from src.scrapers.base import BaseScraper
 from src.scrapers.deduplication import deduplicator
-from src.scrapers.tagger import tagger
 from src.scrapers.storage import store
+from src.scrapers.tagger import tagger
 
 
 class Priority(IntEnum):
-    CRITICAL = 0   # CVE, alertes sécurité
-    HIGH = 1       # Sources principales (HN, GitHub)
-    NORMAL = 2     # Blogs, RSS génériques
+    CRITICAL = 0  # CVE, alertes sécurité
+    HIGH = 1  # Sources principales (HN, GitHub)
+    NORMAL = 2  # Blogs, RSS génériques
 
 
 @dataclass(order=True)
 class ScraperTask:
     priority: Priority
     scraper: BaseScraper = field(compare=False)
-    scheduled_at: datetime = field(default_factory=lambda: datetime.now(tz=timezone.utc), compare=False)
+    scheduled_at: datetime = field(
+        default_factory=lambda: datetime.now(tz=UTC), compare=False
+    )
 
 
 class ScraperQueue:
@@ -37,7 +39,9 @@ class ScraperQueue:
         self._processed = 0
         self._failed = 0
 
-    def enqueue(self, scraper: BaseScraper, priority: Priority = Priority.NORMAL) -> None:
+    def enqueue(
+        self, scraper: BaseScraper, priority: Priority = Priority.NORMAL
+    ) -> None:
         task = ScraperTask(priority=priority, scraper=scraper)
         self._queue.put_nowait(task)
         logger.debug(f"[queue] Ajout : {scraper.name} (priorité {priority.name})")

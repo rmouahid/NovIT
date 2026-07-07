@@ -1,5 +1,5 @@
 import json
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 import aiosqlite
@@ -49,7 +49,7 @@ class ArticleStore:
     async def save(self, articles: list[Article]) -> int:
         if not self._initialized:
             await self.init()
-        now = datetime.now(tz=timezone.utc).isoformat()
+        now = datetime.now(tz=UTC).isoformat()
         saved = 0
         async with aiosqlite.connect(self.db_path) as db:
             for article in articles:
@@ -89,7 +89,7 @@ class ArticleStore:
     ) -> list[Article]:
         if not self._initialized:
             await self.init()
-        since = (datetime.now(tz=timezone.utc) - timedelta(hours=hours)).isoformat()
+        since = (datetime.now(tz=UTC) - timedelta(hours=hours)).isoformat()
         query = "SELECT * FROM articles WHERE published_at >= ? ORDER BY score DESC, published_at DESC LIMIT ?"
         params: list = [since, limit]
 
@@ -126,13 +126,19 @@ class ArticleStore:
     async def purge_expired(self) -> int:
         if not self._initialized:
             await self.init()
-        cutoff = (datetime.now(tz=timezone.utc) - timedelta(days=self.retention_days)).isoformat()
+        cutoff = (
+            datetime.now(tz=UTC) - timedelta(days=self.retention_days)
+        ).isoformat()
         async with aiosqlite.connect(self.db_path) as db:
-            cursor = await db.execute("DELETE FROM articles WHERE inserted_at < ?", [cutoff])
+            cursor = await db.execute(
+                "DELETE FROM articles WHERE inserted_at < ?", [cutoff]
+            )
             await db.commit()
             deleted = cursor.rowcount
         if deleted:
-            logger.info(f"[storage] {deleted} articles expirés supprimés (rétention {self.retention_days}j)")
+            logger.info(
+                f"[storage] {deleted} articles expirés supprimés (rétention {self.retention_days}j)"
+            )
         return deleted
 
     def _row_to_article(self, row: aiosqlite.Row) -> Article:

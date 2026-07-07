@@ -7,6 +7,9 @@ from mcp.types import (
 )
 
 from config.settings import get_settings
+from src.mcp.daily import build_daily_summary
+from src.mcp.dig import dig_url
+from src.mcp.domain_selector import set_domains
 from src.mcp.errors import NovitError
 from src.mcp.handlers import (
     handle_get_by_domain,
@@ -14,22 +17,19 @@ from src.mcp.handlers import (
     handle_get_profile,
     handle_search,
 )
-from src.mcp.daily import build_daily_summary
-from src.mcp.trends import detect_trends
-from src.mcp.domain_selector import list_domains, set_domains
-from src.mcp.onboarding import start_novit
-from src.mcp.profile_selector import get_current_profile, select_profile
-from src.mcp.unusual import get_unusual
-from src.mcp.dig import dig_url
-from src.mcp.related import find_related
 from src.mcp.health import get_cache_health, get_health, get_sources_health
 from src.mcp.logging_config import configure_logging
+from src.mcp.onboarding import start_novit
+from src.mcp.profile_selector import select_profile
+from src.mcp.related import find_related
 from src.mcp.schemas import (
     GetByDomainInput,
     GetNewsInput,
     GetProfileInput,
     SearchInput,
 )
+from src.mcp.trends import detect_trends
+from src.mcp.unusual import get_unusual
 
 _settings = get_settings()
 configure_logging(
@@ -135,7 +135,10 @@ TOOLS: list[Tool] = [
             "properties": {
                 "domaines": {
                     "oneOf": [
-                        {"type": "string", "description": "Ex: 'ia, securite' ou 'tout'"},
+                        {
+                            "type": "string",
+                            "description": "Ex: 'ia, securite' ou 'tout'",
+                        },
                         {"type": "array", "items": {"type": "string"}},
                     ]
                 },
@@ -149,7 +152,11 @@ TOOLS: list[Tool] = [
         inputSchema={
             "type": "object",
             "properties": {
-                "profil": {"type": "string", "enum": ["ETUDIANT", "INGENIEUR"], "description": "Profil à activer"},
+                "profil": {
+                    "type": "string",
+                    "enum": ["ETUDIANT", "INGENIEUR"],
+                    "description": "Profil à activer",
+                },
             },
             "required": ["profil"],
         },
@@ -170,7 +177,11 @@ TOOLS: list[Tool] = [
         inputSchema={
             "type": "object",
             "properties": {
-                "count": {"type": "integer", "default": 3, "description": "Nombre d'articles insolites (1-5)"},
+                "count": {
+                    "type": "integer",
+                    "default": 3,
+                    "description": "Nombre d'articles insolites (1-5)",
+                },
             },
         },
     ),
@@ -180,8 +191,16 @@ TOOLS: list[Tool] = [
         inputSchema={
             "type": "object",
             "properties": {
-                "days": {"type": "integer", "default": 7, "description": "Fenêtre d'analyse en jours"},
-                "top_k": {"type": "integer", "default": 10, "description": "Nombre de tendances à afficher"},
+                "days": {
+                    "type": "integer",
+                    "default": 7,
+                    "description": "Fenêtre d'analyse en jours",
+                },
+                "top_k": {
+                    "type": "integer",
+                    "default": 10,
+                    "description": "Nombre de tendances à afficher",
+                },
             },
         },
     ),
@@ -203,10 +222,24 @@ TOOLS: list[Tool] = [
         inputSchema={
             "type": "object",
             "properties": {
-                "url": {"type": "string", "description": "URL de l'article de référence"},
-                "title": {"type": "string", "description": "Titre de l'article (utilisé si URL absente)"},
-                "domaines": {"type": "array", "items": {"type": "string"}, "description": "Domaines de l'article"},
-                "top_k": {"type": "integer", "default": 5, "description": "Nombre d'articles similaires à retourner"},
+                "url": {
+                    "type": "string",
+                    "description": "URL de l'article de référence",
+                },
+                "title": {
+                    "type": "string",
+                    "description": "Titre de l'article (utilisé si URL absente)",
+                },
+                "domaines": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "description": "Domaines de l'article",
+                },
+                "top_k": {
+                    "type": "integer",
+                    "default": 5,
+                    "description": "Nombre d'articles similaires à retourner",
+                },
             },
         },
     ),
@@ -272,8 +305,11 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
             )
         elif name == "novit_daily":
             from src.profiles.profile import get_profile as _gp
+
             _profile = _gp(arguments.get("profil", "ETUDIANT"))
-            result = await build_daily_summary(_profile, domaines=arguments.get("domaines"))
+            result = await build_daily_summary(
+                _profile, domaines=arguments.get("domaines")
+            )
         elif name == "novit_related":
             result = await find_related(
                 url=arguments.get("url", ""),
@@ -287,7 +323,12 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
             detail = arguments.get("detail", "global")
             if detail == "sources":
                 sources = await get_sources_health()
-                result = "\n".join(f"- {'✅' if s.available else '❌'} {s.name}" for s in sources) or "Aucune source enregistrée."
+                result = (
+                    "\n".join(
+                        f"- {'✅' if s.available else '❌'} {s.name}" for s in sources
+                    )
+                    or "Aucune source enregistrée."
+                )
             elif detail == "cache":
                 stats = await get_cache_health()
                 result = "\n".join(f"- {k}: {v}" for k, v in stats.items())

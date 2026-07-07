@@ -1,6 +1,6 @@
 """Scrapers réglementation : CNIL, EUR-Lex (AI Act), W3C News."""
 
-from src.scrapers.rss import RssSource, RssScraper
+from src.scrapers.rss import RssScraper, RssSource
 
 REGULATION_RSS_SOURCES = [
     RssSource(

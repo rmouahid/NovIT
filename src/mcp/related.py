@@ -9,7 +9,26 @@ def _jaccard(a: set[str], b: set[str]) -> float:
 
 
 def _title_tokens(title: str) -> set[str]:
-    stop = {"the", "a", "an", "of", "in", "on", "to", "for", "and", "or", "is", "with", "de", "le", "la", "les", "un", "une"}
+    stop = {
+        "the",
+        "a",
+        "an",
+        "of",
+        "in",
+        "on",
+        "to",
+        "for",
+        "and",
+        "or",
+        "is",
+        "with",
+        "de",
+        "le",
+        "la",
+        "les",
+        "un",
+        "une",
+    }
     return {w.lower() for w in title.split() if len(w) > 2 and w.lower() not in stop}
 
 
@@ -34,7 +53,14 @@ async def find_related(url: str, title: str, domains: list[str], top_k: int = 5)
     candidates = await store.get_recent(domains=domains or None, hours=168, limit=200)
 
     scored: list[tuple[float, Article]] = []
-    ref = Article(title=title, url=url, summary="", published_at=__import__("datetime").datetime.now(), source="", domains=domains)
+    ref = Article(
+        title=title,
+        url=url,
+        summary="",
+        published_at=__import__("datetime").datetime.now(),
+        source="",
+        domains=domains,
+    )
 
     for candidate in candidates:
         if candidate.url == url:
@@ -53,7 +79,9 @@ async def find_related(url: str, title: str, domains: list[str], top_k: int = 5)
     for rank, (sim, article) in enumerate(top, 1):
         pub = article.published_at.strftime("%d/%m") if article.published_at else ""
         lines.append(f"### {rank}. {article.title}")
-        lines.append(f"🔗 {article.url}  · 📅 {pub} · 📰 {article.source}  · similarité {sim:.0%}")
+        lines.append(
+            f"🔗 {article.url}  · 📅 {pub} · 📰 {article.source}  · similarité {sim:.0%}"
+        )
         if article.summary:
             lines.append(article.summary[:150])
         lines.append("")

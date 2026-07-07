@@ -64,7 +64,7 @@ async def start_novit(profil: str | None = None) -> str:
     if not resolved or resolved not in ("ETUDIANT", "INGENIEUR"):
         return _PROFILE_SELECTION
 
-    profile = get_profile(resolved)
+    get_profile(resolved)  # valide que le profil existe
     domains_menu = _DOMAINS_MENU
 
     if resolved == "ETUDIANT":

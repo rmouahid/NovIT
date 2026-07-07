@@ -1,11 +1,10 @@
-from dataclasses import dataclass, field
-from enum import Enum
+from dataclasses import dataclass
+from enum import StrEnum
 
 from src.scrapers.base import Article
-from src.scrapers.storage import store
 
 
-class AlertLevel(str, Enum):
+class AlertLevel(StrEnum):
     INFO = "info"
     IMPORTANT = "important"
     CRITIQUE = "critique"
@@ -37,7 +36,11 @@ class AlertManager:
         before = len(self._alerts)
         self._alerts = [a for a in self._alerts if a.keyword != keyword.lower()]
         removed = before - len(self._alerts)
-        return f"{removed} alerte(s) supprimée(s) pour '{keyword}'" if removed else f"Aucune alerte pour '{keyword}'"
+        return (
+            f"{removed} alerte(s) supprimée(s) pour '{keyword}'"
+            if removed
+            else f"Aucune alerte pour '{keyword}'"
+        )
 
     def list_alerts(self) -> str:
         if not self._alerts:
@@ -62,7 +65,9 @@ class AlertManager:
 
         lines = ["## 🔔 Alertes déclenchées\n"]
         for alert, article in triggered[:10]:
-            lines.append(f"{alert.emoji()} **[{alert.keyword}]** — [{article.title}]({article.url}) · {article.source}")
+            lines.append(
+                f"{alert.emoji()} **[{alert.keyword}]** — [{article.title}]({article.url}) · {article.source}"
+            )
         return "\n".join(lines)
 
 

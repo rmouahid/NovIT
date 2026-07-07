@@ -4,8 +4,17 @@ import httpx
 from bs4 import BeautifulSoup
 from loguru import logger
 
-
-_BOILERPLATE_TAGS = {"nav", "footer", "header", "aside", "script", "style", "noscript", "form", "button"}
+_BOILERPLATE_TAGS = {
+    "nav",
+    "footer",
+    "header",
+    "aside",
+    "script",
+    "style",
+    "noscript",
+    "form",
+    "button",
+}
 _CONTENT_TAGS = {"article", "main", "section"}
 
 
@@ -26,14 +35,18 @@ def _extract_text(html: str) -> str:
 
     # Fallback : body complet
     body = soup.find("body")
-    return body.get_text(separator="\n", strip=True) if body else soup.get_text(separator="\n", strip=True)
+    return (
+        body.get_text(separator="\n", strip=True)
+        if body
+        else soup.get_text(separator="\n", strip=True)
+    )
 
 
 def _clean(text: str, max_chars: int = 4000) -> str:
     """Nettoie et tronque le texte extrait."""
     text = re.sub(r"\n{3,}", "\n\n", text)
     text = re.sub(r" {2,}", " ", text)
-    lines = [l for l in text.splitlines() if len(l.strip()) > 20]
+    lines = [line for line in text.splitlines() if len(line.strip()) > 20]
     clean = "\n".join(lines)
     if len(clean) > max_chars:
         clean = clean[:max_chars] + "\n\n[... article tronqué à 4000 caractères]"

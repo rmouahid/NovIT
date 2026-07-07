@@ -1,8 +1,8 @@
-from datetime import datetime, timezone
+from collections import Counter
+from datetime import UTC, datetime
 
 from src.mcp.session import session_manager
 from src.mcp.trends import _extract_keywords
-from collections import Counter
 
 
 async def build_session_summary(session_id: str = "default") -> str:
@@ -13,7 +13,7 @@ async def build_session_summary(session_id: str = "default") -> str:
     if not history:
         return "Aucun article consulté dans cette session."
 
-    now = datetime.now(tz=timezone.utc)
+    now = datetime.now(tz=UTC)
     duration = now - session.started_at
     minutes = int(duration.total_seconds() / 60)
 

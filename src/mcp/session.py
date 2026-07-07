@@ -1,6 +1,6 @@
 from collections import deque
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from src.scrapers.base import Article
 
@@ -12,8 +12,8 @@ _MAX_HISTORY = 100
 class SessionState:
     seen_urls: set[str] = field(default_factory=set)
     history: deque = field(default_factory=lambda: deque(maxlen=_MAX_HISTORY))
-    started_at: datetime = field(default_factory=lambda: datetime.now(tz=timezone.utc))
-    last_active: datetime = field(default_factory=lambda: datetime.now(tz=timezone.utc))
+    started_at: datetime = field(default_factory=lambda: datetime.now(tz=UTC))
+    last_active: datetime = field(default_factory=lambda: datetime.now(tz=UTC))
     current_index: int = 0
     current_results: list[Article] = field(default_factory=list)
 
@@ -37,11 +37,13 @@ class SessionManager:
         if session is None or self._is_expired(session):
             session = SessionState()
             self._sessions[session_id] = session
-        session.last_active = datetime.now(tz=timezone.utc)
+        session.last_active = datetime.now(tz=UTC)
         return session
 
     def _is_expired(self, session: SessionState) -> bool:
-        return datetime.now(tz=timezone.utc) - session.last_active > timedelta(hours=_SESSION_TTL_HOURS)
+        return datetime.now(tz=UTC) - session.last_active > timedelta(
+            hours=_SESSION_TTL_HOURS
+        )
 
     def mark_seen(self, session_id: str, articles: list[Article]) -> None:
         session = self.get_or_create(session_id)
@@ -73,7 +75,11 @@ class SessionManager:
         if session.current_index <= 1:
             return None
         session.current_index -= 2
-        return session.current_results[session.current_index] if session.current_results else None
+        return (
+            session.current_results[session.current_index]
+            if session.current_results
+            else None
+        )
 
     def position(self, session_id: str) -> tuple[int, int]:
         session = self.get_or_create(session_id)
@@ -84,7 +90,9 @@ class SessionManager:
 
     def purge_expired(self) -> int:
         before = len(self._sessions)
-        self._sessions = {sid: s for sid, s in self._sessions.items() if not self._is_expired(s)}
+        self._sessions = {
+            sid: s for sid, s in self._sessions.items() if not self._is_expired(s)
+        }
         return before - len(self._sessions)
 
 

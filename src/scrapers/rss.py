@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from email.utils import parsedate_to_datetime
 
 import feedparser
@@ -55,12 +55,12 @@ def _parse_date(entry: dict) -> datetime:
         value = getattr(entry, attr, None)
         if value:
             try:
-                return parsedate_to_datetime(value).astimezone(timezone.utc)
+                return parsedate_to_datetime(value).astimezone(UTC)
             except Exception:
                 pass
     if hasattr(entry, "published_parsed") and entry.published_parsed:
-        return datetime(*entry.published_parsed[:6], tzinfo=timezone.utc)
-    return datetime.now(tz=timezone.utc)
+        return datetime(*entry.published_parsed[:6], tzinfo=UTC)
+    return datetime.now(tz=UTC)
 
 
 class RssScraper(BaseScraper):
@@ -108,17 +108,19 @@ class RssScraper(BaseScraper):
                 # Nettoyer le HTML basique des résumés RSS
                 summary = summary[:600].strip() if summary else ""
 
-                articles.append(Article(
-                    title=title,
-                    url=url,
-                    summary=summary,
-                    published_at=_parse_date(entry),
-                    source=self.name,
-                    domains=self._source.domains,
-                    profiles=self._source.profiles,
-                    score=self._source.base_score,
-                    extra={"feed_url": self._source.url},
-                ))
+                articles.append(
+                    Article(
+                        title=title,
+                        url=url,
+                        summary=summary,
+                        published_at=_parse_date(entry),
+                        source=self.name,
+                        domains=self._source.domains,
+                        profiles=self._source.profiles,
+                        score=self._source.base_score,
+                        extra={"feed_url": self._source.url},
+                    )
+                )
             except Exception as e:
                 logger.warning(f"[{self.name}] Erreur entrée RSS : {e}")
 

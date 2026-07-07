@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class NovitErrorCode(str, Enum):
+class NovitErrorCode(StrEnum):
     SOURCE_UNAVAILABLE = "NOVIT_SOURCE_UNAVAILABLE"
     SOURCE_TIMEOUT = "NOVIT_SOURCE_TIMEOUT"
     NO_RESULTS = "NOVIT_NO_RESULTS"

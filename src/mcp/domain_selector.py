@@ -56,10 +56,7 @@ async def set_domains(raw: str | list[str]) -> str:
     """Définit les domaines actifs de la session et les persiste."""
     domains = _resolve_domains(raw)
     if not domains:
-        return (
-            "Je n'ai pas reconnu ces domaines.\n"
-            + list_domains()
-        )
+        return "Je n'ai pas reconnu ces domaines.\n" + list_domains()
 
     await prefs_store.update(domaines_favoris=domains)
 

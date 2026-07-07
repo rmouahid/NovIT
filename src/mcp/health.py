@@ -17,7 +17,7 @@ class SourceStatus:
 
 @dataclass
 class HealthReport:
-    status: str           # "ok" | "degraded" | "down"
+    status: str  # "ok" | "degraded" | "down"
     uptime_seconds: float
     version: str
     sources: list[SourceStatus] = field(default_factory=list)
@@ -40,7 +40,10 @@ class HealthReport:
         ]
         for src in self.sources:
             status_icon = "✅" if src.available else "❌"
-            lines.append(f"- {status_icon} **{src.name}**" + (f" — {src.last_error}" if src.last_error else ""))
+            lines.append(
+                f"- {status_icon} **{src.name}**"
+                + (f" — {src.last_error}" if src.last_error else "")
+            )
         return "\n".join(lines)
 
 

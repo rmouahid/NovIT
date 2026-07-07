@@ -1,6 +1,6 @@
 """Scrapers pour les blogs d'ingénierie : Netflix, Google Eng, Meta Eng, The New Stack."""
 
-from src.scrapers.rss import RssSource, RssScraper
+from src.scrapers.rss import RssScraper, RssSource
 
 ENG_RSS_SOURCES = [
     RssSource(

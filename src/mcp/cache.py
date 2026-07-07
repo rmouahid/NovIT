@@ -1,5 +1,5 @@
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from threading import Lock
 from typing import Any
 
@@ -59,10 +59,10 @@ class TTLCache:
 
 
 # TTL par type de contenu (secondes)
-TTL_NEWS = 3600       # 1h — actualités
-TTL_PROFILE = 86400   # 24h — profils utilisateur
-TTL_SEARCH = 1800     # 30min — résultats de recherche
-TTL_HEALTH = 60       # 1min — statut des sources
+TTL_NEWS = 3600  # 1h — actualités
+TTL_PROFILE = 86400  # 24h — profils utilisateur
+TTL_SEARCH = 1800  # 30min — résultats de recherche
+TTL_HEALTH = 60  # 1min — statut des sources
 
 # Instance globale partagée entre les handlers
 cache = TTLCache(default_ttl=TTL_NEWS)
