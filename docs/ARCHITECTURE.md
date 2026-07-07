@@ -118,15 +118,17 @@ Structure miroir de `src/`. Chaque module a son fichier de tests.
 
 ## Décisions d'architecture
 
-Voir [docs/ADR/](ADR/) pour les Architecture Decision Records complets.
+Voir [docs/ADR/](ADR/) pour les Architecture Decision Records complets (contexte, alternatives
+écartées, conséquences assumées — y compris les écarts avec la vision initiale ci-dessous).
 
-| Décision | Choix | Raison |
+| Décision | Choix réel | ADR |
 |---|---|---|
-| Framework serveur | FastAPI | Async natif, Pydantic intégré, rapide |
-| Base de données dev | SQLite (aiosqlite) | Zéro config, fichier local, async |
-| Base de données prod | PostgreSQL | Scalabilité, index performants |
-| Cache | cachetools (TTL) | Simple, en-mémoire, sans dépendance externe |
-| Logging | loguru | API simple, JSON out-of-the-box |
+| Transport serveur MCP | SDK `mcp` officiel, stdio (pas FastAPI) | [ADR-001](ADR/0001-transport-serveur-mcp.md) |
+| Base de données dev | SQLite (aiosqlite) | [ADR-002](ADR/0002-sqlite-dev-postgresql-prod.md) |
+| Base de données prod | PostgreSQL envisagé, **non implémenté** | [ADR-002](ADR/0002-sqlite-dev-postgresql-prod.md) |
+| Cache | `TTLCache` maison (TTL en mémoire) | [ADR-003](ADR/0003-strategie-cache-ttl.md) |
+| Format de sortie des outils | Texte markdown (pas JSON structuré) | [ADR-004](ADR/0004-format-sortie-standardise.md) |
+| Logging | loguru | API simple, JSON out-of-the-box en prod |
 
 ---
 
