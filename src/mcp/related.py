@@ -1,3 +1,5 @@
+from datetime import UTC, datetime
+
 from src.scrapers.base import Article
 from src.scrapers.storage import store
 
@@ -57,7 +59,7 @@ async def find_related(url: str, title: str, domains: list[str], top_k: int = 5)
         title=title,
         url=url,
         summary="",
-        published_at=__import__("datetime").datetime.now(),
+        published_at=datetime.now(tz=UTC),
         source="",
         domains=domains,
     )
