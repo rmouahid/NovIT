@@ -1,11 +1,13 @@
-"""Template de scraper — copier ce fichier pour ajouter une nouvelle source.
+"""Template de scraper — copier ce fichier pour ajouter une nouvelle source
+avec une API/format propre (pas un simple flux RSS — pour un flux RSS, voir
+docs/ADDING_A_SOURCE.md, il suffit d'ajouter une entrée à RSS_SOURCES).
 
-Étapes :
+Étapes : voir docs/ADDING_A_SOURCE.md pour le guide complet.
 1. Copier ce fichier : cp _template.py ma_source.py
 2. Renommer la classe et remplir name, domains, profiles
 3. Implémenter fetch() et health_check()
-4. Ajouter l'entrée dans config/sources.yaml
-5. Écrire les tests dans tests/unit/test_ma_source.py
+4. Enregistrer le scraper dans ScraperManager._build_all_scrapers() (src/scrapers/manager.py)
+5. Écrire les tests dans tests/test_ma_source.py
 """
 
 import httpx
