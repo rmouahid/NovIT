@@ -160,7 +160,9 @@ ruff check src/ tests/
 
 - [Guide d'installation complet](docs/INSTALLATION_GUIDE.md)
 - [Documentation technique](docs/TECHNICAL_DOCUMENTATION.md) (modules, outils MCP, débogage)
-- [Architecture](docs/ARCHITECTURE.md)
+- [Exemples de requêtes](docs/EXAMPLES.md) (par profil, question → réponse attendue)
+- [Guide de prompting](docs/PROMPTING_GUIDE.md)
+- [Architecture](docs/ARCHITECTURE.md) · [Décisions d'architecture (ADR)](docs/ADR/)
 - [Guide de contribution](CONTRIBUTING.md)
 - [Roadmap](docs/ROADMAP.md)
 - [Changelog](CHANGELOG.md)
