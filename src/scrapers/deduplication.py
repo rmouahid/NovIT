@@ -1,6 +1,6 @@
 import hashlib
 import re
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from loguru import logger
 
@@ -11,7 +11,11 @@ def _normalize(text: str) -> str:
     """Normalise un titre pour la comparaison : minuscules, sans ponctuation ni articles."""
     text = text.lower()
     text = re.sub(r"[^\w\s]", " ", text)
-    text = re.sub(r"\b(the|a|an|le|la|les|un|une|des|de|du|and|or|is|in|on|at|to|for|of)\b", "", text)
+    text = re.sub(
+        r"\b(the|a|an|le|la|les|un|une|des|de|du|and|or|is|in|on|at|to|for|of|now|new|today)\b",
+        "",
+        text,
+    )
     return re.sub(r"\s+", " ", text).strip()
 
 
@@ -46,9 +50,11 @@ class Deduplicator:
 
     def _prune_expired(self) -> None:
         """Supprime les entrées expirées de l'index."""
-        cutoff = datetime.now(tz=timezone.utc) - self.window
+        cutoff = datetime.now(tz=UTC) - self.window
         self._url_index = {k: v for k, v in self._url_index.items() if v > cutoff}
-        self._title_index = {k: v for k, v in self._title_index.items() if v[1] > cutoff}
+        self._title_index = {
+            k: v for k, v in self._title_index.items() if v[1] > cutoff
+        }
 
     def is_duplicate(self, article: Article) -> bool:
         """Retourne True si l'article est un doublon (URL ou titre similaire)."""
@@ -74,7 +80,7 @@ class Deduplicator:
 
     def register(self, article: Article) -> None:
         """Enregistre un article dans l'index."""
-        now = datetime.now(tz=timezone.utc)
+        now = datetime.now(tz=UTC)
         self._url_index[article.url] = now
         self._title_index[article.title] = (article.url, now)
 
@@ -87,7 +93,9 @@ class Deduplicator:
                 unique.append(article)
         removed = len(articles) - len(unique)
         if removed:
-            logger.info(f"Déduplication : {removed} doublon(s) supprimé(s) sur {len(articles)}")
+            logger.info(
+                f"Déduplication : {removed} doublon(s) supprimé(s) sur {len(articles)}"
+            )
         return unique
 
 
