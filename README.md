@@ -125,7 +125,7 @@ Claude : [utilise novit_get_by_domain avec domaine=sécurité]
 ```
 NovIT/
 ├── src/
-│   ├── mcp/        # Serveur FastAPI + handlers MCP
+│   ├── mcp/        # Serveur MCP (SDK `mcp`, transport stdio) + handlers
 │   ├── scrapers/   # Un scraper par source (HN, GitHub, CVE…)
 │   ├── profiles/   # Logique de filtrage par profil
 │   └── prompts/    # Prompts système et templates
@@ -158,6 +158,8 @@ ruff check src/ tests/
 
 ## Documentation
 
+- [Guide d'installation complet](docs/INSTALLATION_GUIDE.md)
+- [Documentation technique](docs/TECHNICAL_DOCUMENTATION.md) (modules, outils MCP, débogage)
 - [Architecture](docs/ARCHITECTURE.md)
 - [Guide de contribution](CONTRIBUTING.md)
 - [Roadmap](docs/ROADMAP.md)
