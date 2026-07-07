@@ -1,11 +1,17 @@
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from email.utils import parsedate_to_datetime
+from pathlib import Path
 
 import feedparser
+import yaml
 from loguru import logger
 
 from src.scrapers.base import Article, BaseScraper
+
+SOURCES_CONFIG_PATH = Path("config/sources.yaml")
+
+_REQUIRED_FIELDS = ("name", "url", "domains", "profiles")
 
 
 @dataclass
@@ -15,38 +21,67 @@ class RssSource:
     domains: list[str]
     profiles: list[str]
     base_score: float = 0.5
+    category: str = ""
 
 
-RSS_SOURCES: list[RssSource] = [
-    RssSource(
-        name="dev_to",
-        url="https://dev.to/feed",
-        domains=["dev", "formation"],
-        profiles=["ETUDIANT", "INGENIEUR"],
-        base_score=0.5,
-    ),
-    RssSource(
-        name="techcrunch",
-        url="https://techcrunch.com/feed/",
-        domains=["dev", "ia", "ingenierie"],
-        profiles=["ETUDIANT", "INGENIEUR"],
-        base_score=0.6,
-    ),
-    RssSource(
-        name="the_verge",
-        url="https://www.theverge.com/rss/index.xml",
-        domains=["dev", "ia"],
-        profiles=["ETUDIANT"],
-        base_score=0.45,
-    ),
-    RssSource(
-        name="mit_tech_review",
-        url="https://www.technologyreview.com/feed/",
-        domains=["ia", "reglementation"],
-        profiles=["ETUDIANT", "INGENIEUR"],
-        base_score=0.7,
-    ),
-]
+class SourcesConfigError(ValueError):
+    """Le fichier config/sources.yaml est absent, malformé ou invalide."""
+
+
+def load_rss_sources(
+    path: Path | None = None, category: str | None = None
+) -> list[RssSource]:
+    """Charge et valide les sources RSS déclaratives depuis config/sources.yaml.
+
+    Lit le fichier à chaque appel (pas de cache) : combiné à
+    ScraperManager.reload_sources(), une source ajoutée/modifiée est prise en
+    compte sans redémarrer le serveur. Filtre par `category` si fourni.
+    Lève SourcesConfigError si le fichier est absent ou qu'une entrée n'a pas
+    les champs requis — on préfère un échec net au démarrage à des sources
+    silencieusement ignorées.
+
+    `path` par défaut résolu à l'appel (pas en valeur par défaut figée à
+    l'import) pour que la config puisse être redirigée dynamiquement (tests,
+    rechargement) via le module-level SOURCES_CONFIG_PATH.
+    """
+    path = path or SOURCES_CONFIG_PATH
+    if not path.exists():
+        raise SourcesConfigError(f"Fichier de sources introuvable : {path}")
+
+    with path.open(encoding="utf-8") as f:
+        data = yaml.safe_load(f) or {}
+
+    entries = data.get("sources", [])
+    names_seen: set[str] = set()
+    sources: list[RssSource] = []
+
+    for i, entry in enumerate(entries):
+        missing = [field for field in _REQUIRED_FIELDS if not entry.get(field)]
+        if missing:
+            raise SourcesConfigError(
+                f"{path}: entrée #{i} invalide, champs manquants : {missing}"
+            )
+        if entry["name"] in names_seen:
+            raise SourcesConfigError(
+                f"{path}: nom de source dupliqué : {entry['name']}"
+            )
+        names_seen.add(entry["name"])
+
+        if category and entry.get("category") != category:
+            continue
+
+        sources.append(
+            RssSource(
+                name=entry["name"],
+                url=entry["url"],
+                domains=list(entry["domains"]),
+                profiles=list(entry["profiles"]),
+                base_score=float(entry.get("base_score", 0.5)),
+                category=entry.get("category", ""),
+            )
+        )
+
+    return sources
 
 
 def _parse_date(entry: dict) -> datetime:
@@ -136,5 +171,5 @@ class RssScraper(BaseScraper):
 
 
 def build_rss_scrapers() -> list[RssScraper]:
-    """Retourne la liste de tous les scrapers RSS configurés."""
-    return [RssScraper(source) for source in RSS_SOURCES]
+    """Retourne les scrapers RSS de la catégorie "actualites" (config/sources.yaml)."""
+    return [RssScraper(source) for source in load_rss_sources(category="actualites")]

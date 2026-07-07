@@ -79,7 +79,7 @@ class BaseScraper(ABC):
 |---|---|
 | `manager.py` | `ScraperManager` : construit la liste des scrapers (22 sources actuellement), les lance en parallèle (`asyncio.gather` + timeout individuel), agrège, déduplique par URL, produit un `FetchResult` (articles + `ScraperReport` par source). |
 | `hacker_news.py`, `github_trending.py`, `cve.py` (CVE NVD + ANSSI) | Scrapers dédiés par API. |
-| `rss.py`, `ai_blogs.py`, `eng_blogs.py`, `regulation.py`, `training.py` | Scrapers RSS génériques, instanciés depuis des listes de sources déclarées en Python (voir §4, non encore dans `config/sources.yaml`). |
+| `rss.py`, `ai_blogs.py`, `eng_blogs.py`, `regulation.py`, `training.py` | `RssScraper` générique instancié depuis `config/sources.yaml` (`load_rss_sources()`, filtré par `category`) ; `ai_blogs.py`/`training.py` ajoutent en plus un scraper code (`ArxivScraper`/`RoadmapScraper`) pour les sources non-RSS. |
 | `deduplication.py` | `Deduplicator` : dédoublonnage par URL exacte, hash de titre normalisé, et similarité de Jaccard fuzzy (seuil configurable, 0.7 par défaut). Complexité fuzzy en O(n²) sur la fenêtre — voir `tests/test_performance.py`. |
 | `storage.py` | `ArticleStore` : persistance SQLite async (`aiosqlite`), rétention configurable, recherche plein texte `LIKE`. |
 | `tagger.py` | `DomainTagger` : enrichit `article.domains` par mots-clés (`config/domains.yaml`), sans jamais écraser les tags déjà posés par le scraper. |
@@ -101,11 +101,7 @@ class BaseScraper(ABC):
 | `settings.py` | `Settings` (Pydantic Settings), préfixe d'env `NOVIT_`, chargé depuis `.env`. |
 | `profiles.yaml` | Définition des 2 profils (sources prioritaires, domaines favoris/secondaires, `score_min`, `nb_articles_defaut`). |
 | `domains.yaml` | Mots-clés de tagging par domaine NovIT. |
-
-**Écart avec ARCHITECTURE.md v0.1 :** il n'existe pas de `config/sources.yaml` — la liste des
-sources RSS/blogs est aujourd'hui déclarée en dur dans `src/scrapers/rss.py`, `ai_blogs.py`,
-`eng_blogs.py`, `regulation.py`, `training.py` (voir issue « Rendre la configuration des sources
-100% déclarative »).
+| `sources.yaml` | Sources RSS déclaratives (`name`, `url`, `domains`, `profiles`, `base_score`, `category`) — voir [ADDING_A_SOURCE.md](ADDING_A_SOURCE.md). Chargé/validé par `load_rss_sources()` (`src/scrapers/rss.py`), aucun cache : `ScraperManager.reload_sources()` permet de recharger sans redémarrer le serveur. |
 
 ### `src/prompts/`
 

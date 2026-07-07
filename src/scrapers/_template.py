@@ -1,6 +1,6 @@
 """Template de scraper — copier ce fichier pour ajouter une nouvelle source
 avec une API/format propre (pas un simple flux RSS — pour un flux RSS, voir
-docs/ADDING_A_SOURCE.md, il suffit d'ajouter une entrée à RSS_SOURCES).
+docs/ADDING_A_SOURCE.md, il suffit d'ajouter une entrée à config/sources.yaml).
 
 Étapes : voir docs/ADDING_A_SOURCE.md pour le guide complet.
 1. Copier ce fichier : cp _template.py ma_source.py

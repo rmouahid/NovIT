@@ -6,17 +6,7 @@ import httpx
 from loguru import logger
 
 from src.scrapers.base import Article, BaseScraper
-from src.scrapers.rss import RssScraper, RssSource
-
-TRAINING_RSS_SOURCES = [
-    RssSource(
-        name="freecodecamp",
-        url="https://www.freecodecamp.org/news/rss/",
-        domains=["formation", "dev"],
-        profiles=["ETUDIANT"],
-        base_score=0.7,
-    ),
-]
+from src.scrapers.rss import RssScraper, load_rss_sources
 
 ROADMAP_RELEASES_URL = (
     "https://api.github.com/repos/kamranahmedse/developer-roadmap/releases"
@@ -73,6 +63,8 @@ class RoadmapScraper(BaseScraper):
 
 
 def build_training_scrapers() -> list[BaseScraper]:
-    scrapers: list[BaseScraper] = [RssScraper(src) for src in TRAINING_RSS_SOURCES]
+    scrapers: list[BaseScraper] = [
+        RssScraper(src) for src in load_rss_sources(category="formation")
+    ]
     scrapers.append(RoadmapScraper())
     return scrapers

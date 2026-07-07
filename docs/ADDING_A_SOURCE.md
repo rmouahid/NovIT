@@ -7,29 +7,36 @@ Deux cas selon le type de source : **flux RSS standard** (le cas le plus courant
 
 ## Cas 1 — Flux RSS standard
 
-La majorité des sources NovIT sont des flux RSS déclarés (pas de code par source). Choisir le
-fichier selon la catégorie éditoriale, puis ajouter une entrée à sa liste `*_SOURCES` :
+La majorité des sources NovIT sont des flux RSS déclarés dans **`config/sources.yaml`** —
+aucun code à écrire. Ajouter une entrée à la fin du fichier, sous la `category` éditoriale
+adéquate (purement organisationnelle, sert aussi à `build_rss_scrapers()`/`build_ai_scrapers()`/
+`build_eng_scrapers()`/`build_regulation_scrapers()`/`build_training_scrapers()` pour filtrer) :
 
-| Fichier | Catégorie | Fonction builder |
-|---|---|---|
-| `src/scrapers/rss.py` | Actus tech générales | `build_rss_scrapers()` (liste `RSS_SOURCES`) |
-| `src/scrapers/ai_blogs.py` | Blogs IA (labos, recherche) | `build_ai_scrapers()` |
-| `src/scrapers/eng_blogs.py` | Blogs d'ingénierie (tech companies) | `build_eng_scrapers()` |
-| `src/scrapers/regulation.py` | Réglementation / conformité | `build_regulation_scrapers()` |
-| `src/scrapers/training.py` | Formation / certifications | `build_training_scrapers()` |
+| `category` | Sens |
+|---|---|
+| `actualites` | Actus tech générales |
+| `ia` | Blogs IA (labos, recherche) |
+| `ingenierie` | Blogs d'ingénierie (tech companies) |
+| `reglementation` | Réglementation / conformité |
+| `formation` | Formation / certifications |
 
-```python
-RssSource(
-    name="mon_blog",                          # identifiant unique, snake_case
-    url="https://monblog.example.com/feed",    # URL du flux RSS/Atom
-    domains=["dev", "ia"],                     # domaines NovIT couverts (voir domains.yaml)
-    profiles=["ETUDIANT", "INGENIEUR"],        # profils concernés
-    base_score=0.5,                            # pertinence de base 0.0–1.0 (0.5 = neutre)
-)
+```yaml
+sources:
+  # ... sources existantes ...
+  - name: mon_blog                            # identifiant unique, snake_case
+    category: dev                             # groupe éditorial (voir tableau ci-dessus)
+    url: "https://monblog.example.com/feed"    # URL du flux RSS/Atom
+    domains: [dev, ia]                        # domaines NovIT couverts (voir domains.yaml)
+    profiles: [ETUDIANT, INGENIEUR]           # profils concernés
+    base_score: 0.5                           # pertinence de base 0.0–1.0 (0.5 = neutre)
 ```
 
-C'est tout : `RssScraper` (classe partagée) gère le fetch, le parsing (`feedparser`) et la
-conversion en `Article`. Aucun nouveau fichier, aucune modification de `ScraperManager`.
+C'est tout : `load_rss_sources()` (`src/scrapers/rss.py`) charge et valide le fichier au
+démarrage (échec net si un champ requis manque ou si un `name` est dupliqué), `RssScraper`
+(classe partagée) gère le fetch, le parsing (`feedparser`) et la conversion en `Article`. Aucun
+nouveau fichier Python, aucune modification de `ScraperManager`. Le rechargement est possible
+sans redémarrer le serveur via `ScraperManager.reload_sources()` (voir
+[docs/SECRET_ROTATION.md](SECRET_ROTATION.md) pour le principe équivalent côté secrets).
 
 ---
 

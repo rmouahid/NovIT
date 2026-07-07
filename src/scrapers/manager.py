@@ -67,6 +67,23 @@ class ScraperManager:
         scrapers.extend(build_training_scrapers())
         return scrapers
 
+    def reload_sources(self) -> int:
+        """Recharge la liste des scrapers depuis config/sources.yaml sans redémarrer.
+
+        build_rss_scrapers()/build_ai_scrapers()/etc. relisent le fichier YAML à
+        chaque appel (aucun cache) : une source ajoutée, modifiée ou supprimée
+        dans config/sources.yaml est prise en compte dès le prochain
+        fetch_all()/fetch_by_domains(). Retourne le nombre total de scrapers
+        actifs après rechargement. Lève SourcesConfigError si le fichier est
+        invalide — dans ce cas la liste précédente reste active (rechargement
+        atomique, pas de dégradation de service sur une config cassée).
+        """
+        self._scrapers = self._build_all_scrapers()
+        logger.info(
+            f"ScraperManager : sources rechargées ({len(self._scrapers)} scrapers)"
+        )
+        return len(self._scrapers)
+
     async def fetch_all(self) -> FetchResult:
         """Lance tous les scrapers en parallèle et agrège les résultats."""
         logger.info(f"ScraperManager : lancement de {len(self._scrapers)} scrapers")

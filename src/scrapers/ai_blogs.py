@@ -7,38 +7,7 @@ import httpx
 from loguru import logger
 
 from src.scrapers.base import Article, BaseScraper
-from src.scrapers.rss import RssScraper, RssSource
-
-AI_RSS_SOURCES = [
-    RssSource(
-        name="anthropic_blog",
-        url="https://www.anthropic.com/rss.xml",
-        domains=["ia"],
-        profiles=["ETUDIANT", "INGENIEUR"],
-        base_score=0.9,
-    ),
-    RssSource(
-        name="openai_blog",
-        url="https://openai.com/news/rss.xml",
-        domains=["ia"],
-        profiles=["ETUDIANT", "INGENIEUR"],
-        base_score=0.9,
-    ),
-    RssSource(
-        name="deepmind_blog",
-        url="https://deepmind.google/blog/rss.xml",
-        domains=["ia"],
-        profiles=["INGENIEUR"],
-        base_score=0.85,
-    ),
-    RssSource(
-        name="papers_with_code",
-        url="https://paperswithcode.com/latest/rss",
-        domains=["ia"],
-        profiles=["INGENIEUR"],
-        base_score=0.75,
-    ),
-]
+from src.scrapers.rss import RssScraper, load_rss_sources
 
 ARXIV_API_URL = "http://export.arxiv.org/api/query"
 
@@ -110,6 +79,8 @@ class ArxivScraper(BaseScraper):
 
 
 def build_ai_scrapers() -> list[BaseScraper]:
-    scrapers: list[BaseScraper] = [RssScraper(src) for src in AI_RSS_SOURCES]
+    scrapers: list[BaseScraper] = [
+        RssScraper(src) for src in load_rss_sources(category="ia")
+    ]
     scrapers.append(ArxivScraper())
     return scrapers
