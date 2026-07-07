@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: 💬 Question / discussion générale
+    url: https://github.com/LePhyX/NovIT/discussions
+    about: Pour une question qui n'est pas un bug ni une proposition concrète
+  - name: 📖 Documentation
+    url: https://github.com/LePhyX/NovIT/tree/main/docs
+    about: Guides d'installation, technique, de contribution

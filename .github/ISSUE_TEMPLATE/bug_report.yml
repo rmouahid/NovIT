@@ -1,0 +1,62 @@
+name: 🐛 Signalement de bug
+description: Un comportement de NovIT ne correspond pas à ce qui est attendu
+title: "bug: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Merci de signaler ce bug ! Voir aussi le
+        [guide de débogage](https://github.com/LePhyX/NovIT/blob/main/docs/TECHNICAL_DOCUMENTATION.md#4-guide-de-débogage)
+        avant d'ouvrir l'issue, la réponse s'y trouve peut-être déjà.
+
+  - type: input
+    id: version
+    attributes:
+      label: Version de NovIT
+      description: Contenu du fichier `VERSION` à la racine du dépôt
+      placeholder: "0.1.0"
+    validations:
+      required: true
+
+  - type: input
+    id: python-version
+    attributes:
+      label: Version de Python
+      description: Sortie de `python --version`
+      placeholder: "Python 3.11.9"
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: Étapes pour reproduire
+      description: Requête envoyée à Claude, outil MCP concerné, paramètres utilisés
+      placeholder: |
+        1. Demander à Claude : "..."
+        2. Outil appelé : novit_get_news(profil=..., domaines=...)
+        3. ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Comportement attendu
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Comportement observé
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs pertinents
+      description: Niveau DEBUG si possible (`NOVIT_LOG_LEVEL=DEBUG`) — ne pas coller de clé API/secret
+      render: shell
