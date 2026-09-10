@@ -1,0 +1,21 @@
+title: "[Idée] "
+labels: ["idea"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Pour une proposition déjà concrète et prête à être planifiée, ouvrir plutôt une
+        [issue de fonctionnalité](https://github.com/LePhyX/NovIT/issues/new/choose). Cette
+        catégorie sert aux idées à discuter avant de les cadrer.
+
+  - type: textarea
+    id: idea
+    attributes:
+      label: L'idée
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Contexte / motivation

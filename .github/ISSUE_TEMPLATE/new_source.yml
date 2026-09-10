@@ -1,0 +1,70 @@
+name: 📡 Nouvelle source de scraping
+description: Proposer l'ajout d'une nouvelle source (flux RSS, API...) à NovIT
+title: "feat: ajouter le scraper "
+labels: ["feature"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Voir le guide complet : [docs/ADDING_A_SOURCE.md](https://github.com/LePhyX/NovIT/blob/main/docs/ADDING_A_SOURCE.md).
+        La plupart des sources sont de simples flux RSS déclarés en quelques lignes, sans code.
+
+  - type: input
+    id: name
+    attributes:
+      label: Nom de la source
+      placeholder: "ex: The Pragmatic Engineer"
+    validations:
+      required: true
+
+  - type: input
+    id: url
+    attributes:
+      label: URL (flux RSS ou API)
+      placeholder: "https://..."
+    validations:
+      required: true
+
+  - type: dropdown
+    id: type
+    attributes:
+      label: Type
+      options:
+        - Flux RSS/Atom standard
+        - API JSON propre
+        - Page HTML à parser
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: domains
+    attributes:
+      label: Domaines NovIT couverts
+      options:
+        - label: ia
+        - label: securite
+        - label: dev
+        - label: ingenierie
+        - label: reglementation
+        - label: formation
+    validations:
+      required: true
+
+  - type: dropdown
+    id: profiles
+    attributes:
+      label: Profil(s) concerné(s)
+      multiple: true
+      options:
+        - ETUDIANT
+        - INGENIEUR
+    validations:
+      required: true
+
+  - type: textarea
+    id: why
+    attributes:
+      label: Pourquoi cette source ?
+      description: Qualité éditoriale, fréquence de publication, ce qu'elle apporte qui manque aujourd'hui
+    validations:
+      required: true

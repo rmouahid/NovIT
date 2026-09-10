@@ -1,0 +1,132 @@
+# Sources RSS/Atom déclaratives de NovIT.
+#
+# Ajouter une source ici ne nécessite aucun code (voir docs/ADDING_A_SOURCE.md) : elle est
+# chargée par src.scrapers.rss.load_rss_sources() et transformée en RssScraper générique.
+#
+# `category` est purement organisationnel (regroupement dans ce fichier et dans les tests),
+# sans effet sur le comportement du scraper.
+#
+# Champs requis : name (unique), url, domains (>=1, valeurs de config/domains.yaml),
+# profiles (>=1, ETUDIANT et/ou INGENIEUR). base_score est optionnel (0.5 par défaut).
+#
+# Note : certaines sources ne sont pas de simples flux RSS (API JSON, pages HTML) et restent
+# des scrapers dédiés en code : HackerNewsScraper, GitHubTrendingScraper, CVEScraper,
+# ANSSIScraper, ArxivScraper (ai_blogs.py), RoadmapScraper (training.py).
+
+sources:
+  # --- Actualités tech générales ---
+  - name: dev_to
+    category: actualites
+    url: "https://dev.to/feed"
+    domains: [dev, formation]
+    profiles: [ETUDIANT, INGENIEUR]
+    base_score: 0.5
+
+  - name: techcrunch
+    category: actualites
+    url: "https://techcrunch.com/feed/"
+    domains: [dev, ia, ingenierie]
+    profiles: [ETUDIANT, INGENIEUR]
+    base_score: 0.6
+
+  - name: the_verge
+    category: actualites
+    url: "https://www.theverge.com/rss/index.xml"
+    domains: [dev, ia]
+    profiles: [ETUDIANT]
+    base_score: 0.45
+
+  - name: mit_tech_review
+    category: actualites
+    url: "https://www.technologyreview.com/feed/"
+    domains: [ia, reglementation]
+    profiles: [ETUDIANT, INGENIEUR]
+    base_score: 0.7
+
+  # --- Blogs IA (labos, recherche) ---
+  - name: anthropic_blog
+    category: ia
+    url: "https://www.anthropic.com/rss.xml"
+    domains: [ia]
+    profiles: [ETUDIANT, INGENIEUR]
+    base_score: 0.9
+
+  - name: openai_blog
+    category: ia
+    url: "https://openai.com/news/rss.xml"
+    domains: [ia]
+    profiles: [ETUDIANT, INGENIEUR]
+    base_score: 0.9
+
+  - name: deepmind_blog
+    category: ia
+    url: "https://deepmind.google/blog/rss.xml"
+    domains: [ia]
+    profiles: [INGENIEUR]
+    base_score: 0.85
+
+  - name: papers_with_code
+    category: ia
+    url: "https://paperswithcode.com/latest/rss"
+    domains: [ia]
+    profiles: [INGENIEUR]
+    base_score: 0.75
+
+  # --- Blogs d'ingénierie (tech companies) ---
+  - name: netflix_tech
+    category: ingenierie
+    url: "https://netflixtechblog.com/feed"
+    domains: [ingenierie, dev]
+    profiles: [INGENIEUR]
+    base_score: 0.85
+
+  - name: google_eng
+    category: ingenierie
+    url: "https://developers.googleblog.com/feeds/posts/default"
+    domains: [ingenierie, dev, ia]
+    profiles: [INGENIEUR]
+    base_score: 0.8
+
+  - name: meta_eng
+    category: ingenierie
+    url: "https://engineering.fb.com/feed/"
+    domains: [ingenierie, dev]
+    profiles: [INGENIEUR]
+    base_score: 0.8
+
+  - name: the_new_stack
+    category: ingenierie
+    url: "https://thenewstack.io/feed/"
+    domains: [ingenierie, dev]
+    profiles: [INGENIEUR]
+    base_score: 0.7
+
+  # --- Réglementation / conformité ---
+  - name: cnil
+    category: reglementation
+    url: "https://www.cnil.fr/fr/rss.xml"
+    domains: [reglementation]
+    profiles: [ETUDIANT, INGENIEUR]
+    base_score: 0.8
+
+  - name: eurlex_ai
+    category: reglementation
+    url: "https://eur-lex.europa.eu/rss/legal-act/en/new.rss"
+    domains: [reglementation, ia]
+    profiles: [INGENIEUR]
+    base_score: 0.75
+
+  - name: w3c_news
+    category: reglementation
+    url: "https://www.w3.org/news/feed"
+    domains: [reglementation, dev]
+    profiles: [INGENIEUR]
+    base_score: 0.65
+
+  # --- Formation / certifications ---
+  - name: freecodecamp
+    category: formation
+    url: "https://www.freecodecamp.org/news/rss/"
+    domains: [formation, dev]
+    profiles: [ETUDIANT]
+    base_score: 0.7

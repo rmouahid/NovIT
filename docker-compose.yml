@@ -1,0 +1,23 @@
+services:
+  novit:
+    build:
+      context: .
+      target: runtime
+    image: novit:dev
+    container_name: novit-mcp
+    stdin_open: true   # requis pour le transport stdio MCP
+    tty: false
+    environment:
+      - NOVIT_ENV=development
+      - NOVIT_LOG_LEVEL=DEBUG
+      - NOVIT_DB_PATH=/data/novit.db
+    env_file:
+      - .env
+    volumes:
+      - novit-data:/data
+      - ./src:/app/src:ro        # hot-reload du code source en dev
+      - ./config:/app/config:ro
+    restart: unless-stopped
+
+volumes:
+  novit-data:

@@ -1,0 +1,160 @@
+domains:
+  ia:
+    label: "Intelligence Artificielle"
+    keywords:
+      - ai
+      - artificial intelligence
+      - llm
+      - large language model
+      - gpt
+      - claude
+      - gemini
+      - mistral
+      - llama
+      - machine learning
+      - deep learning
+      - neural network
+      - transformer
+      - diffusion
+      - stable diffusion
+      - midjourney
+      - openai
+      - anthropic
+      - deepmind
+      - hugging face
+      - rag
+      - fine-tuning
+      - reinforcement learning
+      - computer vision
+      - nlp
+      - natural language
+
+  securite:
+    label: "Cybersécurité"
+    keywords:
+      - security
+      - cybersecurity
+      - vulnerability
+      - cve
+      - exploit
+      - malware
+      - ransomware
+      - phishing
+      - zero-day
+      - penetration testing
+      - pentest
+      - breach
+      - hack
+      - hacker
+      - infosec
+      - sécurité
+      - cryptography
+      - encryption
+      - authentication
+      - oauth
+      - jwt
+      - cert-fr
+      - anssi
+      - nvd
+      - cvss
+
+  dev:
+    label: "Développement logiciel"
+    keywords:
+      - javascript
+      - typescript
+      - python
+      - rust
+      - golang
+      - go
+      - java
+      - kotlin
+      - swift
+      - react
+      - vue
+      - angular
+      - nextjs
+      - api
+      - rest
+      - graphql
+      - open source
+      - github
+      - git
+      - npm
+      - package
+      - library
+      - framework
+      - sdk
+      - cli
+      - developer
+      - programming
+      - coding
+      - software
+
+  ingenierie:
+    label: "Ingénierie logicielle"
+    keywords:
+      - kubernetes
+      - docker
+      - devops
+      - ci/cd
+      - microservices
+      - distributed systems
+      - scalability
+      - performance
+      - architecture
+      - cloud
+      - aws
+      - gcp
+      - azure
+      - postgresql
+      - redis
+      - kafka
+      - elasticsearch
+      - monitoring
+      - observability
+      - infrastructure
+      - platform engineering
+      - sre
+      - reliability
+
+  reglementation:
+    label: "Réglementation & conformité"
+    keywords:
+      - gdpr
+      - rgpd
+      - ai act
+      - regulation
+      - compliance
+      - privacy
+      - data protection
+      - cnil
+      - eur-lex
+      - w3c
+      - standard
+      - norme
+      - directive
+      - legislation
+      - legal
+      - policy
+      - governance
+
+  formation:
+    label: "Formation & certifications"
+    keywords:
+      - tutorial
+      - learn
+      - course
+      - beginner
+      - guide
+      - how to
+      - introduction
+      - certification
+      - roadmap
+      - best practices
+      - tips
+      - getting started
+      - explained
+      - formation
+      - apprentissage
+      - freecodecamp

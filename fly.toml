@@ -1,0 +1,44 @@
+# Configuration Fly.io — voir docs/CLOUD_DEPLOYMENT.md avant tout déploiement.
+#
+# Prérequis non satisfait à ce jour : NovIT ne parle que stdio (ADR-001), pas
+# HTTP/SSE. Ce fichier prépare le déploiement (build, volume, secrets) pour
+# le jour où le transport HTTP+SSE sera implémenté ; `fly deploy` échouera
+# tant que le serveur n'écoute pas sur $PORT.
+
+app = "novit-mcp"
+primary_region = "cdg"  # Paris — à ajuster selon la localisation des utilisateurs
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  NOVIT_ENV = "production"
+  NOVIT_LOG_LEVEL = "INFO"
+  NOVIT_DB_PATH = "/data/novit.db"
+  NOVIT_HOST = "0.0.0.0"
+  NOVIT_PORT = "8080"
+
+[[mounts]]
+  source = "novit_data"
+  destination = "/data"
+
+[[services]]
+  internal_port = 8080
+  protocol = "tcp"
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 0
+
+  [[services.ports]]
+    port = 443
+    handlers = ["tls", "http"]
+
+  [[services.http_checks]]
+    interval = "30s"
+    timeout = "5s"
+    grace_period = "10s"
+    method = "get"
+    path = "/health"
+
+[processes]
+  app = "python -m src.mcp.server"

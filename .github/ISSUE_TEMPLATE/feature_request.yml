@@ -1,0 +1,46 @@
+name: ✨ Proposition de fonctionnalité
+description: Proposer une nouvelle fonctionnalité ou une amélioration pour NovIT
+title: "feature: "
+labels: ["feature"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Pour un changement structurant (nouvelle dépendance majeure, changement d'architecture,
+        changement de format de sortie), voir [GOVERNANCE.md](https://github.com/LePhyX/NovIT/blob/main/GOVERNANCE.md#prise-de-décision) :
+        la discussion se fait ici, avant toute PR.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Quel problème cela résout-il ?
+      description: Décrire le besoin ou la limitation actuelle, pas encore la solution
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Solution proposée
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives envisagées
+      description: Autres approches considérées et pourquoi elles ont été écartées
+
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Périmètre
+      options:
+        - Nouvel outil MCP
+        - Nouvelle source de scraping (voir plutôt le template dédié "Nouvelle source")
+        - Amélioration d'un outil existant
+        - Infrastructure / CI / tests
+        - Documentation
+        - Autre
+    validations:
+      required: true
