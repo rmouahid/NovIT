@@ -174,3 +174,5 @@ ruff check src/ tests/
 ## Licence
 
 MIT — voir [LICENSE](LICENSE)
+
+<!-- yolo badge unlock 1789722931 -->
