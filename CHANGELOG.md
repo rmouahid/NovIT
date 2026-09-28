@@ -17,6 +17,9 @@ projet adhérant au [Semantic Versioning](https://semver.org/lang/fr/).
 - `pyproject.toml` pour la configuration des outils
 - `CHANGELOG.md` et `VERSION` (0.1.0)
 
+### Fixed
+- CI rétablie : `mcp` borné à la série 1.x (la 2.x retire `Server.list_tools()`)
+
 ---
 
 ## [0.1.0] — 2026-06-26
