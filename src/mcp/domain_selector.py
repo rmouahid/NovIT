@@ -58,7 +58,7 @@ async def set_domains(raw: str | list[str]) -> str:
     if not domains:
         return "Je n'ai pas reconnu ces domaines.\n" + list_domains()
 
-    await prefs_store.update(domaines_favoris=domains)
+    prefs_store.update(domaines_favoris=domains)
 
     labels = [_DOMAIN_LABELS.get(d, d) for d in domains]
     return f"Domaines actifs : {', '.join(labels)}\n\nDis-moi ce que tu veux explorer !"
