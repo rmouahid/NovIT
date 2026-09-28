@@ -7,7 +7,7 @@ Merci de vouloir contribuer à NovIT ! Ce guide explique comment soumettre des b
 ## Avant de commencer
 
 1. **Lisez le [README](README.md)** pour comprendre le projet.
-2. **Cherchez dans les [issues](https://github.com/LePhyX/NovIT/issues)** si votre sujet n'existe pas déjà.
+2. **Cherchez dans les [issues](https://github.com/rmouahid/NovIT/issues)** si votre sujet n'existe pas déjà.
 3. Pour les changements importants, **ouvrez d'abord une issue** pour en discuter.
 4. Ce projet suit un [Code de conduite](CODE_OF_CONDUCT.md) — merci de le respecter dans tous
    les échanges (issues, PR, discussions).
@@ -51,7 +51,7 @@ En résumé : copiez `src/scrapers/_template.py`, implémentez `BaseScraper`, aj
 ```bash
 git clone https://github.com/VOTRE_USERNAME/NovIT.git
 cd NovIT
-git remote add upstream https://github.com/LePhyX/NovIT.git
+git remote add upstream https://github.com/rmouahid/NovIT.git
 ```
 
 ### 2. Créer une branche
@@ -123,4 +123,4 @@ test: ajouter les tests d'intégration MCP (#65)
 
 ## Questions ?
 
-Ouvrez une [Discussion GitHub](https://github.com/LePhyX/NovIT/discussions) ou une issue avec le label `question`.
+Ouvrez une [Discussion GitHub](https://github.com/rmouahid/NovIT/discussions) ou une issue avec le label `question`.

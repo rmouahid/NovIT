@@ -61,7 +61,7 @@ Détails complets : [docs/TECHNICAL_DOCUMENTATION.md](../TECHNICAL_DOCUMENTATION
 ## Comment l'utiliser
 
 ```bash
-git clone https://github.com/LePhyX/NovIT.git
+git clone https://github.com/rmouahid/NovIT.git
 cd NovIT
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
@@ -78,7 +78,7 @@ d'exemples dans [docs/EXAMPLES.md](../EXAMPLES.md).
 ## Comment contribuer
 
 Le projet est jeune et le backlog est public (voir les
-[issues GitHub](https://github.com/LePhyX/NovIT/issues)). Deux points d'entrée simples pour une
+[issues GitHub](https://github.com/rmouahid/NovIT/issues)). Deux points d'entrée simples pour une
 première contribution :
 
 - **Ajouter une source** : la majorité sont des flux RSS déclarés en quelques lignes, pas de

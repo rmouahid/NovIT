@@ -23,7 +23,7 @@ sous-processus (pas de port réseau à ouvrir, pas de compte cloud nécessaire p
 ### 2.1 Cloner le dépôt
 
 ```bash
-git clone https://github.com/LePhyX/NovIT.git
+git clone https://github.com/rmouahid/NovIT.git
 cd NovIT
 ```
 

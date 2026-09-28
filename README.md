@@ -64,7 +64,7 @@ Claude possède une date de coupure de connaissance. NovIT lui donne accès à l
 
 ```bash
 # 1. Cloner le dépôt
-git clone https://github.com/LePhyX/NovIT.git
+git clone https://github.com/rmouahid/NovIT.git
 cd NovIT
 
 # 2. Créer l'environnement virtuel

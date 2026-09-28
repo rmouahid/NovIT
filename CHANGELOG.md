@@ -31,5 +31,5 @@ projet adhérant au [Semantic Versioning](https://semver.org/lang/fr/).
 - Branches `main` et `dev`
 - 98 issues et 10 milestones créés sur GitHub
 
-[Unreleased]: https://github.com/LePhyX/NovIT/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/LePhyX/NovIT/releases/tag/v0.1.0
+[Unreleased]: https://github.com/rmouahid/NovIT/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/rmouahid/NovIT/releases/tag/v0.1.0
