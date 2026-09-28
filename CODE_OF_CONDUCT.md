@@ -48,7 +48,7 @@ communauté.
 ## Signalement
 
 Les cas de comportement abusif, harcelant ou autrement inacceptable peuvent être signalés en
-ouvrant une [issue confidentielle](https://github.com/LePhyX/NovIT/issues/new) marquée
+ouvrant une [issue confidentielle](https://github.com/rmouahid/NovIT/issues/new) marquée
 `conduct`, ou en contactant directement un mainteneur listé dans
 [GOVERNANCE.md](GOVERNANCE.md). Toutes les plaintes seront examinées et donneront lieu à une
 réponse jugée nécessaire et appropriée aux circonstances. L'équipe de maintenance est tenue de

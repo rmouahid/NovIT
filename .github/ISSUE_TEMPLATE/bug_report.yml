@@ -7,7 +7,7 @@ body:
     attributes:
       value: |
         Merci de signaler ce bug ! Voir aussi le
-        [guide de débogage](https://github.com/LePhyX/NovIT/blob/main/docs/TECHNICAL_DOCUMENTATION.md#4-guide-de-débogage)
+        [guide de débogage](https://github.com/rmouahid/NovIT/blob/main/docs/TECHNICAL_DOCUMENTATION.md#4-guide-de-débogage)
         avant d'ouvrir l'issue, la réponse s'y trouve peut-être déjà.
 
   - type: input

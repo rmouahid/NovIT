@@ -10,7 +10,7 @@
 - Coupe les releases (voir *Processus de release* ci-dessous).
 - Fait respecter le [Code de conduite](CODE_OF_CONDUCT.md).
 
-À ce jour, [LePhyX](https://github.com/LePhyX) est l'unique mainteneur du projet. Cette section
+À ce jour, [rmouahid](https://github.com/rmouahid) est l'unique mainteneur du projet. Cette section
 sera mise à jour si l'équipe de maintenance s'élargit.
 
 ### Reviewer

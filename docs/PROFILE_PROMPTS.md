@@ -80,4 +80,4 @@ Ton objectif : lui faire gagner du temps, pas lui expliquer les bases.
 
 Les variables `{profil}`, `{domaines_actifs}`, `{sources_prioritaires}` et `{score_min}`
 sont injectées automatiquement via `src/mcp/context.py` dans chaque appel aux outils.
-Voir [Issue #48](https://github.com/LePhyX/NovIT/issues/48) pour l'implémentation.
+Voir [Issue #48](https://github.com/rmouahid/NovIT/issues/48) pour l'implémentation.

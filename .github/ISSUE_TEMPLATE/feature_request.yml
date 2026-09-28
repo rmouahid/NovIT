@@ -7,7 +7,7 @@ body:
     attributes:
       value: |
         Pour un changement structurant (nouvelle dépendance majeure, changement d'architecture,
-        changement de format de sortie), voir [GOVERNANCE.md](https://github.com/LePhyX/NovIT/blob/main/GOVERNANCE.md#prise-de-décision) :
+        changement de format de sortie), voir [GOVERNANCE.md](https://github.com/rmouahid/NovIT/blob/main/GOVERNANCE.md#prise-de-décision) :
         la discussion se fait ici, avant toute PR.
 
   - type: textarea
