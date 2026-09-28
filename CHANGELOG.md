@@ -16,6 +16,8 @@ projet adhérant au [Semantic Versioning](https://semver.org/lang/fr/).
 - Pre-commit hooks : black, ruff, isort, detect-secrets
 - `pyproject.toml` pour la configuration des outils
 - `CHANGELOG.md` et `VERSION` (0.1.0)
+- `scripts/demo.py` : session de démonstration sur les sources en direct, sans client MCP graphique
+- Landing page du projet dans le README : logo, démo animée, captures de réponses réelles, badges et appels à l'action
 
 ### Fixed
 - CI rétablie : `mcp` borné à la série 1.x (la 2.x retire `Server.list_tools()`)
