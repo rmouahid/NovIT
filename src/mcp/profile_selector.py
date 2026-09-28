@@ -25,14 +25,14 @@ async def select_profile(profil: str) -> str:
         )
 
     get_profile(profil)  # valide que le profil existe
-    await prefs_store.update(profil=profil)
+    prefs_store.update(profil=profil)
 
     return _CHANGE_CONFIRM[profil]
 
 
 async def get_current_profile() -> str:
     """Retourne un résumé du profil actuellement actif."""
-    prefs = await prefs_store.load()
+    prefs = prefs_store.load()
     if not prefs.profil:
         return "Aucun profil défini. Dis-moi : **ETUDIANT** ou **INGENIEUR** ?"
 

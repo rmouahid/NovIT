@@ -56,7 +56,7 @@ async def start_novit(profil: str | None = None) -> str:
     Si le profil est inconnu, affiche le menu de sélection.
     Si le profil est connu, affiche le message de bienvenue adapté.
     """
-    prefs = await prefs_store.load()
+    prefs = prefs_store.load()
 
     # Résolution du profil : argument > préférences sauvegardées > None
     resolved = profil or prefs.profil
