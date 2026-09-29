@@ -16,6 +16,8 @@ USER_AGENTS = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:126.0) Gecko/20100101 Firefox/126.0",
 ]
 
+# Mots entiers : « ai » ne doit pas correspondre à « email » ou « maintain »
+_AI_KEYWORDS_RE = re.compile(r"\b(ai|llms?|machine learning|neural)\b", re.IGNORECASE)
 _COUNT_RE = re.compile(r"(\d[\d,.]*)\s*([kK])?")
 
 
@@ -115,13 +117,10 @@ class GitHubTrendingScraper(BaseScraper):
                     else 0
                 )
 
-                domains = LANGUAGE_DOMAIN_MAP.get(language.lower(), ["dev"])
-                if any(
-                    kw in description.lower()
-                    for kw in ["ai", "llm", "machine learning", "neural"]
-                ):
-                    if "ia" not in domains:
-                        domains.append("ia")
+                # Copie : ajouter "ia" ne doit pas modifier la table partagée
+                domains = list(LANGUAGE_DOMAIN_MAP.get(language.lower(), ["dev"]))
+                if _AI_KEYWORDS_RE.search(description) and "ia" not in domains:
+                    domains.append("ia")
 
                 summary = f"⭐ {format_count(stars)} étoiles"
                 if today_stars:
