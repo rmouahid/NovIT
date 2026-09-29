@@ -1,4 +1,5 @@
 import random
+import re
 from datetime import UTC, datetime
 
 import httpx
@@ -14,6 +15,25 @@ USER_AGENTS = [
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Safari/605.1.15",
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:126.0) Gecko/20100101 Firefox/126.0",
 ]
+
+_COUNT_RE = re.compile(r"(\d[\d,.]*)\s*([kK])?")
+
+
+def parse_count(text: str) -> int:
+    """Premier nombre d'un texte GitHub : « 3,274 stars today » → 3274, « 1.2k » → 1200."""
+    match = _COUNT_RE.search(text or "")
+    if not match:
+        return 0
+    number, thousands = match.groups()
+    if thousands:
+        return round(float(number.replace(",", "")) * 1000)
+    return int(number.replace(",", "").replace(".", ""))
+
+
+def format_count(n: int) -> str:
+    """Séparateur de milliers à la française, insécable : 42358 → « 42 358 »."""
+    return f"{n:,}".replace(",", "\u00a0")
+
 
 LANGUAGE_DOMAIN_MAP: dict[str, list[str]] = {
     "python": ["ia", "dev"],
@@ -82,21 +102,17 @@ class GitHubTrendingScraper(BaseScraper):
                 language = lang_tag.get_text(strip=True) if lang_tag else ""
 
                 stars_tag = repo_box.select_one("a[href*='stargazers']")
-                stars_text = (
-                    stars_tag.get_text(strip=True).replace(",", "").replace("k", "000")
-                    if stars_tag
-                    else "0"
-                )
-                try:
-                    stars = int(stars_text)
-                except ValueError:
-                    stars = 0
+                stars = parse_count(stars_tag.get_text(strip=True)) if stars_tag else 0
 
+                # Texte anglais de GitHub (« 3,274 stars today ») : on n'en
+                # garde que le nombre
                 today_stars_tag = repo_box.select_one(
                     "span.d-inline-block.float-sm-right"
                 )
                 today_stars = (
-                    today_stars_tag.get_text(strip=True) if today_stars_tag else ""
+                    parse_count(today_stars_tag.get_text(strip=True))
+                    if today_stars_tag
+                    else 0
                 )
 
                 domains = LANGUAGE_DOMAIN_MAP.get(language.lower(), ["dev"])
@@ -107,9 +123,9 @@ class GitHubTrendingScraper(BaseScraper):
                     if "ia" not in domains:
                         domains.append("ia")
 
-                summary = f"⭐ {stars:,} étoiles"
+                summary = f"⭐ {format_count(stars)} étoiles"
                 if today_stars:
-                    summary += f" · {today_stars} aujourd'hui"
+                    summary += f" · +{format_count(today_stars)} aujourd'hui"
                 if language:
                     summary += f" · {language}"
                 if description:
@@ -125,7 +141,11 @@ class GitHubTrendingScraper(BaseScraper):
                         domains=domains,
                         profiles=self.profiles,
                         score=min(stars / 10000, 1.0),
-                        extra={"stars": stars, "language": language},
+                        extra={
+                            "stars": stars,
+                            "stars_today": today_stars,
+                            "language": language,
+                        },
                     )
                 )
             except Exception as e:
