@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import UTC, datetime
 
 
 @dataclass
@@ -14,6 +14,16 @@ class Article:
     profiles: list[str] = field(default_factory=list)
     score: float = 0.0
     extra: dict = field(default_factory=dict)
+
+    def __post_init__(self) -> None:
+        # Toutes les dates en UTC avec fuseau : certaines sources (API NVD)
+        # renvoient des dates naïves, et comparer naïf et avec fuseau lève
+        # TypeError (novit_trends, filtres par période). Une date naïve est
+        # considérée comme UTC.
+        if self.published_at.tzinfo is None:
+            self.published_at = self.published_at.replace(tzinfo=UTC)
+        else:
+            self.published_at = self.published_at.astimezone(UTC)
 
     def __hash__(self) -> int:
         return hash(self.url)
