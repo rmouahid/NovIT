@@ -64,3 +64,33 @@ def test_missing_daily_stars_are_omitted():
     (article,) = parse(repo_box("owner/repo", today=""))
 
     assert "aujourd'hui" not in article.summary
+
+
+def test_ai_repositories_are_tagged_ia_without_tagging_the_next_ones():
+    first, second = parse(
+        repo_box("a/agent", "An AI agent framework", language="TypeScript"),
+        repo_box("b/ui", "A UI component library", language="TypeScript"),
+    )
+
+    assert "ia" in first.domains
+    assert second.domains == ["dev"]
+    # La table partagée n'est pas modifiée
+    (again,) = parse(repo_box("c/ui", "Another UI kit", language="TypeScript"))
+    assert again.domains == ["dev"]
+
+
+@pytest.mark.parametrize(
+    "description, tagged",
+    [
+        ("Run LLMs locally", True),
+        ("Neural search engine", True),
+        ("Open source AI assistant", True),
+        ("Send email from the terminal", False),
+        ("Maintain your dotfiles", False),
+        ("Detailed changelog generator", False),
+    ],
+)
+def test_ai_keywords_match_whole_words_only(description, tagged):
+    (article,) = parse(repo_box("o/r", description, language="Go"))
+
+    assert ("ia" in article.domains) is tagged
