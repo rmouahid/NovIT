@@ -81,7 +81,7 @@ class BaseScraper(ABC):
 | `hacker_news.py`, `github_trending.py`, `cve.py` (CVE NVD + ANSSI) | Scrapers dédiés par API. |
 | `rss.py`, `ai_blogs.py`, `eng_blogs.py`, `regulation.py`, `training.py` | `RssScraper` générique instancié depuis `config/sources.yaml` (`load_rss_sources()`, filtré par `category`) ; `ai_blogs.py`/`training.py` ajoutent en plus un scraper code (`ArxivScraper`/`RoadmapScraper`) pour les sources non-RSS. |
 | `deduplication.py` | `Deduplicator` : dédoublonnage par URL exacte, hash de titre normalisé, et similarité de Jaccard fuzzy (seuil configurable, 0.7 par défaut). Complexité fuzzy en O(n²) sur la fenêtre — voir `tests/test_performance.py`. |
-| `storage.py` | `ArticleStore` : persistance SQLite async (`aiosqlite`), rétention configurable, recherche plein texte `LIKE`. |
+| `storage.py` | `ArticleStore` : persistance SQLite async (`aiosqlite`), rétention configurable, recherche plein texte FTS5 (mots entiers, insensible à la casse et aux accents, classement BM25). |
 | `tagger.py` | `DomainTagger` : enrichit `article.domains` par mots-clés (`config/domains.yaml`), sans jamais écraser les tags déjà posés par le scraper. |
 | `queue.py`, `rate_limiter.py` | File d'attente de scraping à 3 niveaux de priorité, limiteur de débit par source. |
 | `_template.py` | Squelette à copier pour ajouter une nouvelle source dans le dépôt. |
@@ -128,7 +128,7 @@ du texte markdown (`TextContent`), avec `isError: true` en cas de `NovitError` n
 | Outil | Entrées (obligatoire en gras) | Sortie |
 |---|---|---|
 | `novit_get_news` | **`profil`** (ETUDIANT\|INGENIEUR), `domaines[]`, `nb_articles` (déf. 10), `periode` (1h\|6h\|24h\|7j, déf. 24h) | Liste markdown numérotée, triée par score, groupée sous un titre `# Veille NovIT — {période} · {domaines}`. |
-| `novit_search` | **`query`**, `domaine`, `source`, `profil`, `page` (déf. 1), `per_page` (déf. 10) | `# Recherche : « {query} »`, résultats paginés en base SQLite (`LIKE` sur titre/résumé). |
+| `novit_search` | **`query`**, `domaine`, `source`, `profil`, `page` (déf. 1), `per_page` (déf. 10) | `# Recherche : « {query} »`, résultats paginés en base SQLite (index FTS5 sur titre/résumé, tous les mots requis, classés par pertinence). |
 | `novit_get_by_domain` | **`domaine`**, `profil` (déf. INGENIEUR), `nb_articles` (déf. 10) | Articles filtrés par domaine, `# Domaine : {domaine}`. |
 | `novit_get_profile` | **`profil`** | Résumé du profil (`Profile.to_summary()`) : sources prioritaires, domaines favoris, score minimum. |
 | `novit_set_domains` | **`domaines`** (string `"ia, securite"` ou array, ou `"tout"`) | Confirmation + persistance dans les préférences. |

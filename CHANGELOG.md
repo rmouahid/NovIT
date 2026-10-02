@@ -20,6 +20,7 @@ projet adhérant au [Semantic Versioning](https://semver.org/lang/fr/).
 - Landing page du projet dans le README : logo, démo animée, captures de réponses réelles, badges et appels à l'action
 
 ### Fixed
+- `novit_search` cherche des mots entiers (index SQLite FTS5) au lieu de sous-chaînes : « rust » ne renvoie plus « trust » ; résultats classés par pertinence (#104)
 - CI rétablie : `mcp` borné à la série 1.x (la 2.x retire `Server.list_tools()`)
 
 ---
