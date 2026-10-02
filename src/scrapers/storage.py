@@ -1,4 +1,5 @@
 import json
+import re
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
@@ -24,7 +25,45 @@ CREATE TABLE IF NOT EXISTS articles (
 CREATE INDEX IF NOT EXISTS idx_articles_source ON articles(source);
 CREATE INDEX IF NOT EXISTS idx_articles_published ON articles(published_at);
 CREATE INDEX IF NOT EXISTS idx_articles_inserted ON articles(inserted_at);
+
+CREATE VIRTUAL TABLE IF NOT EXISTS articles_fts USING fts5(
+    url UNINDEXED,
+    title,
+    summary,
+    tokenize = 'unicode61 remove_diacritics 2'
+);
+
+CREATE TRIGGER IF NOT EXISTS articles_fts_insert AFTER INSERT ON articles BEGIN
+    INSERT INTO articles_fts (url, title, summary)
+    VALUES (new.url, new.title, coalesce(new.summary, ''));
+END;
+
+CREATE TRIGGER IF NOT EXISTS articles_fts_delete AFTER DELETE ON articles BEGIN
+    DELETE FROM articles_fts WHERE url = old.url;
+END;
+
+CREATE TRIGGER IF NOT EXISTS articles_fts_update AFTER UPDATE ON articles BEGIN
+    DELETE FROM articles_fts WHERE url = old.url;
+    INSERT INTO articles_fts (url, title, summary)
+    VALUES (new.url, new.title, coalesce(new.summary, ''));
+END;
 """
+
+# Poids BM25 par colonne de articles_fts (url, title, summary) : un terme
+# présent dans le titre compte plus que dans le résumé
+BM25_WEIGHTS = (0.0, 2.0, 1.0)
+
+_WORD_RE = re.compile(r"\w", re.UNICODE)
+
+
+def to_fts_query(query: str) -> str:
+    """Traduit une saisie libre en requête FTS5 : chaque terme devient une
+    phrase entre guillemets (« node.js » → les mots « node » puis « js »),
+    tous les termes sont requis, et la syntaxe FTS5 (AND, *, :, parenthèses)
+    n'est jamais interprétée. Chaîne vide si aucun terme n'a de mot.
+    """
+    terms = [t for t in query.split() if _WORD_RE.search(t)]
+    return " ".join('"' + t.replace('"', '""') + '"' for t in terms)
 
 
 class ArticleStore:
@@ -41,7 +80,17 @@ class ArticleStore:
     async def init(self) -> None:
         Path(self.db_path).parent.mkdir(parents=True, exist_ok=True)
         async with aiosqlite.connect(self.db_path) as db:
+            async with db.execute(
+                "SELECT 1 FROM sqlite_master WHERE name = 'articles_fts'"
+            ) as cursor:
+                had_index = await cursor.fetchone() is not None
             await db.executescript(SCHEMA)
+            if not had_index:
+                # Base antérieure à l'index plein texte : indexer l'existant
+                await db.execute(
+                    "INSERT INTO articles_fts (url, title, summary) "
+                    "SELECT url, title, coalesce(summary, '') FROM articles"
+                )
             await db.commit()
         self._initialized = True
         logger.info(f"[storage] Base initialisée : {self.db_path}")
@@ -108,18 +157,26 @@ class ArticleStore:
         return articles
 
     async def search(self, query: str, limit: int = 20) -> list[Article]:
+        """Articles dont le titre ou le résumé contient tous les mots de
+        `query` (mots entiers, sans tenir compte de la casse ni des
+        accents), du plus pertinent (BM25) au moins pertinent.
+        """
         if not self._initialized:
             await self.init()
-        pattern = f"%{query.lower()}%"
-        sql = """
-            SELECT * FROM articles
-            WHERE lower(title) LIKE ? OR lower(summary) LIKE ?
-            ORDER BY score DESC, published_at DESC
+        fts_query = to_fts_query(query)
+        if not fts_query:
+            return []
+        sql = f"""
+            SELECT articles.* FROM articles_fts
+            JOIN articles ON articles.url = articles_fts.url
+            WHERE articles_fts MATCH ?
+            ORDER BY bm25(articles_fts, {", ".join(map(str, BM25_WEIGHTS))}),
+                     articles.score DESC, articles.published_at DESC
             LIMIT ?
         """
         async with aiosqlite.connect(self.db_path) as db:
             db.row_factory = aiosqlite.Row
-            async with db.execute(sql, [pattern, pattern, limit]) as cursor:
+            async with db.execute(sql, [fts_query, limit]) as cursor:
                 rows = await cursor.fetchall()
         return [self._row_to_article(row) for row in rows]
 
