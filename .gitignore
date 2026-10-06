@@ -119,3 +119,6 @@ Thumbs.db
 # Scrapers plugin déposés localement (voir docs/PLUGINS.md) — pas versionnés,
 # NOVIT_PLUGINS_DIR pointe ici par défaut. Exemple à copier : examples/plugins/.
 /plugins/
+
+# Rapport du monitoring des sources, réécrit à chaque novit_health
+monitoring.json
