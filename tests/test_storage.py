@@ -237,3 +237,66 @@ async def test_article_roundtrip_preserves_fields(store):
     assert restored.url == original.url
     assert set(restored.domains) == set(original.domains)
     assert restored.score == original.score
+
+
+async def test_domain_filter_is_applied_before_the_limit(store):
+    """Les articles bien notés d'autres domaines ne doivent pas évincer ceux du
+    domaine demandé (#107 : `securite` vide derrière github_trending et openai_blog)."""
+    popular = [
+        make_article(
+            f"IA {i}", url=f"https://example.com/ia/{i}", domains=["ia"], score=0.9
+        )
+        for i in range(20)
+    ]
+    security = [
+        make_article(
+            f"CVE {i}",
+            url=f"https://example.com/cve/{i}",
+            domains=["securite"],
+            score=0.4,
+        )
+        for i in range(3)
+    ]
+    await store.save(popular + security)
+
+    recent = await store.get_recent(domains=["securite"], limit=10)
+
+    assert sorted(a.title for a in recent) == ["CVE 0", "CVE 1", "CVE 2"]
+
+
+async def test_profile_filter_is_applied_before_the_limit(store):
+    others = [
+        make_article(
+            f"Ingé {i}",
+            url=f"https://example.com/inge/{i}",
+            profiles=["INGENIEUR"],
+            score=0.9,
+        )
+        for i in range(20)
+    ]
+    students = [
+        make_article(
+            "Étudiant",
+            url="https://example.com/etudiant",
+            profiles=["ETUDIANT"],
+            score=0.3,
+        )
+    ]
+    await store.save(others + students)
+
+    recent = await store.get_recent(profiles=["ETUDIANT"], limit=5)
+
+    assert [a.title for a in recent] == ["Étudiant"]
+
+
+async def test_limit_still_applies_after_filtering(store):
+    await store.save(
+        [
+            make_article(
+                f"S {i}", url=f"https://example.com/s/{i}", domains=["securite"]
+            )
+            for i in range(8)
+        ]
+    )
+
+    assert len(await store.get_recent(domains=["securite"], limit=5)) == 5
