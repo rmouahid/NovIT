@@ -331,7 +331,9 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
                 sources = await get_sources_health()
                 result = (
                     "\n".join(
-                        f"- {'✅' if s.available else '❌'} {s.name}" for s in sources
+                        f"- {'✅' if s.available else '❌'} {s.name}"
+                        + (f" — {s.last_error}" if s.last_error else "")
+                        for s in sources
                     )
                     or "Aucune source enregistrée."
                 )

@@ -223,3 +223,23 @@ class TestPipelineIntegration:
         titles = [a.title for a in ranked]
         assert "Article pertinent" in titles
         assert "Article peu pertinent" not in titles
+
+
+async def test_health_check_all_marks_a_hanging_source_down():
+    import asyncio
+
+    from src.scrapers.manager import ScraperManager
+
+    class Hanging:
+        name = "hanging"
+
+        async def health_check(self):
+            await asyncio.sleep(60)
+            return True
+
+    manager = ScraperManager(timeout_per_scraper=1)
+    manager._scrapers = [Hanging()]
+
+    assert await asyncio.wait_for(manager.health_check_all(), timeout=10) == {
+        "hanging": False
+    }
