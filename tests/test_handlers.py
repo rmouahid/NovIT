@@ -197,3 +197,56 @@ class TestHandleGetByDomain:
 
         mock_manager.fetch_by_domains.assert_called_once()
         assert "ia" in result
+
+
+class TestDomainsHiddenByPopularSources:
+    """#107 : avec des articles IA mieux notés en base, `securite` et
+    `reglementation` répondaient « Aucun article trouvé »."""
+
+    @pytest.fixture
+    async def real_store(self, tmp_path):
+        from src.scrapers.storage import ArticleStore
+
+        s = ArticleStore(db_path=str(tmp_path / "novit.db"))
+        await s.init()
+        popular = [
+            make_article(
+                f"Trending {i}",
+                url=f"https://github.com/{i}",
+                domains=["ia", "dev"],
+                score=0.9,
+            )
+            for i in range(30)
+        ]
+        cve = make_article(
+            "CVE-2026-1234 dans OpenSSL",
+            url="https://nvd.nist.gov/1",
+            domains=["securite"],
+            score=0.5,
+        )
+        cnil = make_article(
+            "La CNIL publie ses recommandations IA",
+            url="https://cnil.fr/1",
+            domains=["reglementation"],
+            score=0.4,
+        )
+        await s.save(popular + [cve, cnil])
+        return s
+
+    @pytest.mark.parametrize(
+        "domaine, titre",
+        [
+            ("securite", "CVE-2026-1234 dans OpenSSL"),
+            ("reglementation", "La CNIL publie ses recommandations IA"),
+        ],
+    )
+    async def test_get_by_domain_finds_the_domain_articles(
+        self, real_store, domaine, titre
+    ):
+        with patch("src.mcp.handlers.store", real_store):
+            result = await handle_get_by_domain(
+                GetByDomainInput(domaine=domaine, nb_articles=5)
+            )
+
+        assert titre in result
+        assert "Aucun article" not in result

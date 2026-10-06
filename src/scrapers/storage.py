@@ -139,22 +139,30 @@ class ArticleStore:
         if not self._initialized:
             await self.init()
         since = (datetime.now(tz=UTC) - timedelta(hours=hours)).isoformat()
-        query = "SELECT * FROM articles WHERE published_at >= ? ORDER BY score DESC, published_at DESC LIMIT ?"
-        params: list = [since, limit]
+        conditions = ["published_at >= ?"]
+        params: list = [since]
+        # Filtres appliqués en SQL, avant LIMIT : filtrés après coup, les articles
+        # les mieux notés d'autres domaines remplissaient la limite et ceux du
+        # domaine demandé disparaissaient (#107)
+        for column, values in (("domains", domains), ("profiles", profiles)):
+            if values:
+                placeholders = ", ".join("?" * len(values))
+                conditions.append(
+                    f"EXISTS (SELECT 1 FROM json_each(articles.{column}) WHERE value IN ({placeholders}))"
+                )
+                params.extend(values)
+        query = (
+            f"SELECT * FROM articles WHERE {' AND '.join(conditions)} "
+            "ORDER BY score DESC, published_at DESC LIMIT ?"
+        )
+        params.append(limit)
 
         async with aiosqlite.connect(self.db_path) as db:
             db.row_factory = aiosqlite.Row
             async with db.execute(query, params) as cursor:
                 rows = await cursor.fetchall()
 
-        articles = [self._row_to_article(row) for row in rows]
-
-        if domains:
-            articles = [a for a in articles if any(d in a.domains for d in domains)]
-        if profiles:
-            articles = [a for a in articles if any(p in a.profiles for p in profiles)]
-
-        return articles
+        return [self._row_to_article(row) for row in rows]
 
     async def search(self, query: str, limit: int = 20) -> list[Article]:
         """Articles dont le titre ou le résumé contient tous les mots de
