@@ -171,7 +171,11 @@ class ScraperManager:
         return unique
 
     async def health_check_all(self) -> dict[str, bool]:
-        """Vérifie la disponibilité de toutes les sources en parallèle."""
-        tasks = {scraper.name: scraper.health_check() for scraper in self._scrapers}
+        """Vérifie la disponibilité de toutes les sources en parallèle ; une
+        source qui ne répond pas dans le délai d'un scraper est indisponible."""
+        tasks = {
+            scraper.name: asyncio.wait_for(scraper.health_check(), timeout=self.timeout)
+            for scraper in self._scrapers
+        }
         results = await asyncio.gather(*tasks.values(), return_exceptions=True)
         return {name: (result is True) for name, result in zip(tasks.keys(), results)}
