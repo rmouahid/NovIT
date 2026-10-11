@@ -19,9 +19,9 @@ if ! command -v flyctl >/dev/null 2>&1; then
 fi
 
 echo "==> Lint (black, isort, ruff)"
-black --check src tests
-isort --check-only --profile black src tests
-ruff check src tests
+black --check novit tests
+isort --check-only --profile black novit tests
+ruff check novit tests
 
 echo "==> Tests (hors benchmarks)"
 pytest tests/ --benchmark-skip

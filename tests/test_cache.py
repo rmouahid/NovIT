@@ -1,6 +1,6 @@
 import time
 
-from src.mcp.cache import TTLCache
+from novit.mcp.cache import TTLCache
 
 
 def test_set_and_get():

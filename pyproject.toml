@@ -5,7 +5,7 @@ target-version = ["py311"]
 [tool.isort]
 profile = "black"
 line_length = 88
-known_first_party = ["src", "config"]
+known_first_party = ["novit"]
 known_third_party = ["mcp"]
 
 [tool.ruff]
@@ -17,7 +17,7 @@ select = ["E", "F", "I", "N", "W", "UP"]
 ignore = ["E501"]
 
 [tool.ruff.lint.isort]
-known-first-party = ["src", "config"]
+known-first-party = ["novit"]
 known-third-party = ["mcp"]
 
 [tool.mypy]
@@ -28,4 +28,4 @@ ignore_missing_imports = true
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]
-addopts = "--cov=src --cov-report=term-missing"
+addopts = "--cov=novit --cov-report=term-missing"

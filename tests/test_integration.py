@@ -6,13 +6,13 @@ from datetime import UTC, datetime
 
 import pytest
 
-from src.mcp.handlers import _format_articles
-from src.profiles.filter import filter_and_rank
-from src.profiles.profile import get_profile
-from src.scrapers.base import Article, BaseScraper
-from src.scrapers.manager import ScraperManager
-from src.scrapers.storage import ArticleStore
-from src.scrapers.tagger import DomainTagger
+from novit.mcp.handlers import _format_articles
+from novit.profiles.filter import filter_and_rank
+from novit.profiles.profile import get_profile
+from novit.scrapers.base import Article, BaseScraper
+from novit.scrapers.manager import ScraperManager
+from novit.scrapers.storage import ArticleStore
+from novit.scrapers.tagger import DomainTagger
 
 
 def make_article(title, url, source="hacker_news", domains=None, score=0.8) -> Article:
@@ -228,7 +228,7 @@ class TestPipelineIntegration:
 async def test_health_check_all_marks_a_hanging_source_down():
     import asyncio
 
-    from src.scrapers.manager import ScraperManager
+    from novit.scrapers.manager import ScraperManager
 
     class Hanging:
         name = "hanging"

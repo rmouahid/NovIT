@@ -25,7 +25,7 @@ NovIT est un **serveur MCP (Model Context Protocol)** qui s'intercale entre Clau
 
 ## Modules
 
-### `src/mcp/` — Serveur MCP
+### `novit/mcp/` — Serveur MCP
 
 Point d'entrée du serveur. Responsable de :
 - L'initialisation et le cycle de vie du serveur FastAPI
@@ -35,7 +35,7 @@ Point d'entrée du serveur. Responsable de :
 
 **Fichiers attendus :**
 ```
-src/mcp/
+novit/mcp/
 ├── __init__.py
 ├── server.py        # Point d'entrée principal
 ├── handlers.py      # Implémentation des outils MCP
@@ -43,7 +43,7 @@ src/mcp/
 └── errors.py        # Codes d'erreur NovIT
 ```
 
-### `src/scrapers/` — Scrapers
+### `novit/scrapers/` — Scrapers
 
 Un fichier par source de données. Tous héritent de `BaseScraper`.
 
@@ -68,7 +68,7 @@ class Article:
     score: float         # pertinence 0.0–1.0
 ```
 
-### `src/profiles/` — Logique de profils
+### `novit/profiles/` — Logique de profils
 
 Filtrage et scoring des articles selon le profil actif.
 
@@ -81,7 +81,7 @@ Filtrage et scoring des articles selon le profil actif.
 - Scorer chaque article (TF-IDF simplifié sur titre + résumé)
 - Trier et paginer les résultats
 
-### `src/prompts/` — Prompts système
+### `novit/prompts/` — Prompts système
 
 Templates de prompts injectés dans chaque échange avec Claude.
 Gestion des variables dynamiques (profil, domaines actifs, date/heure).
@@ -97,7 +97,7 @@ Gestion des variables dynamiques (profil, domaines actifs, date/heure).
 
 ### `tests/` — Tests
 
-Structure miroir de `src/`. Chaque module a son fichier de tests.
+Structure miroir de `novit/`. Chaque module a son fichier de tests.
 - `tests/unit/` : tests unitaires (scrapers mockés, handlers MCP)
 - `tests/integration/` : flux complets end-to-end
 
@@ -134,7 +134,7 @@ Voir [docs/ADR/](ADR/) pour les Architecture Decision Records complets (contexte
 
 ## Ajouter une source
 
-1. Copier `src/scrapers/_template.py` → `src/scrapers/ma_source.py`
+1. Copier `novit/scrapers/_template.py` → `novit/scrapers/ma_source.py`
 2. Implémenter `fetch()` et `health_check()`
 3. Ajouter l'entrée dans `config/sources.yaml`
 4. Écrire les tests dans `tests/unit/test_ma_source.py`

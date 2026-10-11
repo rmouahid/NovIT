@@ -26,7 +26,7 @@ domains:
       - spark
 ```
 
-`DomainTagger` (`src/scrapers/tagger.py`) charge ce fichier au démarrage et tague chaque
+`DomainTagger` (`novit/scrapers/tagger.py`) charge ce fichier au démarrage et tague chaque
 article dont le titre + résumé contient un des mots-clés (recherche insensible à la casse,
 sous-chaîne simple — pas de regex). Les tags posés par un scraper (`article.domains` déjà
 rempli) sont **enrichis, jamais écrasés**.
@@ -42,7 +42,7 @@ rempli) sont **enrichis, jamais écrasés**.
 
 Un nouveau domaine n'apparaît dans les résultats d'un profil que si le profil l'accepte :
 `filter_and_rank()` ne filtre pas sur le domaine par défaut, mais `score_article()`
-(`src/profiles/filter.py`) pondère fortement (`domain_weight`) selon
+(`novit/profiles/filter.py`) pondère fortement (`domain_weight`) selon
 `config/profiles.yaml` :
 
 ```yaml
@@ -60,8 +60,8 @@ le `score_min` du profil et n'apparaîtront pas dans les réponses par défaut).
 ## 4. Tester le tagging automatique
 
 ```python
-from src.scrapers.tagger import DomainTagger
-from src.scrapers.base import Article
+from novit.scrapers.tagger import DomainTagger
+from novit.scrapers.base import Article
 from datetime import datetime, UTC
 
 tagger = DomainTagger()
@@ -88,7 +88,7 @@ mots-clés (faux positif) en testant un titre d'un autre domaine.
 
 ## 5. Documenter le domaine ailleurs si emoji/label dédié attendu
 
-`src/mcp/daily.py` (`domain_labels`) associe un emoji à chaque domaine pour le résumé
+`novit/mcp/daily.py` (`domain_labels`) associe un emoji à chaque domaine pour le résumé
 quotidien — sans entrée, le domaine s'affiche avec `domain.capitalize()` (acceptable, mais
 moins soigné). Ajouter une entrée si le domaine est destiné à un usage fréquent :
 

@@ -2,7 +2,7 @@ import httpx
 import pytest
 import respx
 
-from src.scrapers.hacker_news import HN_API, HackerNewsScraper, _tag_domains
+from novit.scrapers.hacker_news import HN_API, HackerNewsScraper, _tag_domains
 
 STORY_1 = {
     "id": 1,

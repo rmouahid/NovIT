@@ -23,6 +23,9 @@ projet adhérant au [Semantic Versioning](https://semver.org/lang/fr/).
 - `novit_search` cherche des mots entiers (index SQLite FTS5) au lieu de sous-chaînes : « rust » ne renvoie plus « trust » ; résultats classés par pertinence (#104)
 - CI rétablie : `mcp` borné à la série 1.x (la 2.x retire `Server.list_tools()`)
 
+### Changed
+- **Rupture** : le package `src` devient `novit` et `config.settings` devient `novit.settings`. Lancement : `python -m novit.mcp` (mettre à jour la configuration du client MCP). Préalable à la publication sur PyPI, où `src` et `config` entreraient en conflit avec d'autres paquets (#93)
+
 ---
 
 ## [0.1.0] — 2026-06-26

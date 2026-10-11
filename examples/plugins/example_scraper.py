@@ -18,7 +18,7 @@ from datetime import datetime
 import httpx
 from loguru import logger
 
-from src.scrapers.base import Article, BaseScraper
+from novit.scrapers.base import Article, BaseScraper
 
 LOBSTERS_API_URL = "https://lobste.rs/hottest.json"
 

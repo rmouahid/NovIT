@@ -2,8 +2,8 @@ from datetime import UTC, datetime
 
 import pytest
 
-from src.scrapers.base import Article
-from src.scrapers.storage import ArticleStore
+from novit.scrapers.base import Article
+from novit.scrapers.storage import ArticleStore
 
 
 def make_article(
@@ -180,7 +180,7 @@ async def test_search_index_follows_purge(tmp_path):
 async def test_existing_database_is_indexed_on_init(tmp_path):
     import sqlite3
 
-    from src.scrapers.storage import SCHEMA
+    from novit.scrapers.storage import SCHEMA
 
     db = tmp_path / "old.db"
     legacy = SCHEMA.split("CREATE VIRTUAL TABLE")[0]

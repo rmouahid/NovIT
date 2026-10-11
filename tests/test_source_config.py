@@ -2,16 +2,16 @@ from pathlib import Path
 
 import pytest
 
-from src.scrapers.ai_blogs import build_ai_scrapers
-from src.scrapers.eng_blogs import build_eng_scrapers
-from src.scrapers.manager import ScraperManager
-from src.scrapers.regulation import build_regulation_scrapers
-from src.scrapers.rss import (
+from novit.scrapers.ai_blogs import build_ai_scrapers
+from novit.scrapers.eng_blogs import build_eng_scrapers
+from novit.scrapers.manager import ScraperManager
+from novit.scrapers.regulation import build_regulation_scrapers
+from novit.scrapers.rss import (
     SourcesConfigError,
     build_rss_scrapers,
     load_rss_sources,
 )
-from src.scrapers.training import build_training_scrapers
+from novit.scrapers.training import build_training_scrapers
 
 
 def write_yaml(tmp_path: Path, content: str) -> Path:
@@ -129,7 +129,7 @@ class TestScraperManagerReload:
                 profiles: [ETUDIANT]
             """,
         )
-        monkeypatch.setattr("src.scrapers.rss.SOURCES_CONFIG_PATH", config_path)
+        monkeypatch.setattr("novit.scrapers.rss.SOURCES_CONFIG_PATH", config_path)
 
         manager = ScraperManager()
         assert "source_v1" in {s.name for s in manager._scrapers}
@@ -170,7 +170,7 @@ class TestScraperManagerReload:
                 profiles: [ETUDIANT]
             """,
         )
-        monkeypatch.setattr("src.scrapers.rss.SOURCES_CONFIG_PATH", config_path)
+        monkeypatch.setattr("novit.scrapers.rss.SOURCES_CONFIG_PATH", config_path)
         manager = ScraperManager()
         before = {s.name for s in manager._scrapers}
 

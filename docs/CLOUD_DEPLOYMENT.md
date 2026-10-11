@@ -66,7 +66,7 @@ flyctl secrets set SENTRY_DSN=... NVD_API_KEY=... --app novit-mcp
 1. Implémenter le transport HTTP+SSE (`fastapi`/`uvicorn`, déjà en dépendances — voir
    [ADR-001](ADR/0001-transport-serveur-mcp.md)) à côté du transport stdio existant, sans casser
    l'usage local avec Claude Desktop.
-2. Exposer une route `/health` HTTP qui réutilise `get_health()` (`src/mcp/health.py`).
+2. Exposer une route `/health` HTTP qui réutilise `get_health()` (`novit/mcp/health.py`).
 3. Décider de l'authentification du transport distant (le protocole MCP ne définit pas de
    mécanisme d'auth HTTP standard à ce jour — à documenter dans une ADR dédiée le moment venu).
 4. Revoir le volet multi-utilisateurs (#87) et SQLite (ADR-002) si le déploiement doit servir

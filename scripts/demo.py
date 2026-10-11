@@ -35,7 +35,7 @@ SCENARIO = [
 
 async def run(scenario: list[tuple[str, dict]]) -> list[dict]:
     params = StdioServerParameters(
-        command=sys.executable, args=["-m", "src.mcp"], cwd=str(ROOT)
+        command=sys.executable, args=["-m", "novit.mcp"], cwd=str(ROOT)
     )
     transcript = []
     async with stdio_client(params) as (read, write):

@@ -2,8 +2,8 @@
 
 from datetime import UTC, datetime, timedelta, timezone
 
-from src.mcp import trends
-from src.scrapers.base import Article
+from novit.mcp import trends
+from novit.scrapers.base import Article
 
 
 def article(published_at, title="Rust async runtime released"):

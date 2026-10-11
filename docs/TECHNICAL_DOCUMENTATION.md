@@ -28,7 +28,7 @@ par Claude.
                                               └─────────────────────────────────┘
 ```
 
-**Écart avec ARCHITECTURE.md v0.1 :** le serveur n'utilise pas FastAPI. `src/mcp/server.py`
+**Écart avec ARCHITECTURE.md v0.1 :** le serveur n'utilise pas FastAPI. `novit/mcp/server.py`
 instancie directement `mcp.server.Server` (SDK Python officiel MCP) sur transport **stdio**.
 `fastapi`/`uvicorn` restent dans `requirements.txt` en prévision d'un transport HTTP+SSE pour
 un déploiement distant (voir [MCP_NOTES.md](MCP_NOTES.md)), non implémenté à ce jour.
@@ -37,7 +37,7 @@ un déploiement distant (voir [MCP_NOTES.md](MCP_NOTES.md)), non implémenté à
 
 ## 2. Modules
 
-### `src/mcp/` — Serveur et logique applicative
+### `novit/mcp/` — Serveur et logique applicative
 
 | Fichier | Rôle |
 |---|---|
@@ -58,9 +58,9 @@ un déploiement distant (voir [MCP_NOTES.md](MCP_NOTES.md)), non implémenté à
 | `i18n.py` | Détection de langue basique + `t()` pour les chaînes FR/EN. |
 | `logging_config.py` | Configuration `loguru` (niveau, fichier, format JSON en production). |
 
-### `src/scrapers/` — Sources de données
+### `novit/scrapers/` — Sources de données
 
-Chaque source implémente le contrat `BaseScraper` (`src/scrapers/base.py`) :
+Chaque source implémente le contrat `BaseScraper` (`novit/scrapers/base.py`) :
 
 ```python
 class BaseScraper(ABC):
@@ -72,7 +72,7 @@ class BaseScraper(ABC):
     async def health_check(self) -> bool: ...
 ```
 
-`Article` (dataclass, `src/scrapers/base.py`) : `title`, `url`, `summary`, `published_at`,
+`Article` (dataclass, `novit/scrapers/base.py`) : `title`, `url`, `summary`, `published_at`,
 `source`, `domains`, `profiles`, `score`, `extra`. Égalité/hash basés sur `url`.
 
 | Fichier | Rôle |
@@ -87,7 +87,7 @@ class BaseScraper(ABC):
 | `_template.py` | Squelette à copier pour ajouter une nouvelle source dans le dépôt. |
 | `plugins.py` | `discover_plugin_scrapers()` : charge dynamiquement des scrapers `BaseScraper` déposés dans `NOVIT_PLUGINS_DIR` (`plugins/`, non versionné), sans modifier le dépôt. Voir [PLUGINS.md](PLUGINS.md). |
 
-### `src/profiles/` — Filtrage et scoring
+### `novit/profiles/` — Filtrage et scoring
 
 | Fichier | Rôle |
 |---|---|
@@ -102,9 +102,9 @@ class BaseScraper(ABC):
 | `settings.py` | `Settings` (Pydantic Settings), préfixe d'env `NOVIT_`, chargé depuis `.env`. |
 | `profiles.yaml` | Définition des 2 profils (sources prioritaires, domaines favoris/secondaires, `score_min`, `nb_articles_defaut`). |
 | `domains.yaml` | Mots-clés de tagging par domaine NovIT. |
-| `sources.yaml` | Sources RSS déclaratives (`name`, `url`, `domains`, `profiles`, `base_score`, `category`) — voir [ADDING_A_SOURCE.md](ADDING_A_SOURCE.md). Chargé/validé par `load_rss_sources()` (`src/scrapers/rss.py`), aucun cache : `ScraperManager.reload_sources()` permet de recharger sans redémarrer le serveur. |
+| `sources.yaml` | Sources RSS déclaratives (`name`, `url`, `domains`, `profiles`, `base_score`, `category`) — voir [ADDING_A_SOURCE.md](ADDING_A_SOURCE.md). Chargé/validé par `load_rss_sources()` (`novit/scrapers/rss.py`), aucun cache : `ScraperManager.reload_sources()` permet de recharger sans redémarrer le serveur. |
 
-### `src/prompts/`
+### `novit/prompts/`
 
 Vide à ce jour (`__init__.py` + `.gitkeep`). Les « prompts » NovIT sont en réalité des documents
 markdown lus par Claude comme instructions (pas de génération dynamique de prompt côté serveur) :
@@ -122,7 +122,7 @@ les fixtures partagées (`make_article`, etc.).
 
 ## 3. Outils MCP
 
-Déclarés dans `TOOLS` (`src/mcp/server.py`), routés dans `call_tool()`. Toutes les réponses sont
+Déclarés dans `TOOLS` (`novit/mcp/server.py`), routés dans `call_tool()`. Toutes les réponses sont
 du texte markdown (`TextContent`), avec `isError: true` en cas de `NovitError` non rattrapée.
 
 | Outil | Entrées (obligatoire en gras) | Sortie |
@@ -141,7 +141,7 @@ du texte markdown (`TextContent`), avec `isError: true` en cas de `NovitError` n
 | `novit_dig` | **`url`** | Extraction du contenu principal de la page (heuristique `article`/`main`/`section`, fallback `body`), tronqué à 4000 caractères. |
 | `novit_health` | `detail` (global\|sources\|cache, déf. global) | Statut serveur : uptime, version, stats cache. `sources` toujours vide actuellement (voir §2, `health.py`). |
 
-Schémas JSON complets : voir `TOOLS` dans `src/mcp/server.py`, ou [MCP_NOTES.md](MCP_NOTES.md)
+Schémas JSON complets : voir `TOOLS` dans `novit/mcp/server.py`, ou [MCP_NOTES.md](MCP_NOTES.md)
 pour le format générique requête/réponse MCP.
 
 ---
@@ -150,14 +150,14 @@ pour le format générique requête/réponse MCP.
 
 ### Logs
 
-`loguru`, configuré par `configure_logging()` (`src/mcp/logging_config.py`) au démarrage du
+`loguru`, configuré par `configure_logging()` (`novit/mcp/logging_config.py`) au démarrage du
 serveur. Niveau piloté par `NOVIT_LOG_LEVEL` (`.env` ou variable d'environnement, `DEBUG` en
 dev). **Important en transport stdio** : les logs doivent aller sur **stderr**, jamais sur
 stdout (réservé aux messages JSON-RPC) — ne pas utiliser `print()`.
 
 ### Mode verbose par outil
 
-`DebugInfo` (`src/mcp/debug.py`) + `append_debug()` ajoutent un bloc `**🔍 Debug NovIT**` en
+`DebugInfo` (`novit/mcp/debug.py`) + `append_debug()` ajoutent un bloc `**🔍 Debug NovIT**` en
 pied de réponse (temps d'exécution, sources consultées, nombre d'articles avant/après filtrage,
 cache hit/miss, erreurs). À activer en passant `debug=True` dans les arguments d'un outil
 (quand le handler le supporte).
@@ -173,8 +173,8 @@ dette connue, pas un bug caché.
 ### Monitoring d'erreurs (Sentry)
 
 Optionnel, désactivé par défaut. Renseigner `SENTRY_DSN` dans `.env` (voir `.env.example`)
-pour l'activer — sans DSN, `init_sentry()` (`src/mcp/sentry_config.py`) ne fait rien, aucun
-appel réseau. Toute exception non gérée dans `call_tool()` (`src/mcp/server.py`) est envoyée
+pour l'activer — sans DSN, `init_sentry()` (`novit/mcp/sentry_config.py`) ne fait rien, aucun
+appel réseau. Toute exception non gérée dans `call_tool()` (`novit/mcp/server.py`) est envoyée
 avec un contexte enrichi : nom de l'outil MCP, profil et domaine (tags `mcp_tool`,
 `novit_profil`, `novit_domaine`), arguments complets en contexte. `NOVIT_ENV` détermine
 l'environnement Sentry (`development`/`staging`/`production`). `SENTRY_TRACES_SAMPLE_RATE`
@@ -182,7 +182,7 @@ l'environnement Sentry (`development`/`staging`/`production`). `SENTRY_TRACES_SA
 
 ### Erreurs NovIT
 
-Chaque erreur applicative est un `NovitError(code, message)` (`src/mcp/errors.py`), converti en
+Chaque erreur applicative est un `NovitError(code, message)` (`novit/mcp/errors.py`), converti en
 texte via `to_mcp_error()` → `"Erreur NovIT [{code}] : {message}"`. Codes disponibles :
 `NOVIT_SOURCE_UNAVAILABLE`, `NOVIT_SOURCE_TIMEOUT`, `NOVIT_NO_RESULTS`, `NOVIT_INVALID_PROFILE`,
 `NOVIT_INVALID_DOMAIN`, `NOVIT_CACHE_ERROR`, `NOVIT_SCRAPER_ERROR`, `NOVIT_INTERNAL_ERROR`. Voir
@@ -191,7 +191,7 @@ chaque code à l'utilisateur.
 
 ### Reproduire un problème de scraping
 
-1. Isoler le scraper concerné : `python -c "import asyncio; from src.scrapers.hacker_news import HackerNewsScraper; print(asyncio.run(HackerNewsScraper().fetch()))"`.
+1. Isoler le scraper concerné : `python -c "import asyncio; from novit.scrapers.hacker_news import HackerNewsScraper; print(asyncio.run(HackerNewsScraper().fetch()))"`.
 2. Vérifier son `health_check()` séparément (ne dépend pas du réseau applicatif NovIT).
 3. `ScraperManager._run_scraper()` capture toute exception par scraper (timeout inclus) sans
    faire échouer les autres sources — un scraper cassé n'empêche jamais `fetch_all()` de
@@ -203,7 +203,7 @@ chaque code à l'utilisateur.
 pip install -r requirements-dev.txt
 pytest tests/                       # suite complète + couverture (voir pyproject.toml)
 pytest tests/ --benchmark-skip      # exclut les tests de performance (plus rapide)
-black --check src tests && isort --check-only --profile black src tests && ruff check src tests
+black --check novit tests && isort --check-only --profile black novit tests && ruff check novit tests
 ```
 
 La CI (`.github/workflows/ci.yml`) exécute exactement ces commandes sur chaque push/PR vers
@@ -212,4 +212,4 @@ La CI (`.github/workflows/ci.yml`) exécute exactement ces commandes sur chaque 
 ### Base SQLite locale
 
 `ArticleStore` écrit dans `NOVIT_DB_PATH` (déf. `./novit.db`). Pour repartir d'une base vide :
-supprimer ce fichier (il est recréé au prochain appel — schéma dans `src/scrapers/storage.py`).
+supprimer ce fichier (il est recréé au prochain appel — schéma dans `novit/scrapers/storage.py`).

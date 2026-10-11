@@ -1,6 +1,6 @@
 from unittest.mock import patch
 
-from src.mcp.sentry_config import capture_tool_error, init_sentry
+from novit.mcp.sentry_config import capture_tool_error, init_sentry
 
 
 class TestInitSentry:

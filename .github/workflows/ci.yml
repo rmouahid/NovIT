@@ -28,13 +28,13 @@ jobs:
         run: pip install -r requirements-dev.txt
 
       - name: black --check
-        run: black --check src tests
+        run: black --check novit tests
 
       - name: isort --check
-        run: isort --check-only --profile black src tests
+        run: isort --check-only --profile black novit tests
 
       - name: ruff check
-        run: ruff check src tests
+        run: ruff check novit tests
 
   test:
     name: Tests (pytest)
