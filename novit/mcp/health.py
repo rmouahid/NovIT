@@ -1,6 +1,8 @@
 import time
 from dataclasses import dataclass, field
 from datetime import datetime
+from importlib.metadata import PackageNotFoundError
+from importlib.metadata import version as package_version
 
 from novit.mcp.cache import cache
 from novit.mcp.monitoring import SourceMonitor
@@ -50,10 +52,15 @@ class HealthReport:
 
 
 def _read_version() -> str:
+    """Fichier VERSION (dépôt, image Docker), sinon version du paquet installé."""
     try:
         with open("VERSION") as f:
             return f.read().strip()
     except FileNotFoundError:
+        pass
+    try:
+        return package_version("novit")
+    except PackageNotFoundError:
         return "unknown"
 
 

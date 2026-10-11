@@ -1,4 +1,5 @@
 from functools import lru_cache
+from pathlib import Path
 from typing import Literal
 
 from pydantic import Field, field_validator
@@ -84,3 +85,22 @@ def reload_settings() -> Settings:
     """
     get_settings.cache_clear()
     return get_settings()
+
+
+# Copie des YAML de config/ embarquée dans le paquet installé (pyproject.toml).
+_PACKAGED_CONFIG_DIR = Path(__file__).parent / "data"
+
+
+def config_file(name: str) -> Path:
+    """Chemin d'un fichier de configuration YAML (sources, domaines, profils).
+
+    `config/<name>` du répertoire courant s'il existe (dépôt cloné, image
+    Docker, personnalisation locale), sinon la copie par défaut embarquée dans
+    le paquet installé depuis PyPI. Si aucun n'existe, renvoie le chemin local
+    pour que le message d'erreur indique où créer le fichier.
+    """
+    local = Path("config") / name
+    if local.exists():
+        return local
+    packaged = _PACKAGED_CONFIG_DIR / name
+    return packaged if packaged.exists() else local

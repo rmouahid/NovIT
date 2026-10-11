@@ -1,7 +1,7 @@
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="docs/assets/logo-dark.png">
-    <img src="docs/assets/logo-light.png" alt="NovIT — He knows. You know." width="560">
+    <img src="https://raw.githubusercontent.com/rmouahid/NovIT/main/docs/assets/logo-light.png" alt="NovIT — He knows. You know." width="560">
   </picture>
 </p>
 
@@ -27,7 +27,7 @@
 </p>
 
 <p align="center">
-  <img src="docs/assets/demo.gif" alt="Session MCP réelle : novit_start, puis novit_get_news et novit_search sur les sources en direct" width="820">
+  <img src="https://raw.githubusercontent.com/rmouahid/NovIT/main/docs/assets/demo.gif" alt="Session MCP réelle : novit_start, puis novit_get_news et novit_search sur les sources en direct" width="820">
   <br>
   <sub>Session réelle enregistrée avec <a href="scripts/demo.py"><code>scripts/demo.py</code></a> : le serveur NovIT est lancé en stdio et interrogé comme le ferait Claude.</sub>
 </p>
@@ -50,8 +50,8 @@ NovIT est un **serveur MCP (Model Context Protocol)** : il expose des outils que
 
 <table>
   <tr>
-    <td width="50%" valign="top"><img src="docs/assets/screenshot-start.png" alt="Réponse de novit_start pour le profil INGENIEUR"></td>
-    <td width="50%" valign="top"><img src="docs/assets/screenshot-news.png" alt="Réponse de novit_get_news pour le domaine IA sur 7 jours"></td>
+    <td width="50%" valign="top"><img src="https://raw.githubusercontent.com/rmouahid/NovIT/main/docs/assets/screenshot-start.png" alt="Réponse de novit_start pour le profil INGENIEUR"></td>
+    <td width="50%" valign="top"><img src="https://raw.githubusercontent.com/rmouahid/NovIT/main/docs/assets/screenshot-news.png" alt="Réponse de novit_get_news pour le domaine IA sur 7 jours"></td>
   </tr>
   <tr>
     <td align="center"><sub><code>novit_start</code> : accueil et domaines disponibles</sub></td>
@@ -136,7 +136,7 @@ cp .env.example .env
 python scripts/demo.py
 ```
 
-> Le paquet PyPI (`pip install novit`) arrive avec la version 1.0 ([#93](https://github.com/rmouahid/NovIT/issues/93)).
+> Le paquet Python est prêt : `pip install .` installe la commande `novit`, avec la configuration YAML par défaut embarquée. Sa publication sur PyPI (`pip install novit`) est suivie dans [#93](https://github.com/rmouahid/NovIT/issues/93) ; la procédure est décrite dans [docs/PUBLISHING.md](docs/PUBLISHING.md).
 
 ### Connecter à Claude Desktop
 
