@@ -69,7 +69,7 @@ _Évaluation initiale à compléter après première intégration Claude._
 
 ## Procédure d'évaluation
 
-1. Lancer le serveur NovIT en local : `python -m src.mcp.server`
+1. Lancer le serveur NovIT en local : `python -m novit.mcp.server`
 2. Connecter Claude Desktop avec la config MCP
 3. Jouer chaque cas et noter les scores (0.0 à 1.0 par critère)
 4. Mettre à jour ce fichier avec les résultats

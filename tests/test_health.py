@@ -2,8 +2,8 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from src.mcp import health
-from src.mcp.monitoring import SourceMonitor
+from novit.mcp import health
+from novit.mcp.monitoring import SourceMonitor
 
 
 @pytest.fixture
@@ -49,7 +49,7 @@ async def test_sources_detail_is_sorted_by_name(sources):
 
 
 def test_the_default_monitor_watches_the_scrapers_used_by_the_tools(monkeypatch):
-    from src.mcp import handlers
+    from novit.mcp import handlers
 
     monkeypatch.setattr(health, "_monitor", None)
 

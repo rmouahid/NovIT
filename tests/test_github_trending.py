@@ -1,6 +1,6 @@
 import pytest
 
-from src.scrapers.github_trending import (
+from novit.scrapers.github_trending import (
     GitHubTrendingScraper,
     format_count,
     parse_count,

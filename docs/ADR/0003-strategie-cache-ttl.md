@@ -12,7 +12,7 @@ re-scraper à chaque appel, sans pour autant servir des données trop périmées
 
 ## Décision
 
-`TTLCache` (`src/mcp/cache.py`) : cache en mémoire (process unique), clé → valeur avec
+`TTLCache` (`novit/mcp/cache.py`) : cache en mémoire (process unique), clé → valeur avec
 expiration individuelle, TTL différencié par type de contenu :
 
 | Constante | Valeur | Usage |

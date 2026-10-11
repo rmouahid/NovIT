@@ -207,4 +207,4 @@ Le SDK `mcp` fournit :
 - `@server.resource()` : décorateur pour une ressource
 - Gestion automatique du handshake et du transport stdio/HTTP
 
-Voir `src/mcp/server.py` pour l'implémentation NovIT.
+Voir `novit/mcp/server.py` pour l'implémentation NovIT.

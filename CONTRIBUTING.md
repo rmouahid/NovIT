@@ -40,7 +40,7 @@ Ouvrez une issue avec le label `feature` en décrivant :
 ## Ajouter une nouvelle source de scraping
 
 Voir [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md#ajouter-une-source) pour le guide complet.
-En résumé : copiez `src/scrapers/_template.py`, implémentez `BaseScraper`, ajoutez des tests.
+En résumé : copiez `novit/scrapers/_template.py`, implémentez `BaseScraper`, ajoutez des tests.
 
 ---
 
@@ -82,9 +82,9 @@ pre-commit install
 pytest
 
 # Formatage (appliqué automatiquement par pre-commit)
-black src/ tests/
-isort src/ tests/
-ruff check src/ tests/
+black novit/ tests/
+isort novit/ tests/
+ruff check novit/ tests/
 ```
 
 Les tests doivent passer à 100% avant d'ouvrir une PR.

@@ -147,7 +147,7 @@ Ajouter dans la configuration MCP de Claude Desktop :
   "mcpServers": {
     "novit": {
       "command": "python",
-      "args": ["-m", "src.mcp"],
+      "args": ["-m", "novit.mcp"],
       "cwd": "/chemin/vers/NovIT"
     }
   }
@@ -182,7 +182,7 @@ Claude : [utilise novit_get_by_domain avec domaine=securite]
 
 ```
 NovIT/
-├── src/
+├── novit/          # Package Python `novit` (settings.py : configuration .env)
 │   ├── mcp/        # Serveur MCP (SDK `mcp`, transport stdio) + handlers
 │   ├── scrapers/   # Un scraper par source (HN, GitHub, CVE…)
 │   ├── profiles/   # Logique de filtrage par profil
@@ -220,8 +220,8 @@ pre-commit install
 pytest
 
 # Vérifier le formatage
-black src/ tests/
-ruff check src/ tests/
+black novit/ tests/
+ruff check novit/ tests/
 ```
 
 ---

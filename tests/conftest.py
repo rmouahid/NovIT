@@ -2,7 +2,7 @@ from datetime import UTC, datetime
 
 import pytest
 
-from src.scrapers.base import Article
+from novit.scrapers.base import Article
 
 
 @pytest.fixture
@@ -33,13 +33,13 @@ def make_article():
 
 @pytest.fixture
 def etudiant_profile():
-    from src.profiles.profile import get_profile
+    from novit.profiles.profile import get_profile
 
     return get_profile("ETUDIANT")
 
 
 @pytest.fixture
 def ingenieur_profile():
-    from src.profiles.profile import get_profile
+    from novit.profiles.profile import get_profile
 
     return get_profile("INGENIEUR")

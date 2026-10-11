@@ -27,7 +27,7 @@ RUN pip install --no-cache-dir --no-index --find-links=/wheels /wheels/* && \
     rm -rf /wheels
 
 # Copier le code source
-COPY src/ ./src/
+COPY novit/ ./novit/
 COPY config/ ./config/
 COPY VERSION .
 
@@ -42,4 +42,4 @@ ENV NOVIT_ENV=production \
 
 EXPOSE 8000
 
-ENTRYPOINT ["python", "-m", "src.mcp.server"]
+ENTRYPOINT ["python", "-m", "novit.mcp.server"]

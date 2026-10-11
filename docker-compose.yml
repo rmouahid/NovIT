@@ -15,7 +15,7 @@ services:
       - .env
     volumes:
       - novit-data:/data
-      - ./src:/app/src:ro        # hot-reload du code source en dev
+      - ./novit:/app/novit:ro        # hot-reload du code source en dev
       - ./config:/app/config:ro
     restart: unless-stopped
 

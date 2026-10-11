@@ -47,7 +47,7 @@ pip install -r requirements-dev.txt
 ### 2.4 Vérifier que le serveur démarre
 
 ```bash
-python -m src.mcp < /dev/null
+python -m novit.mcp < /dev/null
 ```
 
 Sortie attendue (dans les logs, sur stderr) :
@@ -60,7 +60,7 @@ Sortie attendue (dans les logs, sur stderr) :
 Le serveur lit le protocole MCP sur stdin/stdout : sans un vrai client MCP en face, il
 s'arrête proprement dès qu'il atteint la fin de l'entrée (`< /dev/null` fournit un EOF
 immédiat) — c'est le comportement normal, pas une erreur. (Ne pas utiliser `echo | python -m
-src.mcp` pour ce test : le caractère de retour à la ligne envoyé par `echo` est interprété comme
+novit.mcp` pour ce test : le caractère de retour à la ligne envoyé par `echo` est interprété comme
 un message JSON-RPC invalide et génère une erreur dans les logs.)
 
 ---
@@ -97,7 +97,7 @@ Claude Desktop → Settings → Developer → Edit Config) et ajouter :
   "mcpServers": {
     "novit": {
       "command": "/chemin/absolu/vers/NovIT/.venv/bin/python",
-      "args": ["-m", "src.mcp"],
+      "args": ["-m", "novit.mcp"],
       "cwd": "/chemin/absolu/vers/NovIT"
     }
   }
@@ -145,4 +145,4 @@ docker compose up --build
 
 Voir `docker-compose.yml` / `Dockerfile` (transport stdio également — `stdin_open: true` est
 requis dans le service, déjà configuré). Le code source est monté en lecture seule pour le
-hot-reload en développement (`./src:/app/src:ro`).
+hot-reload en développement (`./novit:/app/novit:ro`).

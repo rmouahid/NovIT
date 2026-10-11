@@ -41,4 +41,4 @@ primary_region = "cdg"  # Paris — à ajuster selon la localisation des utilisa
     path = "/health"
 
 [processes]
-  app = "python -m src.mcp.server"
+  app = "python -m novit.mcp.server"

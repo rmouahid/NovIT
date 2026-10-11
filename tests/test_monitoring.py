@@ -4,7 +4,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from src.mcp.monitoring import MonitoringReport, SourceMonitor, SourceStatus
+from novit.mcp.monitoring import MonitoringReport, SourceMonitor, SourceStatus
 
 
 @pytest.fixture

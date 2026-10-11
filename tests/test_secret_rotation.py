@@ -2,8 +2,8 @@ import httpx
 import pytest
 import respx
 
-from config.settings import get_settings, reload_settings
-from src.scrapers.cve import NVD_API_URL, CVEScraper
+from novit.scrapers.cve import NVD_API_URL, CVEScraper
+from novit.settings import get_settings, reload_settings
 
 
 @pytest.fixture(autouse=True)

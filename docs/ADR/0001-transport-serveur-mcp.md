@@ -8,7 +8,7 @@
 La vision technique initiale du projet ([ARCHITECTURE.md](../ARCHITECTURE.md) v0.1, juin 2026)
 prévoyait un serveur **FastAPI**, avant que l'implémentation ne démarre réellement. `fastapi` et
 `uvicorn` ont été ajoutés à `requirements.txt` sur cette base. En pratique, l'implémentation du
-serveur MCP (`src/mcp/server.py`) a divergé de ce plan initial pendant le développement des
+serveur MCP (`novit/mcp/server.py`) a divergé de ce plan initial pendant le développement des
 outils MCP (mi-2026) : NovIT est un serveur MCP en usage local avec Claude Desktop, qui parle le
 protocole MCP directement sur **stdio** (stdin/stdout) — un framework HTTP complet n'apporte
 rien à ce cas d'usage tant qu'aucun transport réseau n'est requis.
@@ -34,7 +34,7 @@ outils (`TOOLS`) et route les appels (`call_tool()`) sans passer par une couche 
   documentaire potentielle (dépendances qui donnent une fausse impression d'architecture) tant
   qu'un transport HTTP+SSE n'est pas implémenté pour le déploiement cloud (#86, prévu, pas fait).
 - Les logs doivent impérativement sortir sur **stderr**, jamais sur stdout (réservé au JSON-RPC)
-  — contrainte structurante pour tout le module `src/mcp/logging_config.py` et tout code qui
+  — contrainte structurante pour tout le module `novit/mcp/logging_config.py` et tout code qui
   serait tenté d'utiliser `print()`.
 - Un transport HTTP+SSE distinct devra être ajouté (probablement en réutilisant FastAPI, d'où
   sa présence conservée dans les dépendances) sans réécrire la logique métier des handlers,

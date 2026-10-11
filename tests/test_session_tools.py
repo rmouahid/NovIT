@@ -6,8 +6,8 @@ du projet.
 
 import pytest
 
-from src.mcp import domain_selector, onboarding, profile_selector
-from src.profiles.preferences import PreferencesStore
+from novit.mcp import domain_selector, onboarding, profile_selector
+from novit.profiles.preferences import PreferencesStore
 
 
 @pytest.fixture

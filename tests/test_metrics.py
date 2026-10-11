@@ -1,4 +1,4 @@
-from src.mcp.metrics import MetricsCollector
+from novit.mcp.metrics import MetricsCollector
 
 
 class TestMetricsCollector:

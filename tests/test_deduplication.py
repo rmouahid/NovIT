@@ -1,7 +1,7 @@
 from datetime import UTC, datetime
 
-from src.scrapers.base import Article
-from src.scrapers.deduplication import (
+from novit.scrapers.base import Article
+from novit.scrapers.deduplication import (
     Deduplicator,
     _jaccard_similarity,
     _normalize,

@@ -3,21 +3,21 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from src.mcp.errors import NovitError, NovitErrorCode
-from src.mcp.handlers import (
+from novit.mcp.errors import NovitError, NovitErrorCode
+from novit.mcp.handlers import (
     handle_get_by_domain,
     handle_get_news,
     handle_get_profile,
     handle_search,
 )
-from src.mcp.schemas import (
+from novit.mcp.schemas import (
     GetByDomainInput,
     GetNewsInput,
     GetProfileInput,
     SearchInput,
 )
-from src.scrapers.base import Article
-from src.scrapers.manager import FetchResult
+from novit.scrapers.base import Article
+from novit.scrapers.manager import FetchResult
 
 
 def make_article(title="Test", url="https://example.com/1", domains=None, score=0.6):
@@ -35,7 +35,7 @@ def make_article(title="Test", url="https://example.com/1", domains=None, score=
 
 @pytest.fixture(autouse=True)
 def clear_cache():
-    from src.mcp.cache import cache
+    from novit.mcp.cache import cache
 
     cache.clear()
     yield
@@ -47,7 +47,7 @@ class TestHandleGetNews:
         articles = [
             make_article(f"Article {i}", url=f"https://x.com/{i}") for i in range(10)
         ]
-        with patch("src.mcp.handlers.store") as mock_store:
+        with patch("novit.mcp.handlers.store") as mock_store:
             mock_store.get_recent = AsyncMock(return_value=articles)
             result = await handle_get_news(
                 GetNewsInput(profil="ETUDIANT", domaines=["ia"])
@@ -58,9 +58,9 @@ class TestHandleGetNews:
 
     async def test_triggers_scraper_when_empty(self):
         with (
-            patch("src.mcp.handlers.store") as mock_store,
-            patch("src.mcp.handlers._manager") as mock_manager,
-            patch("src.mcp.handlers.tagger") as mock_tagger,
+            patch("novit.mcp.handlers.store") as mock_store,
+            patch("novit.mcp.handlers._manager") as mock_manager,
+            patch("novit.mcp.handlers.tagger") as mock_tagger,
         ):
             mock_store.get_recent = AsyncMock(return_value=[])
             mock_store.save = AsyncMock()
@@ -73,7 +73,7 @@ class TestHandleGetNews:
 
     async def test_cache_hit_returns_same_result(self):
         articles = [make_article(f"A{i}", url=f"https://x.com/{i}") for i in range(10)]
-        with patch("src.mcp.handlers.store") as mock_store:
+        with patch("novit.mcp.handlers.store") as mock_store:
             mock_store.get_recent = AsyncMock(return_value=articles)
             params = GetNewsInput(profil="ETUDIANT", domaines=["ia"])
             result1 = await handle_get_news(params)
@@ -84,9 +84,9 @@ class TestHandleGetNews:
 
     async def test_scraper_error_with_empty_store_raises(self):
         with (
-            patch("src.mcp.handlers.store") as mock_store,
-            patch("src.mcp.handlers._manager") as mock_manager,
-            patch("src.mcp.handlers.tagger") as mock_tagger,
+            patch("novit.mcp.handlers.store") as mock_store,
+            patch("novit.mcp.handlers._manager") as mock_manager,
+            patch("novit.mcp.handlers.tagger") as mock_tagger,
         ):
             mock_store.get_recent = AsyncMock(return_value=[])
             mock_store.save = AsyncMock()
@@ -104,7 +104,7 @@ class TestHandleGetNews:
 class TestHandleSearch:
     async def test_returns_results(self):
         articles = [make_article("Python tutorial")]
-        with patch("src.mcp.handlers.store") as mock_store:
+        with patch("novit.mcp.handlers.store") as mock_store:
             mock_store.search = AsyncMock(return_value=articles)
             result = await handle_search(SearchInput(query="python"))
 
@@ -112,7 +112,7 @@ class TestHandleSearch:
         assert "python" in result.lower()
 
     async def test_no_results(self):
-        with patch("src.mcp.handlers.store") as mock_store:
+        with patch("novit.mcp.handlers.store") as mock_store:
             mock_store.search = AsyncMock(return_value=[])
             result = await handle_search(SearchInput(query="zzz_nothing"))
 
@@ -123,7 +123,7 @@ class TestHandleSearch:
             make_article("IA article", url="https://x.com/1", domains=["ia"]),
             make_article("Dev article", url="https://x.com/2", domains=["dev"]),
         ]
-        with patch("src.mcp.handlers.store") as mock_store:
+        with patch("novit.mcp.handlers.store") as mock_store:
             mock_store.search = AsyncMock(return_value=articles)
             result = await handle_search(SearchInput(query="article", domaine="ia"))
 
@@ -132,7 +132,7 @@ class TestHandleSearch:
 
     async def test_pagination(self):
         articles = [make_article(f"A{i}", url=f"https://x.com/{i}") for i in range(5)]
-        with patch("src.mcp.handlers.store") as mock_store:
+        with patch("novit.mcp.handlers.store") as mock_store:
             mock_store.search = AsyncMock(return_value=articles)
             result = await handle_search(
                 SearchInput(query="article", page=1, per_page=3)
@@ -152,7 +152,7 @@ class TestHandleGetProfile:
 
     async def test_raises_novit_error_on_invalid(self):
         with patch(
-            "src.mcp.handlers.get_profile", side_effect=ValueError("Profil inconnu")
+            "novit.mcp.handlers.get_profile", side_effect=ValueError("Profil inconnu")
         ):
             with pytest.raises(NovitError) as exc:
                 await handle_get_profile(GetProfileInput(profil="ETUDIANT"))
@@ -166,8 +166,8 @@ class TestHandleGetByDomain:
             for i in range(5)
         ]
         with (
-            patch("src.mcp.handlers.store") as mock_store,
-            patch("src.mcp.handlers.cache") as mock_cache,
+            patch("novit.mcp.handlers.store") as mock_store,
+            patch("novit.mcp.handlers.cache") as mock_cache,
         ):
             mock_store.get_recent = AsyncMock(return_value=articles)
             mock_cache.get = MagicMock(return_value=None)
@@ -179,10 +179,10 @@ class TestHandleGetByDomain:
     async def test_triggers_scraper_when_empty(self):
         articles = [make_article("Fresh", domains=["ia"])]
         with (
-            patch("src.mcp.handlers.store") as mock_store,
-            patch("src.mcp.handlers._manager") as mock_manager,
-            patch("src.mcp.handlers.tagger") as mock_tagger,
-            patch("src.mcp.handlers.cache") as mock_cache,
+            patch("novit.mcp.handlers.store") as mock_store,
+            patch("novit.mcp.handlers._manager") as mock_manager,
+            patch("novit.mcp.handlers.tagger") as mock_tagger,
+            patch("novit.mcp.handlers.cache") as mock_cache,
         ):
             mock_store.get_recent = AsyncMock(side_effect=[[], articles])
             mock_store.save = AsyncMock()
@@ -205,7 +205,7 @@ class TestDomainsHiddenByPopularSources:
 
     @pytest.fixture
     async def real_store(self, tmp_path):
-        from src.scrapers.storage import ArticleStore
+        from novit.scrapers.storage import ArticleStore
 
         s = ArticleStore(db_path=str(tmp_path / "novit.db"))
         await s.init()
@@ -243,7 +243,7 @@ class TestDomainsHiddenByPopularSources:
     async def test_get_by_domain_finds_the_domain_articles(
         self, real_store, domaine, titre
     ):
-        with patch("src.mcp.handlers.store", real_store):
+        with patch("novit.mcp.handlers.store", real_store):
             result = await handle_get_by_domain(
                 GetByDomainInput(domaine=domaine, nb_articles=5)
             )

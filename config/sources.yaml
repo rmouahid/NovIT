@@ -1,7 +1,7 @@
 # Sources RSS/Atom déclaratives de NovIT.
 #
 # Ajouter une source ici ne nécessite aucun code (voir docs/ADDING_A_SOURCE.md) : elle est
-# chargée par src.scrapers.rss.load_rss_sources() et transformée en RssScraper générique.
+# chargée par novit.scrapers.rss.load_rss_sources() et transformée en RssScraper générique.
 #
 # `category` est purement organisationnel (regroupement dans ce fichier et dans les tests),
 # sans effet sur le comportement du scraper.
