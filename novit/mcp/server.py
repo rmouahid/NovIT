@@ -355,6 +355,13 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
         return [TextContent(type="text", text=f"Erreur interne NovIT : {e}")]
 
 
+def run() -> None:
+    """Point d'entrée de la commande `novit` installée par pip."""
+    import asyncio
+
+    asyncio.run(main())
+
+
 async def main() -> None:
     logger.info("Démarrage du serveur NovIT MCP")
     async with stdio_server() as (read_stream, write_stream):
@@ -363,6 +370,4 @@ async def main() -> None:
 
 
 if __name__ == "__main__":
-    import asyncio
-
-    asyncio.run(main())
+    run()

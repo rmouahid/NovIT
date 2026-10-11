@@ -4,9 +4,11 @@ from typing import Literal
 
 import yaml
 
+from novit.settings import config_file
+
 ProfileName = Literal["ETUDIANT", "INGENIEUR"]
 
-_CONFIG_PATH = Path("config/profiles.yaml")
+_CONFIG_PATH = config_file("profiles.yaml")
 
 
 @dataclass

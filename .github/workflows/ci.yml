@@ -63,3 +63,29 @@ jobs:
           name: coverage-report
           path: .coverage
           retention-days: 7
+
+  package:
+    name: Paquet (build, twine check, installation)
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configurer Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Construire wheel et sdist
+        run: |
+          pip install build twine
+          python -m build
+          twine check --strict dist/*
+
+      - name: Installer la wheel hors du dépôt et démarrer le serveur
+        run: |
+          python -m venv /tmp/novit-venv
+          /tmp/novit-venv/bin/pip install dist/*.whl
+          cd "$RUNNER_TEMP"
+          /tmp/novit-venv/bin/novit < /dev/null
+          /tmp/novit-venv/bin/python -c "from novit.scrapers.rss import load_rss_sources; assert load_rss_sources()"

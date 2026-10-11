@@ -4,8 +4,9 @@ import yaml
 from loguru import logger
 
 from novit.scrapers.base import Article
+from novit.settings import config_file
 
-_CONFIG_PATH = Path("config/domains.yaml")
+_CONFIG_PATH = config_file("domains.yaml")
 
 
 class DomainTagger:

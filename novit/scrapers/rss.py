@@ -8,8 +8,9 @@ import yaml
 from loguru import logger
 
 from novit.scrapers.base import Article, BaseScraper
+from novit.settings import config_file
 
-SOURCES_CONFIG_PATH = Path("config/sources.yaml")
+SOURCES_CONFIG_PATH = config_file("sources.yaml")
 
 _REQUIRED_FIELDS = ("name", "url", "domains", "profiles")
 
