@@ -25,6 +25,7 @@ projet adhérant au [Semantic Versioning](https://semver.org/lang/fr/).
 - CI rétablie : `mcp` borné à la série 1.x (la 2.x retire `Server.list_tools()`)
 
 ### Changed
+- Serveur migré vers l'API du SDK `mcp` 2.x (handlers `on_list_tools` / `on_call_tool` passés au constructeur de `Server`) ; dépendance relevée à `mcp>=2.3.0,<3`. Les erreurs d'outil sont signalées avec `isError` (#112)
 - **Rupture** : le package `src` devient `novit` et `config.settings` devient `novit.settings`. Lancement : `python -m novit.mcp` (mettre à jour la configuration du client MCP). Préalable à la publication sur PyPI, où `src` et `config` entreraient en conflit avec d'autres paquets (#93)
 
 ---

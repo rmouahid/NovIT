@@ -1,7 +1,12 @@
 from loguru import logger
 from mcp.server import Server
+from mcp.server.context import ServerRequestContext
 from mcp.server.stdio import stdio_server
 from mcp.types import (
+    CallToolRequestParams,
+    CallToolResult,
+    ListToolsResult,
+    PaginatedRequestParams,
     TextContent,
     Tool,
 )
@@ -16,7 +21,12 @@ from novit.mcp.handlers import (
     handle_get_profile,
     handle_search,
 )
-from novit.mcp.health import get_cache_health, get_health, get_sources_health
+from novit.mcp.health import (
+    _read_version,
+    get_cache_health,
+    get_health,
+    get_sources_health,
+)
 from novit.mcp.logging_config import configure_logging
 from novit.mcp.onboarding import start_novit
 from novit.mcp.profile_selector import select_profile
@@ -43,8 +53,6 @@ init_sentry(
     environment=_settings.env,
     traces_sample_rate=_settings.sentry_traces_sample_rate,
 )
-
-app = Server("novit")
 
 TOOLS: list[Tool] = [
     Tool(
@@ -278,13 +286,17 @@ TOOLS: list[Tool] = [
 ]
 
 
-@app.list_tools()
-async def list_tools() -> list[Tool]:
-    return TOOLS
+async def list_tools(
+    ctx: ServerRequestContext, params: PaginatedRequestParams | None
+) -> ListToolsResult:
+    return ListToolsResult(tools=TOOLS)
 
 
-@app.call_tool()
-async def call_tool(name: str, arguments: dict) -> list[TextContent]:
+async def call_tool(
+    ctx: ServerRequestContext, params: CallToolRequestParams
+) -> CallToolResult:
+    name = params.name
+    arguments = params.arguments or {}
     logger.info(f"Appel outil : {name} | args={arguments}")
     try:
         if name == "novit_get_news":
@@ -344,15 +356,29 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
                 report = await get_health()
                 result = report.to_text()
         else:
-            result = f"Outil inconnu : {name}"
-        return [TextContent(type="text", text=result)]
+            return _text_result(f"Outil inconnu : {name}", is_error=True)
+        return _text_result(result)
     except NovitError as e:
         logger.warning(f"NovitError : {e}")
-        return [TextContent(type="text", text=e.to_mcp_error())]
+        return _text_result(e.to_mcp_error(), is_error=True)
     except Exception as e:
         logger.exception(f"Erreur inattendue dans {name}")
         capture_tool_error(e, tool_name=name, arguments=arguments)
-        return [TextContent(type="text", text=f"Erreur interne NovIT : {e}")]
+        return _text_result(f"Erreur interne NovIT : {e}", is_error=True)
+
+
+def _text_result(text: str, is_error: bool = False) -> CallToolResult:
+    return CallToolResult(
+        content=[TextContent(type="text", text=text)], is_error=is_error
+    )
+
+
+app = Server(
+    "novit",
+    version=_read_version(),
+    on_list_tools=list_tools,
+    on_call_tool=call_tool,
+)
 
 
 def run() -> None:
