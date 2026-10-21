@@ -22,10 +22,10 @@ from novit.mcp.handlers import (
     handle_search,
 )
 from novit.mcp.health import (
-    _read_version,
     get_cache_health,
     get_health,
     get_sources_health,
+    read_version,
 )
 from novit.mcp.logging_config import configure_logging
 from novit.mcp.onboarding import start_novit
@@ -375,17 +375,34 @@ def _text_result(text: str, is_error: bool = False) -> CallToolResult:
 
 app = Server(
     "novit",
-    version=_read_version(),
+    version=read_version(),
     on_list_tools=list_tools,
     on_call_tool=call_tool,
 )
 
 
-def run() -> None:
+def run(argv: list[str] | None = None) -> None:
     """Point d'entrée de la commande `novit` installée par pip."""
+    import argparse
     import asyncio
 
-    asyncio.run(main())
+    parser = argparse.ArgumentParser(prog="novit", description="Serveur MCP NovIT")
+    parser.add_argument(
+        "--transport",
+        choices=["stdio", "http"],
+        default=_settings.transport,
+        help="stdio pour un client local (défaut), http pour un déploiement distant",
+    )
+    args = parser.parse_args(argv)
+
+    if args.transport == "http":
+        from novit.mcp.http import run_http
+
+        run_http(
+            app, host=_settings.host, port=_settings.port, token=_settings.api_token
+        )
+    else:
+        asyncio.run(main())
 
 
 async def main() -> None:

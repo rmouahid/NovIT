@@ -1,9 +1,7 @@
 # Configuration Fly.io — voir docs/CLOUD_DEPLOYMENT.md avant tout déploiement.
 #
-# Prérequis non satisfait à ce jour : NovIT ne parle que stdio (ADR-001), pas
-# HTTP/SSE. Ce fichier prépare le déploiement (build, volume, secrets) pour
-# le jour où le transport HTTP+SSE sera implémenté ; `fly deploy` échouera
-# tant que le serveur n'écoute pas sur $PORT.
+# Transport HTTP (ADR-005) : endpoint MCP sur /mcp, sonde sur /health.
+# Le jeton d'accès se définit en secret : fly secrets set NOVIT_API_TOKEN=...
 
 app = "novit-mcp"
 primary_region = "cdg"  # Paris — à ajuster selon la localisation des utilisateurs
@@ -15,6 +13,7 @@ primary_region = "cdg"  # Paris — à ajuster selon la localisation des utilisa
   NOVIT_ENV = "production"
   NOVIT_LOG_LEVEL = "INFO"
   NOVIT_DB_PATH = "/data/novit.db"
+  NOVIT_TRANSPORT = "http"
   NOVIT_HOST = "0.0.0.0"
   NOVIT_PORT = "8080"
 
@@ -41,4 +40,4 @@ primary_region = "cdg"  # Paris — à ajuster selon la localisation des utilisa
     path = "/health"
 
 [processes]
-  app = "python -m novit.mcp.server"
+  app = "python -m novit.mcp --transport http"

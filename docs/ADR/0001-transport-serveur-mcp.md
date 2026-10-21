@@ -1,6 +1,6 @@
 # ADR-001 : Transport du serveur MCP — SDK officiel `mcp` en stdio (pas FastAPI)
 
-**Statut :** Acceptée
+**Statut :** Acceptée (complétée par [ADR-005](0005-transport-http-authentification.md) pour le transport distant)
 **Date :** 2026-07-07 (rédigée rétroactivement — voir « Contexte » ci-dessous)
 
 ## Contexte
