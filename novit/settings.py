@@ -16,8 +16,12 @@ class Settings(BaseSettings):
     )
 
     # Serveur
+    # stdio : sous-processus d'un client local ; http : déploiement distant (ADR-005)
+    transport: Literal["stdio", "http"] = "stdio"
     host: str = "127.0.0.1"
     port: int = Field(default=8000, ge=1, le=65535)
+    # Jeton bearer du transport HTTP, obligatoire hors écoute locale
+    api_token: str = ""
     env: Literal["development", "staging", "production"] = "development"
     log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = "INFO"
     log_dir: str = ""

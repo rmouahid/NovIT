@@ -51,7 +51,11 @@ class HealthReport:
         return "\n".join(lines)
 
 
-def _read_version() -> str:
+def uptime_seconds() -> float:
+    return time.time() - _START_TIME
+
+
+def read_version() -> str:
     """Fichier VERSION (dépôt, image Docker), sinon version du paquet installé."""
     try:
         with open("VERSION") as f:
@@ -95,8 +99,8 @@ async def get_health() -> HealthReport:
 
     return HealthReport(
         status=status,
-        uptime_seconds=time.time() - _START_TIME,
-        version=_read_version(),
+        uptime_seconds=uptime_seconds(),
+        version=read_version(),
         sources=sources,
         cache_stats=cache.stats(),
     )

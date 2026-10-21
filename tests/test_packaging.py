@@ -45,7 +45,7 @@ def test_version_falls_back_to_the_installed_package(monkeypatch, tmp_path):
     monkeypatch.chdir(tmp_path)  # pas de fichier VERSION ici
     monkeypatch.setattr(health, "package_version", lambda name: "1.2.3")
 
-    assert health._read_version() == "1.2.3"
+    assert health.read_version() == "1.2.3"
 
 
 def test_version_is_unknown_without_file_nor_package(monkeypatch, tmp_path):
@@ -55,7 +55,7 @@ def test_version_is_unknown_without_file_nor_package(monkeypatch, tmp_path):
     monkeypatch.chdir(tmp_path)
     monkeypatch.setattr(health, "package_version", missing)
 
-    assert health._read_version() == "unknown"
+    assert health.read_version() == "unknown"
 
 
 def _requirement_names(lines: list[str]) -> dict[str, str]:
