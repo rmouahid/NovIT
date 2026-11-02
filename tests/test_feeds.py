@@ -10,8 +10,9 @@ import respx
 
 from novit.scrapers import feeds
 from novit.scrapers.cve import ANSSI_RSS_URL, ANSSIScraper
-from novit.scrapers.feeds import USER_AGENT, fetch_feed
+from novit.scrapers.feeds import fetch_feed
 from novit.scrapers.rss import RssScraper, RssSource
+from novit.settings import get_settings
 
 FEED_URL = "https://blog.example.com/feed.xml"
 
@@ -42,7 +43,9 @@ class TestFetchFeed:
             "Premier article",
             "Second article",
         ]
-        assert route.calls.last.request.headers["user-agent"] == USER_AGENT
+        assert (
+            route.calls.last.request.headers["user-agent"] == get_settings().user_agent
+        )
 
     @respx.mock
     async def test_follows_redirects(self):

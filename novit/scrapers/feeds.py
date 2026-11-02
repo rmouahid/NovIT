@@ -12,12 +12,9 @@ import asyncio
 import feedparser
 import httpx
 
-FEED_TIMEOUT = 20
+from novit.settings import get_settings
 
-# Agent explicite : certains hébergeurs refusent l'agent par défaut d'httpx.
-USER_AGENT = (
-    f"NovIT (+https://github.com/rmouahid/NovIT) feedparser/{feedparser.__version__}"
-)
+FEED_TIMEOUT = 20
 
 
 async def fetch_feed(
@@ -27,10 +24,12 @@ async def fetch_feed(
 
     Suit les redirections, comme le faisait feedparser. Lève une exception
     httpx si la source est injoignable ou répond une erreur HTTP : le
-    ScraperManager compte alors la source comme en échec.
+    ScraperManager compte alors la source comme en échec. L'agent envoyé est
+    `NOVIT_USER_AGENT` : certains hébergeurs refusent celui d'httpx.
     """
+    headers = {"User-Agent": get_settings().user_agent}
     async with httpx.AsyncClient(
-        timeout=timeout, follow_redirects=True, headers={"User-Agent": USER_AGENT}
+        timeout=timeout, follow_redirects=True, headers=headers
     ) as client:
         response = await client.get(url)
         response.raise_for_status()
