@@ -1,10 +1,10 @@
 from datetime import UTC, datetime, timedelta
 
-import feedparser
 import httpx
 from loguru import logger
 
 from novit.scrapers.base import Article, BaseScraper
+from novit.scrapers.feeds import fetch_feed
 from novit.settings import get_settings
 
 NVD_API_URL = "https://services.nvd.nist.gov/rest/json/cves/2.0"
@@ -134,7 +134,7 @@ class ANSSIScraper(BaseScraper):
 
     async def fetch(self) -> list[Article]:
         logger.debug(f"[{self.name}] Lecture du flux RSS ANSSI")
-        feed = feedparser.parse(ANSSI_RSS_URL)
+        feed = await fetch_feed(ANSSI_RSS_URL)
         articles: list[Article] = []
 
         for entry in feed.entries:
@@ -165,7 +165,7 @@ class ANSSIScraper(BaseScraper):
 
     async def health_check(self) -> bool:
         try:
-            feed = feedparser.parse(ANSSI_RSS_URL)
+            feed = await fetch_feed(ANSSI_RSS_URL, timeout=5)
             return feed.bozo is False and len(feed.entries) > 0
         except Exception:
             return False

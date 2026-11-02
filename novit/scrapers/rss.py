@@ -3,11 +3,11 @@ from datetime import UTC, datetime
 from email.utils import parsedate_to_datetime
 from pathlib import Path
 
-import feedparser
 import yaml
 from loguru import logger
 
 from novit.scrapers.base import Article, BaseScraper
+from novit.scrapers.feeds import fetch_feed
 from novit.settings import config_file
 
 SOURCES_CONFIG_PATH = config_file("sources.yaml")
@@ -123,7 +123,7 @@ class RssScraper(BaseScraper):
 
     async def fetch(self) -> list[Article]:
         logger.debug(f"[{self.name}] Lecture du flux RSS : {self._source.url}")
-        feed = feedparser.parse(self._source.url)
+        feed = await fetch_feed(self._source.url)
 
         if feed.bozo and not feed.entries:
             logger.warning(f"[{self.name}] Flux RSS invalide : {feed.bozo_exception}")
@@ -165,7 +165,7 @@ class RssScraper(BaseScraper):
 
     async def health_check(self) -> bool:
         try:
-            feed = feedparser.parse(self._source.url)
+            feed = await fetch_feed(self._source.url, timeout=5)
             return not feed.bozo or len(feed.entries) > 0
         except Exception:
             return False

@@ -23,6 +23,9 @@ projet adhérant au [Semantic Versioning](https://semver.org/lang/fr/).
 - Mode hors-ligne dégradé : quand aucune source ne répond, `novit_get_news` et `novit_get_by_domain` servent les articles encore en base (fenêtre de rétention) avec un bandeau qui indique la date et l'âge de la dernière collecte réussie ; la collecte est relancée en arrière-plan (30 s, 2 min, 5 min) et la réponse dégradée n'est gardée en cache qu'une minute ([guide des erreurs](docs/ERROR_HANDLING_GUIDE.md)) (#91)
 - Multi-utilisateurs en HTTP : `NOVIT_API_TOKENS` donne un jeton à chaque utilisateur ; profil, domaines favoris et historique de session sont rangés par utilisateur et ne fuient pas de l'un à l'autre (ADR-006, #87)
 
+### Performance
+- Collecte complète des 22 sources en ~2 s au lieu de 6 à 9 s : les flux RSS sont téléchargés en asynchrone (httpx) et analysés hors de la boucle d'événements au lieu de `feedparser.parse(url)`, bloquant ; les items Hacker News sont récupérés 10 par 10. Une source RSS en erreur HTTP est désormais comptée en échec au lieu de « 0 article ». Mesure : `scripts/profile_scrapers.py` ([docs/PERFORMANCE.md](docs/PERFORMANCE.md)) (#90)
+
 ### Fixed
 - `novit_search` cherche des mots entiers (index SQLite FTS5) au lieu de sous-chaînes : « rust » ne renvoie plus « trust » ; résultats classés par pertinence (#104)
 - CI rétablie : `mcp` borné à la série 1.x (la 2.x retire `Server.list_tools()`)
