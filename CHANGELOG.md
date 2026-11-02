@@ -21,6 +21,9 @@ projet adhérant au [Semantic Versioning](https://semver.org/lang/fr/).
 - Paquet Python `novit` (`pyproject.toml`, build hatchling, version lue dans `VERSION`) : commande `novit`, configuration YAML par défaut embarquée et utilisée quand `./config/` est absent ; job CI qui construit, vérifie (`twine check`) et installe la wheel hors du dépôt ; workflow de publication TestPyPI puis PyPI sur tag `vX.Y.Z` par trusted publishing ([docs/PUBLISHING.md](docs/PUBLISHING.md)) (#93)
 - Transport HTTP pour le déploiement distant : `novit --transport http` (ou `NOVIT_TRANSPORT=http`) sert le serveur MCP en Streamable HTTP sur `/mcp`, protégé par le jeton bearer `NOVIT_API_TOKEN`, avec une sonde publique `/health` (`?sources=1` pour l'état des sources). stdio reste le défaut ([ADR-005](docs/ADR/0005-transport-http-authentification.md)) (#100)
 
+### Performance
+- Collecte complète des 22 sources en ~2 s au lieu de 6 à 9 s : les flux RSS sont téléchargés en asynchrone (httpx) et analysés hors de la boucle d'événements au lieu de `feedparser.parse(url)`, bloquant ; les items Hacker News sont récupérés 10 par 10. Une source RSS en erreur HTTP est désormais comptée en échec au lieu de « 0 article ». Mesure : `scripts/profile_scrapers.py` ([docs/PERFORMANCE.md](docs/PERFORMANCE.md)) (#90)
+
 ### Fixed
 - `novit_search` cherche des mots entiers (index SQLite FTS5) au lieu de sous-chaînes : « rust » ne renvoie plus « trust » ; résultats classés par pertinence (#104)
 - CI rétablie : `mcp` borné à la série 1.x (la 2.x retire `Server.list_tools()`)
