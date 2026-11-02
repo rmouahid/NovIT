@@ -1,0 +1,51 @@
+name: Wiki
+
+# Publie docs/wiki/ dans le wiki GitHub du dépôt : les pages sont relues en
+# pull request comme le reste de la documentation, le wiki n'en est qu'une copie.
+on:
+  push:
+    branches: [dev]
+    paths:
+      - docs/wiki/**
+      - .github/workflows/wiki.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: wiki
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Cloner le wiki
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if ! git clone --depth 1 \
+              "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.wiki.git" wiki; then
+            echo "::error::Wiki introuvable. GitHub ne crée le dépôt du wiki qu'après une première page : ouvrir l'onglet Wiki, créer la page Home (contenu indifférent), puis relancer ce workflow."
+            exit 1
+          fi
+
+      - name: Copier les pages
+        run: rsync -a --delete --exclude .git docs/wiki/ wiki/
+
+      - name: Publier
+        working-directory: wiki
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "Wiki déjà à jour"
+            exit 0
+          fi
+          git commit -m "docs: synchroniser le wiki depuis docs/wiki (${GITHUB_SHA::7})"
+          git push
