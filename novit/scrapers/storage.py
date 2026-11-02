@@ -188,6 +188,16 @@ class ArticleStore:
                 rows = await cursor.fetchall()
         return [self._row_to_article(row) for row in rows]
 
+    async def last_inserted_at(self) -> datetime | None:
+        """Date du dernier article enregistré, c'est-à-dire de la dernière
+        collecte réussie ; None si la base est vide."""
+        if not self._initialized:
+            await self.init()
+        async with aiosqlite.connect(self.db_path) as db:
+            async with db.execute("SELECT max(inserted_at) FROM articles") as cursor:
+                row = await cursor.fetchone()
+        return datetime.fromisoformat(row[0]) if row and row[0] else None
+
     async def purge_expired(self) -> int:
         if not self._initialized:
             await self.init()
