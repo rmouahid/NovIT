@@ -20,6 +20,7 @@ projet adhérant au [Semantic Versioning](https://semver.org/lang/fr/).
 - Landing page du projet dans le README : logo, démo animée, captures de réponses réelles, badges et appels à l'action
 - Paquet Python `novit` (`pyproject.toml`, build hatchling, version lue dans `VERSION`) : commande `novit`, configuration YAML par défaut embarquée et utilisée quand `./config/` est absent ; job CI qui construit, vérifie (`twine check`) et installe la wheel hors du dépôt ; workflow de publication TestPyPI puis PyPI sur tag `vX.Y.Z` par trusted publishing ([docs/PUBLISHING.md](docs/PUBLISHING.md)) (#93)
 - Transport HTTP pour le déploiement distant : `novit --transport http` (ou `NOVIT_TRANSPORT=http`) sert le serveur MCP en Streamable HTTP sur `/mcp`, protégé par le jeton bearer `NOVIT_API_TOKEN`, avec une sonde publique `/health` (`?sources=1` pour l'état des sources). stdio reste le défaut ([ADR-005](docs/ADR/0005-transport-http-authentification.md)) (#100)
+- Outil `novit_feedback` : enregistre un retour (bug, suggestion, avis positif ou négatif) avec l'outil et la requête concernés, le profil, les domaines favoris et la version, dans la table `feedback` de la base locale ; un bug renvoie un lien vers une issue GitHub pré-remplie. Rapport hebdomadaire : `scripts/feedback_report.py` (#89)
 
 ### Fixed
 - `novit_search` cherche des mots entiers (index SQLite FTS5) au lieu de sous-chaînes : « rust » ne renvoie plus « trust » ; résultats classés par pertinence (#104)
