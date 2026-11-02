@@ -1,7 +1,7 @@
 name: 🐛 Signalement de bug
 description: Un comportement de NovIT ne correspond pas à ce qui est attendu
 title: "bug: "
-labels: ["bug"]
+labels: ["bug", "a-trier"]
 body:
   - type: markdown
     attributes:
