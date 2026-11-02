@@ -44,9 +44,10 @@ d'accès.
 ## Conséquences
 
 - Une instance = un utilisateur. L'état de session (profil, domaines choisis) est global au
-  processus, comme en stdio : deux clients connectés à la même instance le partagent. Le
-  multi-utilisateur (#87) reste à faire, avec OAuth et un état par session ; SQLite sur un
-  volume mono-instance ([ADR-002](0002-sqlite-dev-postgresql-prod.md)) suffit d'ici là.
+  processus, comme en stdio : deux clients connectés à la même instance le partagent. Levé
+  depuis par [ADR-006](0006-multi-utilisateurs-jetons.md) : un jeton par utilisateur, état
+  rangé par utilisateur ; SQLite sur un volume mono-instance
+  ([ADR-002](0002-sqlite-dev-postgresql-prod.md)) suffit toujours.
 - Le jeton se change avec `fly secrets set NOVIT_API_TOKEN=...` ; Fly.io redémarre l'instance,
   ce qui coupe les sessions ouvertes. Pas de rotation à chaud, contrairement aux clés API de
   [SECRET_ROTATION.md](../SECRET_ROTATION.md).
