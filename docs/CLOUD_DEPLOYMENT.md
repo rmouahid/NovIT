@@ -15,7 +15,14 @@ serveur en **Streamable HTTP** ([ADR-005](ADR/0005-transport-http-authentificati
 | `/health` | sonde de vie (statut, version, uptime), sans appel réseau | public |
 | `/health?sources=1` | rapport complet de `get_health()`, état de chaque source | public |
 
-Sans `NOVIT_API_TOKEN`, le serveur refuse de démarrer s'il écoute ailleurs qu'en local.
+Sans `NOVIT_API_TOKEN` ni `NOVIT_API_TOKENS`, le serveur refuse de démarrer s'il écoute
+ailleurs qu'en local.
+
+**Plusieurs utilisateurs** ([ADR-006](ADR/0006-multi-utilisateurs-jetons.md)) : donner à chacun
+son jeton avec `NOVIT_API_TOKENS="alice:$(openssl rand -hex 32),bob:$(openssl rand -hex 32)"`.
+Chaque utilisateur a alors son profil, ses domaines favoris (`.novit_users/<utilisateur>.json`,
+à côté de la base) et son historique de session, invisibles des autres. Identifiants :
+minuscules, chiffres, `_` et `-`.
 Essai en local :
 
 ```bash
@@ -53,6 +60,7 @@ l'[INSTALLATION_GUIDE.md](INSTALLATION_GUIDE.md), en production sur Fly.io :
 | `NOVIT_TRANSPORT` | `http` | `fly.toml` `[env]` |
 | `NOVIT_HOST` / `NOVIT_PORT` | `0.0.0.0` / `8080` | `fly.toml` `[env]` |
 | `NOVIT_API_TOKEN` | jeton long et aléatoire (`openssl rand -hex 32`) | **Secret** : `fly secrets set NOVIT_API_TOKEN=...` |
+| `NOVIT_API_TOKENS` | un jeton par utilisateur : `alice:jeton1,bob:jeton2` (facultatif) | **Secret** : `fly secrets set NOVIT_API_TOKENS=...` |
 | `NOVIT_DB_PATH` | `/data/novit.db` | `fly.toml` `[env]` (sur le volume persistant monté) |
 | `SENTRY_DSN`, `NVD_API_KEY`, `GITHUB_TOKEN` | — | **Jamais dans `fly.toml`** (versionné) : `fly secrets set SENTRY_DSN=... NVD_API_KEY=...` |
 
@@ -72,9 +80,10 @@ flyctl secrets set NOVIT_API_TOKEN=$(openssl rand -hex 32) SENTRY_DSN=... NVD_AP
 
 ## Limites
 
-- **Un utilisateur par instance** : profil et domaines choisis sont globaux au processus ; deux
-  clients sur la même instance les partagent. Le multi-utilisateur (#87) demandera OAuth et un
-  état par session, puis une base partagée si plusieurs instances tournent (ADR-002).
+- **Utilisateurs** : avec le seul `NOVIT_API_TOKEN`, profil et domaines choisis sont partagés par
+  tous les clients de l'instance ; `NOVIT_API_TOKENS` les isole par utilisateur (ADR-006). Ces
+  préférences sont des fichiers locaux : plusieurs instances demanderaient une base partagée
+  (ADR-002).
 - **Changer le jeton** (`fly secrets set NOVIT_API_TOKEN=...`) redémarre l'instance et coupe les
   sessions ouvertes.
 - **TLS** : assuré par Fly.io. Sans proxy HTTPS devant uvicorn, le jeton circulerait en clair.
