@@ -2,6 +2,7 @@ from collections import deque
 from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
 
+from novit.mcp.users import current_user
 from novit.scrapers.base import Article
 
 _SESSION_TTL_HOURS = 24
@@ -26,17 +27,24 @@ class SessionManager:
     - L'historique de navigation (suivant/précédent)
     - Les résultats courants pour la navigation
 
-    Les sessions expirent après 24h d'inactivité.
+    Les sessions expirent après 24h d'inactivité. Elles sont rangées par
+    utilisateur (#87) : un même `session_id` désigne deux sessions distinctes
+    pour deux utilisateurs.
     """
 
     def __init__(self):
         self._sessions: dict[str, SessionState] = {}
 
+    @staticmethod
+    def _key(session_id: str) -> str:
+        return f"{current_user.get()}/{session_id}"
+
     def get_or_create(self, session_id: str = "default") -> SessionState:
-        session = self._sessions.get(session_id)
+        key = self._key(session_id)
+        session = self._sessions.get(key)
         if session is None or self._is_expired(session):
             session = SessionState()
-            self._sessions[session_id] = session
+            self._sessions[key] = session
         session.last_active = datetime.now(tz=UTC)
         return session
 
@@ -86,7 +94,7 @@ class SessionManager:
         return session.current_index, len(session.current_results)
 
     def reset(self, session_id: str) -> None:
-        self._sessions.pop(session_id, None)
+        self._sessions.pop(self._key(session_id), None)
 
     def purge_expired(self) -> int:
         before = len(self._sessions)

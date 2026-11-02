@@ -118,6 +118,7 @@ test: ajouter les tests d'intégration MCP (#65)
 - Linting : **ruff**
 - Typage : annotations de type sur toutes les fonctions publiques
 - Couverture de tests : 80% minimum
+- Dépendances : bornes basses (`>=`), `requirements.txt` et `pyproject.toml` identiques, voir [docs/DEPENDENCIES.md](docs/DEPENDENCIES.md)
 
 ---
 
