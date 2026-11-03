@@ -1,9 +1,11 @@
 """Serveur MCP : déclaration des outils et dispatch, via un client en mémoire."""
 
+import pytest
 from mcp import Client
 
 from novit.mcp import server
 from novit.mcp.errors import NovitError, NovitErrorCode
+from novit.mcp.health import read_version
 
 
 async def test_list_tools_exposes_every_declared_tool():
@@ -64,3 +66,11 @@ async def test_unexpected_exception_does_not_crash_the_server(monkeypatch):
     assert result.is_error
     assert result.content[0].text == "Erreur interne NovIT : boom"
     assert still_alive.tools
+
+
+def test_version_flag_prints_version_and_exits(capsys):
+    with pytest.raises(SystemExit) as exc:
+        server.run(["--version"])
+
+    assert exc.value.code == 0
+    assert capsys.readouterr().out.strip() == f"novit {read_version()}"

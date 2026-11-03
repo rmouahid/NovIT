@@ -81,6 +81,7 @@ NovIT est un **serveur MCP (Model Context Protocol)** : il expose des outils que
 | `novit_get_profile` | Informations et préférences d'un profil |
 | `novit_set_profile` | Change le profil actif et le persiste |
 | `novit_set_domains` | Définit les domaines actifs de la session |
+| `novit_feedback` | Enregistre un retour (bug, suggestion, avis) ; lien vers une issue pré-remplie pour un bug |
 | `novit_health` | État de santé du serveur (uptime, cache, sources) |
 
 ### Profils utilisateur
@@ -206,7 +207,8 @@ NovIT est open source et les contributions sont les bienvenues, du signalement d
 | 🐛 Signaler un bug | [Ouvrir un rapport de bug](https://github.com/rmouahid/NovIT/issues/new?template=bug_report.yml) |
 | ✨ Proposer une fonctionnalité | [Ouvrir une proposition](https://github.com/rmouahid/NovIT/issues/new?template=feature_request.yml) |
 | 📡 Ajouter une source | [Proposer une source](https://github.com/rmouahid/NovIT/issues/new?template=new_source.yml) · [Guide](docs/ADDING_A_SOURCE.md) · [Plugins](docs/PLUGINS.md) |
-| 💬 Poser une question | [Discussions](https://github.com/rmouahid/NovIT/discussions) |
+| 💬 Poser une question | [Discussions](https://github.com/rmouahid/NovIT/discussions) · [délais de réponse](.github/SUPPORT.md) |
+| 🔒 Signaler une faille | [Signalement privé](https://github.com/rmouahid/NovIT/security/advisories/new) · [politique de sécurité](SECURITY.md) |
 | 🧑‍💻 Écrire du code | [Guide de contribution](CONTRIBUTING.md) · [issues « good first issue »](https://github.com/rmouahid/NovIT/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) |
 
 ### Développement
