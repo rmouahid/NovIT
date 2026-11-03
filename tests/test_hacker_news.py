@@ -1,7 +1,11 @@
+import asyncio
+import time
+
 import httpx
 import pytest
 import respx
 
+from novit.scrapers import hacker_news
 from novit.scrapers.hacker_news import HN_API, HackerNewsScraper, _tag_domains
 
 STORY_1 = {
@@ -154,3 +158,81 @@ class TestHackerNewsScraper:
             )
             result = await scraper.health_check()
         assert result is False
+
+
+class TestHackerNewsConcurrency:
+    """Les items sont récupérés en parallèle (#90) sans perdre l'ordre du
+    classement ni dépasser ITEM_CONCURRENCY requêtes simultanées."""
+
+    @staticmethod
+    def story(i: int) -> dict:
+        return {
+            "id": i,
+            "type": "story",
+            "title": f"Story {i}",
+            "url": f"https://example.com/{i}",
+            "score": 100,
+            "time": 1700000000,
+        }
+
+    async def test_keeps_top_stories_order_despite_latency(self, monkeypatch):
+        scraper = HackerNewsScraper(min_score=50, max_articles=3)
+        # Les premiers items répondent le plus lentement
+        delays = {1: 0.05, 2: 0.04, 3: 0.03, 4: 0.0, 5: 0.0, 6: 0.0}
+
+        async def fake_item(client, item_id):
+            await asyncio.sleep(delays[item_id])
+            return self.story(item_id)
+
+        monkeypatch.setattr(scraper, "_fetch_item", fake_item)
+        with respx.mock:
+            respx.get(f"{HN_API}/topstories.json").mock(
+                return_value=httpx.Response(200, json=[1, 2, 3, 4, 5, 6])
+            )
+            articles = await scraper.fetch()
+
+        assert [a.title for a in articles] == ["Story 1", "Story 2", "Story 3"]
+
+    async def test_bounded_concurrency_and_faster_than_sequential(self, monkeypatch):
+        scraper = HackerNewsScraper(min_score=50, max_articles=30)
+        in_flight = 0
+        peak = 0
+
+        async def fake_item(client, item_id):
+            nonlocal in_flight, peak
+            in_flight += 1
+            peak = max(peak, in_flight)
+            await asyncio.sleep(0.02)
+            in_flight -= 1
+            return self.story(item_id)
+
+        monkeypatch.setattr(scraper, "_fetch_item", fake_item)
+        with respx.mock:
+            respx.get(f"{HN_API}/topstories.json").mock(
+                return_value=httpx.Response(200, json=list(range(1, 61)))
+            )
+            start = time.perf_counter()
+            articles = await scraper.fetch()
+            elapsed = time.perf_counter() - start
+
+        assert len(articles) == 30
+        assert peak == hacker_news.ITEM_CONCURRENCY
+        # Séquentiel : 60 × 20 ms = 1,2 s ; parallèle par 10 : ~0,12 s
+        assert elapsed < 0.6
+
+    async def test_failing_item_is_skipped(self, monkeypatch):
+        scraper = HackerNewsScraper(min_score=50, max_articles=5)
+
+        async def fake_item(client, item_id):
+            if item_id == 2:
+                raise httpx.ConnectError("reset")
+            return self.story(item_id)
+
+        monkeypatch.setattr(scraper, "_fetch_item", fake_item)
+        with respx.mock:
+            respx.get(f"{HN_API}/topstories.json").mock(
+                return_value=httpx.Response(200, json=[1, 2, 3])
+            )
+            articles = await scraper.fetch()
+
+        assert [a.title for a in articles] == ["Story 1", "Story 3"]

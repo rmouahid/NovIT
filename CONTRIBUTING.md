@@ -118,9 +118,10 @@ test: ajouter les tests d'intégration MCP (#65)
 - Linting : **ruff**
 - Typage : annotations de type sur toutes les fonctions publiques
 - Couverture de tests : 80% minimum
+- Dépendances : bornes basses (`>=`), `requirements.txt` et `pyproject.toml` identiques, voir [docs/DEPENDENCIES.md](docs/DEPENDENCIES.md)
 
 ---
 
 ## Questions ?
 
-Ouvrez une [Discussion GitHub](https://github.com/rmouahid/NovIT/discussions) ou une issue avec le label `question`.
+Ouvrez une [Discussion GitHub](https://github.com/rmouahid/NovIT/discussions) (catégorie Q&A). Les canaux, les délais de réponse et le triage des issues sont décrits dans [.github/SUPPORT.md](.github/SUPPORT.md) ; une faille de sécurité se signale en privé ([SECURITY.md](SECURITY.md)).

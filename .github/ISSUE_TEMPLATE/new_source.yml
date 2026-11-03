@@ -1,7 +1,7 @@
 name: 📡 Nouvelle source de scraping
 description: Proposer l'ajout d'une nouvelle source (flux RSS, API...) à NovIT
 title: "feat: ajouter le scraper "
-labels: ["feature"]
+labels: ["feature", "a-trier"]
 body:
   - type: markdown
     attributes:

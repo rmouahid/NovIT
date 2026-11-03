@@ -5,7 +5,11 @@ from typing import Literal
 
 from loguru import logger
 
+from novit.mcp.users import DEFAULT_USER, current_user
+
 _PREFS_PATH = Path(".novit_prefs.json")
+# Une instance partagée range les préférences de chaque utilisateur à part (#87).
+_USERS_DIR = Path(".novit_users")
 
 
 @dataclass
@@ -24,10 +28,25 @@ class PreferencesStore:
 
     Le fichier est créé à la racine du projet et ignoré par git (.gitignore).
     Pas de base de données — les préférences sont propres à chaque installation.
+
+    Sans chemin imposé, le fichier dépend de l'utilisateur courant :
+    `.novit_prefs.json` pour l'utilisateur par défaut (usage local),
+    `.novit_users/<utilisateur>.json` pour chaque utilisateur d'une instance
+    partagée.
     """
 
-    def __init__(self, path: Path = _PREFS_PATH):
-        self._path = path
+    def __init__(self, path: Path | None = None, users_dir: Path = _USERS_DIR):
+        self._fixed_path = path
+        self._users_dir = users_dir
+
+    @property
+    def _path(self) -> Path:
+        if self._fixed_path is not None:
+            return self._fixed_path
+        user = current_user.get()
+        if user == DEFAULT_USER:
+            return _PREFS_PATH
+        return self._users_dir / f"{user}.json"
 
     def load(self) -> UserPreferences:
         if not self._path.exists():
@@ -50,6 +69,7 @@ class PreferencesStore:
 
     def save(self, prefs: UserPreferences) -> None:
         try:
+            self._path.parent.mkdir(parents=True, exist_ok=True)
             with self._path.open("w", encoding="utf-8") as f:
                 json.dump(asdict(prefs), f, indent=2, ensure_ascii=False)
             logger.debug(f"[prefs] Préférences sauvegardées dans {self._path}")

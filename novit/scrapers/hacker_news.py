@@ -1,3 +1,4 @@
+import asyncio
 from datetime import UTC, datetime
 
 import httpx
@@ -7,6 +8,10 @@ from novit.scrapers.base import Article, BaseScraper
 
 HN_API = "https://hacker-news.firebaseio.com/v0"
 HN_ITEM_URL = "https://news.ycombinator.com/item?id={id}"
+
+# Requêtes d'items simultanées : l'API Firebase ne renvoie qu'un item par
+# appel, les récupérer un par un faisait de HN la source la plus lente (#90).
+ITEM_CONCURRENCY = 10
 
 DOMAIN_KEYWORDS: dict[str, list[str]] = {
     "ia": [
@@ -87,18 +92,28 @@ class HackerNewsScraper(BaseScraper):
             r.raise_for_status()
             story_ids: list[int] = r.json()[: self.max_articles * 2]
 
-            articles: list[Article] = []
-            for story_id in story_ids:
-                if len(articles) >= self.max_articles:
-                    break
-                try:
-                    item = await self._fetch_item(client, story_id)
-                    if item and item.get("score", 0) >= self.min_score:
-                        article = self._to_article(item)
-                        if article:
-                            articles.append(article)
-                except Exception as e:
-                    logger.warning(f"[{self.name}] Erreur item {story_id}: {e}")
+            semaphore = asyncio.Semaphore(ITEM_CONCURRENCY)
+
+            async def fetch_one(story_id: int) -> dict | None:
+                async with semaphore:
+                    try:
+                        return await self._fetch_item(client, story_id)
+                    except Exception as e:
+                        logger.warning(f"[{self.name}] Erreur item {story_id}: {e}")
+                        return None
+
+            # gather conserve l'ordre des top stories : le classement HN est
+            # respecté quand on tronque à max_articles
+            items = await asyncio.gather(*(fetch_one(sid) for sid in story_ids))
+
+        articles: list[Article] = []
+        for item in items:
+            if len(articles) >= self.max_articles:
+                break
+            if item and item.get("score", 0) >= self.min_score:
+                article = self._to_article(item)
+                if article:
+                    articles.append(article)
 
         logger.info(f"[{self.name}] {len(articles)} articles récupérés")
         return articles

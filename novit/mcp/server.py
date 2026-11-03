@@ -29,6 +29,7 @@ from novit.mcp.health import (
     get_sources_health,
     read_version,
 )
+from novit.mcp.http import USER_STATE_KEY
 from novit.mcp.logging_config import configure_logging
 from novit.mcp.onboarding import start_novit
 from novit.mcp.profile_selector import select_profile
@@ -42,6 +43,7 @@ from novit.mcp.schemas import (
 from novit.mcp.sentry_config import capture_tool_error, init_sentry
 from novit.mcp.trends import detect_trends
 from novit.mcp.unusual import get_unusual
+from novit.mcp.users import DEFAULT_USER, as_user
 from novit.settings import get_settings
 
 _settings = get_settings()
@@ -326,9 +328,21 @@ async def list_tools(
     return ListToolsResult(tools=TOOLS)
 
 
+def request_user(ctx: ServerRequestContext) -> str:
+    """Utilisateur authentifié par le transport HTTP, `default` sinon (stdio)."""
+    state = getattr(ctx.request, "state", None)
+    return getattr(state, USER_STATE_KEY, None) or DEFAULT_USER
+
+
 async def call_tool(
     ctx: ServerRequestContext, params: CallToolRequestParams
 ) -> CallToolResult:
+    # Préférences et sessions lues pendant l'appel sont celles de cet utilisateur.
+    with as_user(request_user(ctx)):
+        return await _call_tool(params)
+
+
+async def _call_tool(params: CallToolRequestParams) -> CallToolResult:
     name = params.name
     arguments = params.arguments or {}
     logger.info(f"Appel outil : {name} | args={arguments}")
@@ -429,6 +443,12 @@ def run(argv: list[str] | None = None) -> None:
 
     parser = argparse.ArgumentParser(prog="novit", description="Serveur MCP NovIT")
     parser.add_argument(
+        "--version",
+        action="version",
+        version=f"%(prog)s {read_version()}",
+        help="affiche la version (à joindre aux signalements de bug)",
+    )
+    parser.add_argument(
         "--transport",
         choices=["stdio", "http"],
         default=_settings.transport,
@@ -438,9 +458,14 @@ def run(argv: list[str] | None = None) -> None:
 
     if args.transport == "http":
         from novit.mcp.http import run_http
+        from novit.mcp.users import parse_api_tokens
 
         run_http(
-            app, host=_settings.host, port=_settings.port, token=_settings.api_token
+            app,
+            host=_settings.host,
+            port=_settings.port,
+            token=_settings.api_token,
+            users=parse_api_tokens(_settings.api_tokens),
         )
     else:
         asyncio.run(main())
