@@ -41,7 +41,7 @@ un déploiement distant (voir [MCP_NOTES.md](MCP_NOTES.md)), non implémenté à
 
 | Fichier | Rôle |
 |---|---|
-| `server.py` | Point d'entrée. Instancie `Server("novit")`, déclare `TOOLS` (13 outils, schémas JSON), route `call_tool()` vers les handlers. |
+| `server.py` | Point d'entrée. Instancie `Server("novit")`, déclare `TOOLS` (14 outils, schémas JSON), route `call_tool()` vers les handlers. |
 | `handlers.py` | Implémente `novit_get_news`, `novit_search`, `novit_get_by_domain`, `novit_get_profile` : cache → lecture `ArticleStore` → scraping si insuffisant → `filter_and_rank` → formatage markdown. |
 | `schemas.py` | Modèles Pydantic d'entrée (`GetNewsInput`, `SearchInput`, `GetByDomainInput`, `GetProfileInput`) et de sortie (`ArticleResult`). |
 | `errors.py` | `NovitErrorCode` (`StrEnum`, 8 codes `NOVIT_*`) et `NovitError` (exception → `to_mcp_error()` → texte affiché à Claude). |
@@ -53,6 +53,7 @@ un déploiement distant (voir [MCP_NOTES.md](MCP_NOTES.md)), non implémenté à
 | `debug.py` | `DebugInfo` / `append_debug()` : bloc markdown de diagnostic ajouté en pied de réponse en mode verbose. |
 | `daily.py`, `trends.py`, `dig.py`, `related.py`, `unusual.py` | Handlers des outils du même nom (résumé quotidien, tendances, extraction d'article, articles similaires, découvertes insolites). |
 | `context.py`, `session.py`, `session_summary.py` | Contexte de conversation NovIT (session en mémoire, historique vu/non-vu, résumé de session). |
+| `feedback.py` | `FeedbackStore` (table `feedback`), `submit_feedback()` (backend de `novit_feedback`), `issue_url()`, `weekly_report()`. |
 | `onboarding.py`, `profile_selector.py`, `domain_selector.py` | `novit_start`, `novit_set_profile`, `novit_set_domains` : sélection/persistance du profil et des domaines actifs. |
 | `alerts.py` | `AlertManager` (`StrEnum` `AlertLevel` info/important/critique) pour les alertes personnalisées. |
 | `i18n.py` | Détection de langue basique + `t()` pour les chaînes FR/EN. |
@@ -139,6 +140,7 @@ du texte markdown (`TextContent`), avec `isError: true` en cas de `NovitError` n
 | `novit_daily` | **`profil`**, `domaines[]` | `# Veille quotidienne NovIT`, groupé par domaine (emoji dédié), 3 articles max/domaine. |
 | `novit_related` | `url`, `title`, `domaines[]`, `top_k` (déf. 5) | Articles similaires (Jaccard 60% domaines + 40% mots du titre), fenêtre 7 jours. |
 | `novit_dig` | **`url`** | Extraction du contenu principal de la page (heuristique `article`/`main`/`section`, fallback `body`), tronqué à 4000 caractères. |
+| `novit_feedback` | **`commentaire`**, `type` (bug\|suggestion\|positif\|negatif, déf. suggestion), `outil`, `requete` | Enregistre le retour et son contexte (profil et domaines favoris, version) dans la table `feedback` de la base SQLite ; pour un bug, renvoie un lien vers une issue GitHub pré-remplie. Rapport : `scripts/feedback_report.py`. |
 | `novit_health` | `detail` (global\|sources\|cache, déf. global) | Statut serveur : uptime, version, stats cache. `sources` toujours vide actuellement (voir §2, `health.py`). |
 
 Schémas JSON complets : voir `TOOLS` dans `novit/mcp/server.py`, ou [MCP_NOTES.md](MCP_NOTES.md)

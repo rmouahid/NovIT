@@ -15,6 +15,8 @@ from novit.mcp.daily import build_daily_summary
 from novit.mcp.dig import dig_url
 from novit.mcp.domain_selector import set_domains
 from novit.mcp.errors import NovitError
+from novit.mcp.feedback import KINDS as FEEDBACK_KINDS
+from novit.mcp.feedback import submit_feedback
 from novit.mcp.handlers import (
     handle_get_by_domain,
     handle_get_news,
@@ -271,6 +273,38 @@ TOOLS: list[Tool] = [
         },
     ),
     Tool(
+        name="novit_feedback",
+        description=(
+            "Enregistre un retour de l'utilisateur sur NovIT (bug, suggestion, avis "
+            "positif ou négatif), avec l'outil et la requête concernés. Pour un bug, "
+            "renvoie un lien vers une issue GitHub pré-remplie."
+        ),
+        inputSchema={
+            "type": "object",
+            "properties": {
+                "commentaire": {
+                    "type": "string",
+                    "description": "Le retour, dans les mots de l'utilisateur",
+                },
+                "type": {
+                    "type": "string",
+                    "enum": list(FEEDBACK_KINDS),
+                    "default": "suggestion",
+                    "description": "Nature du retour",
+                },
+                "outil": {
+                    "type": "string",
+                    "description": "Outil NovIT concerné, ex. novit_get_news",
+                },
+                "requete": {
+                    "type": "string",
+                    "description": "Demande ou paramètres qui ont produit le résultat commenté",
+                },
+            },
+            "required": ["commentaire"],
+        },
+    ),
+    Tool(
         name="novit_health",
         description="Retourne l'état de santé du serveur NovIT (uptime, cache, sources).",
         inputSchema={
@@ -351,6 +385,13 @@ async def _call_tool(params: CallToolRequestParams) -> CallToolResult:
             )
         elif name == "novit_dig":
             result = await dig_url(arguments.get("url", ""))
+        elif name == "novit_feedback":
+            result = await submit_feedback(
+                commentaire=arguments.get("commentaire", ""),
+                type=arguments.get("type", "suggestion"),
+                outil=arguments.get("outil", ""),
+                requete=arguments.get("requete", ""),
+            )
         elif name == "novit_health":
             detail = arguments.get("detail", "global")
             if detail == "sources":

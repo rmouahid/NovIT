@@ -81,6 +81,7 @@ NovIT est un **serveur MCP (Model Context Protocol)** : il expose des outils que
 | `novit_get_profile` | Informations et préférences d'un profil |
 | `novit_set_profile` | Change le profil actif et le persiste |
 | `novit_set_domains` | Définit les domaines actifs de la session |
+| `novit_feedback` | Enregistre un retour (bug, suggestion, avis) ; lien vers une issue pré-remplie pour un bug |
 | `novit_health` | État de santé du serveur (uptime, cache, sources) |
 
 ### Profils utilisateur
