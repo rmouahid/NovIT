@@ -1,5 +1,6 @@
 """Scrapers pour les blogs IA : Anthropic, OpenAI, DeepMind, arXiv, Papers With Code."""
 
+import asyncio
 from datetime import UTC, datetime
 
 import feedparser
@@ -36,7 +37,8 @@ class ArxivScraper(BaseScraper):
             r = await client.get(ARXIV_API_URL, params=params)
             r.raise_for_status()
 
-        feed = feedparser.parse(r.text)
+        # Analyse hors de la boucle d'événements : un gros flux arXiv la bloquait (#90)
+        feed = await asyncio.to_thread(feedparser.parse, r.text)
         articles: list[Article] = []
 
         for entry in feed.entries:

@@ -123,8 +123,8 @@ def test_local_listening_without_a_token_is_allowed():
 def test_transport_option_selects_http(monkeypatch):
     calls = {}
 
-    def fake_run_http(app, host, port, token):
-        calls.update(app=app, host=host, port=port, token=token)
+    def fake_run_http(app, host, port, token, users):
+        calls.update(app=app, host=host, port=port, token=token, users=users)
 
     monkeypatch.setattr("novit.mcp.http.run_http", fake_run_http)
 
@@ -132,3 +132,4 @@ def test_transport_option_selects_http(monkeypatch):
 
     assert calls["app"] is server.app
     assert calls["port"] == server._settings.port
+    assert calls["users"] == {}

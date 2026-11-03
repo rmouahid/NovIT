@@ -125,6 +125,7 @@ Voir [docs/ADR/](ADR/) pour les Architecture Decision Records complets (contexte
 |---|---|---|
 | Transport serveur MCP | SDK `mcp` officiel, stdio (pas FastAPI) | [ADR-001](ADR/0001-transport-serveur-mcp.md) |
 | Transport distant et authentification | Streamable HTTP du SDK, jeton bearer statique | [ADR-005](ADR/0005-transport-http-authentification.md) |
+| Multi-utilisateurs | Un jeton par utilisateur, préférences et sessions rangées par utilisateur | [ADR-006](ADR/0006-multi-utilisateurs-jetons.md) |
 | Base de données dev | SQLite (aiosqlite) | [ADR-002](ADR/0002-sqlite-dev-postgresql-prod.md) |
 | Base de données prod | PostgreSQL envisagé, **non implémenté** | [ADR-002](ADR/0002-sqlite-dev-postgresql-prod.md) |
 | Cache | `TTLCache` maison (TTL en mémoire) | [ADR-003](ADR/0003-strategie-cache-ttl.md) |

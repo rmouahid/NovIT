@@ -2,6 +2,7 @@ from loguru import logger
 
 from novit.mcp.cache import TTL_NEWS, TTL_SEARCH, cache
 from novit.mcp.errors import NovitError, NovitErrorCode
+from novit.mcp.offline import TTL_OFFLINE, all_sources_down, offline_banner, retry
 from novit.mcp.schemas import (
     GetByDomainInput,
     GetNewsInput,
@@ -17,6 +18,41 @@ from novit.scrapers.tagger import tagger
 _manager = ScraperManager()
 
 PERIODE_TO_HOURS = {"1h": 1, "6h": 6, "24h": 24, "7j": 168}
+
+
+async def _collect(domains: list[str] | None) -> bool:
+    """Lance les scrapers (tous, ou ceux des domaines) et enregistre les
+    articles. Renvoie False si aucune source n'a répondu."""
+    if domains:
+        result = await _manager.fetch_by_domains(domains)
+    else:
+        result = await _manager.fetch_all()
+    if all_sources_down(result):
+        return False
+    await store.save(tagger.tag_all(result.articles))
+    return True
+
+
+async def _offline_articles(
+    domains: list[str] | None, profil: str, limit: int
+) -> tuple[list, str]:
+    """Articles servis quand aucune source ne répond : tout ce qui reste en
+    base (fenêtre de rétention), avec le bandeau hors-ligne. Lance une
+    relance en arrière-plan. Lève SOURCE_UNAVAILABLE si la base est vide."""
+    articles = await store.get_recent(
+        domains=domains,
+        profiles=[profil],
+        hours=store.retention_days * 24,
+        limit=limit,
+    )
+    if not articles:
+        raise NovitError(
+            NovitErrorCode.SOURCE_UNAVAILABLE,
+            "Impossible de récupérer les articles. Réessayez dans quelques instants.",
+        )
+    retry.schedule(lambda: _collect(domains))
+    banner = offline_banner(await store.last_inserted_at(), retrying=retry.running)
+    return articles, banner
 
 
 def _format_articles(articles: list, profil: str, titre: str) -> str:
@@ -61,30 +97,29 @@ async def handle_get_news(params: GetNewsInput) -> str:
     )
 
     # 2. Si pas assez d'articles en base, lancer les scrapers
+    banner = ""
     if len(articles) < params.nb_articles:
         logger.info(
             f"Pas assez d'articles en cache ({len(articles)}), lancement des scrapers"
         )
         try:
-            if params.domaines:
-                result = await _manager.fetch_by_domains(params.domaines)
-            else:
-                result = await _manager.fetch_all()
-            fresh = tagger.tag_all(result.articles)
-            await store.save(fresh)
+            online = await _collect(params.domaines or None)
+        except Exception as e:
+            logger.error(f"Erreur scraping : {e}")
+            online = False
+        if online:
             articles = await store.get_recent(
                 domains=params.domaines or None,
                 profiles=[params.profil],
                 hours=hours,
                 limit=params.nb_articles * 3,
             )
-        except Exception as e:
-            logger.error(f"Erreur scraping : {e}")
-            if not articles:
-                raise NovitError(
-                    NovitErrorCode.SOURCE_UNAVAILABLE,
-                    "Impossible de récupérer les articles. Réessayez dans quelques instants.",
-                )
+        else:
+            # Mode hors-ligne : aucune source n'a répondu (#91)
+            logger.warning("Aucune source disponible : réponse servie depuis le cache")
+            articles, banner = await _offline_articles(
+                params.domaines or None, params.profil, params.nb_articles * 3
+            )
 
     # 3. Filtrer et scorer par profil
     ranked = filter_and_rank(
@@ -96,8 +131,10 @@ async def handle_get_news(params: GetNewsInput) -> str:
     )
     titre = f"Veille NovIT — {params.periode} · {domaines_str}"
     result_text = _format_articles(ranked, params.profil, titre)
+    if banner:
+        result_text = f"{banner}\n\n{result_text}"
 
-    cache.set(cache_key, result_text, ttl=TTL_NEWS)
+    cache.set(cache_key, result_text, ttl=TTL_OFFLINE if banner else TTL_NEWS)
     return result_text
 
 
@@ -149,22 +186,31 @@ async def handle_get_by_domain(params: GetByDomainInput) -> str:
         hours=24,
         limit=params.nb_articles * 2,
     )
+    banner = ""
     if not articles and not cache.get(f"scraped:{params.domaine}"):
-        result = await _manager.fetch_by_domains([params.domaine])
-        fresh = tagger.tag_all(result.articles)
-        await store.save(fresh)
-        cache.set(f"scraped:{params.domaine}", True, ttl=TTL_NEWS)
-        articles = await store.get_recent(
-            domains=[params.domaine],
-            profiles=[profil_name],
-            hours=24,
-            limit=params.nb_articles * 2,
-        )
+        try:
+            online = await _collect([params.domaine])
+        except Exception as e:
+            logger.error(f"Erreur scraping : {e}")
+            online = False
+        if online:
+            cache.set(f"scraped:{params.domaine}", True, ttl=TTL_NEWS)
+            articles = await store.get_recent(
+                domains=[params.domaine],
+                profiles=[profil_name],
+                hours=24,
+                limit=params.nb_articles * 2,
+            )
+        else:
+            articles, banner = await _offline_articles(
+                [params.domaine], profil_name, params.nb_articles * 2
+            )
 
     ranked = filter_and_rank(
         articles, profile, domains=[params.domaine], limit=params.nb_articles
     )
-    return _format_articles(ranked, profil_name, f"Domaine : {params.domaine}")
+    result_text = _format_articles(ranked, profil_name, f"Domaine : {params.domaine}")
+    return f"{banner}\n\n{result_text}" if banner else result_text
 
 
 async def handle_get_profile(params: GetProfileInput) -> str:

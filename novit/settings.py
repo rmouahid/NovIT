@@ -22,6 +22,8 @@ class Settings(BaseSettings):
     port: int = Field(default=8000, ge=1, le=65535)
     # Jeton bearer du transport HTTP, obligatoire hors écoute locale
     api_token: str = ""
+    # Un jeton par utilisateur d'une instance partagée : "alice:jeton1,bob:jeton2"
+    api_tokens: str = ""
     env: Literal["development", "staging", "production"] = "development"
     log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = "INFO"
     log_dir: str = ""
