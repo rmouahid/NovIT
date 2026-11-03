@@ -21,6 +21,31 @@ Ne pas bloquer — utiliser les sources restantes et le mentionner.
 
 ---
 
+### Mode hors-ligne — Toutes les sources sont injoignables
+
+**Situation :** aucune source n'a répondu, mais la base locale contient encore
+des articles (jusqu'à la durée de rétention, 7 jours par défaut).
+`novit_get_news` et `novit_get_by_domain` répondent quand même, précédés d'un
+bandeau :
+
+> ⚠️ **Mode hors-ligne** : aucune source n'a répondu. Ces articles proviennent
+> du cache local et peuvent être datés.
+> Dernière collecte réussie : 02/11 à 07:00 UTC (il y a 5 h).
+> Nouvelle tentative de collecte en arrière-plan.
+
+Les articles peuvent sortir de la période demandée (ex. « 24h ») : ce sont les
+plus récents disponibles.
+
+**Réponse attendue :** transmettre l'avertissement et l'âge des données à
+l'utilisateur, puis les articles. Ne pas présenter ces articles comme des
+nouveautés du jour. Proposer de réessayer dans quelques minutes : NovIT relance
+la collecte seul (après 30 s, 2 min puis 5 min) et la réponse dégradée n'est
+gardée en cache qu'une minute.
+
+Si la base est vide, l'outil renvoie `SOURCE_UNAVAILABLE` (section ci-dessus).
+
+---
+
 ### `SOURCE_TIMEOUT` — Délai dépassé
 
 **Situation :** La source a répondu mais trop lentement (> 30s).
