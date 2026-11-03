@@ -239,6 +239,7 @@ ruff check novit/ tests/
 - [Guide de prompting](docs/PROMPTING_GUIDE.md)
 - [Architecture](docs/ARCHITECTURE.md) · [Décisions d'architecture (ADR)](docs/ADR/)
 - [Guide de contribution](CONTRIBUTING.md) · [Gouvernance](GOVERNANCE.md) · [Code de conduite](CODE_OF_CONDUCT.md)
+- [Wiki](https://github.com/rmouahid/NovIT/wiki) : FAQ technique, index des ADR, journal des changements importants (source : [docs/wiki/](docs/wiki/))
 - [Roadmap](docs/ROADMAP.md)
 - [Changelog](CHANGELOG.md)
 
