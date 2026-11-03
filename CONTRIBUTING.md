@@ -124,4 +124,4 @@ test: ajouter les tests d'intégration MCP (#65)
 
 ## Questions ?
 
-Ouvrez une [Discussion GitHub](https://github.com/rmouahid/NovIT/discussions) ou une issue avec le label `question`.
+Ouvrez une [Discussion GitHub](https://github.com/rmouahid/NovIT/discussions) (catégorie Q&A). Les canaux, les délais de réponse et le triage des issues sont décrits dans [.github/SUPPORT.md](.github/SUPPORT.md) ; une faille de sécurité se signale en privé ([SECURITY.md](SECURITY.md)).

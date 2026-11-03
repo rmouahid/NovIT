@@ -1,7 +1,7 @@
 name: ✨ Proposition de fonctionnalité
 description: Proposer une nouvelle fonctionnalité ou une amélioration pour NovIT
 title: "feature: "
-labels: ["feature"]
+labels: ["feature", "a-trier"]
 body:
   - type: markdown
     attributes:

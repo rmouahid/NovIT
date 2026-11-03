@@ -402,6 +402,12 @@ def run(argv: list[str] | None = None) -> None:
 
     parser = argparse.ArgumentParser(prog="novit", description="Serveur MCP NovIT")
     parser.add_argument(
+        "--version",
+        action="version",
+        version=f"%(prog)s {read_version()}",
+        help="affiche la version (à joindre aux signalements de bug)",
+    )
+    parser.add_argument(
         "--transport",
         choices=["stdio", "http"],
         default=_settings.transport,
