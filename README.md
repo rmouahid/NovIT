@@ -11,7 +11,7 @@
 </p>
 
 <p align="center">
-  <a href="VERSION"><img alt="Version" src="https://img.shields.io/badge/version-0.1.0-1a56ff"></a>
+  <a href="VERSION"><img alt="Version" src="https://img.shields.io/badge/version-1.0.0-1a56ff"></a>
   <a href="https://github.com/rmouahid/NovIT/issues/93"><img alt="PyPI" src="https://img.shields.io/badge/PyPI-bient%C3%B4t-lightgrey?logo=pypi&logoColor=white"></a>
   <a href="https://github.com/rmouahid/NovIT/actions/workflows/ci.yml"><img alt="Tests" src="https://github.com/rmouahid/NovIT/actions/workflows/ci.yml/badge.svg?branch=main"></a>
   <a href="LICENSE"><img alt="Licence MIT" src="https://img.shields.io/badge/licence-MIT-green"></a>

@@ -5,7 +5,7 @@
 
 ---
 
-## État au 2 novembre 2026
+## État au 5 novembre 2026
 
 | Milestone | Objectif | Statut |
 |---|---|---|
@@ -16,9 +16,9 @@
 | [M4 — Prompts](https://github.com/rmouahid/NovIT/milestone/5) | Qualité des réponses | ✅ Terminé |
 | [M5 — UX](https://github.com/rmouahid/NovIT/milestone/6) | Commandes et navigation | ✅ Terminé |
 | [M6 — Tests & monitoring](https://github.com/rmouahid/NovIT/milestone/7) | Robustesse et CI/CD | ✅ Terminé |
-| [M7 — Documentation](https://github.com/rmouahid/NovIT/milestone/8) | Onboarding complet | 🔄 Wiki (#78) |
-| [M8 — Collaboration](https://github.com/rmouahid/NovIT/milestone/9) | Contributeurs et scalabilité | 🔄 Multi-utilisateurs (#87), feedback (#89) |
-| [M9 — Release v1.0](https://github.com/rmouahid/NovIT/milestone/10) | Publication publique | 🔄 PyPI (#93), registre MCP (#94), release (#92) |
+| [M7 — Documentation](https://github.com/rmouahid/NovIT/milestone/8) | Onboarding complet | ✅ Terminé |
+| [M8 — Collaboration](https://github.com/rmouahid/NovIT/milestone/9) | Contributeurs et scalabilité | ✅ Terminé |
+| [M9 — Release v1.0](https://github.com/rmouahid/NovIT/milestone/10) | Publication publique | 🔄 Release prête (#92), PyPI (#93), registre MCP (#94) |
 
 ---
 
@@ -43,8 +43,6 @@ Priorités relevées lors des essais réels, à traiter juste après la v1.0 :
 | `novit_trends` : mots vides français et vocabulaire répétitif des CVE | #115 |
 | Captures de NovIT dans un client MCP de bureau pour la documentation | #111 |
 
-Les fonctionnalités de M8 qui ne seraient pas prêtes pour la v1.0
-(multi-utilisateurs, feedback) glissent dans la v1.1.
 
 ## Ensuite
 

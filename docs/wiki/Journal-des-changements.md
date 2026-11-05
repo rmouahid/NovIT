@@ -4,7 +4,10 @@ Le détail de chaque version est dans le
 [CHANGELOG](https://github.com/rmouahid/NovIT/blob/dev/CHANGELOG.md). Ce journal
 ne retient que ce qui change la façon d'installer, d'utiliser ou de contribuer.
 
-## Vers la v1.0 (en cours sur `dev`)
+## v1.0.0 — 5 novembre 2026
+
+Première version publique.
+
 
 - **Paquet `novit`** : le package `src` devient `novit` (rupture : lancer
   `python -m novit.mcp`), installable avec `pip install .` et bientôt depuis
