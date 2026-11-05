@@ -21,7 +21,8 @@ def _normalize(text: str) -> str:
 
 def _title_hash(title: str) -> str:
     normalized = _normalize(title)
-    return hashlib.md5(normalized.encode()).hexdigest()
+    # Empreinte de déduplication, pas de sécurité.
+    return hashlib.md5(normalized.encode(), usedforsecurity=False).hexdigest()
 
 
 def _jaccard_similarity(a: str, b: str) -> float:
