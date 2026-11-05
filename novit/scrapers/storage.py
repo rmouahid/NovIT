@@ -144,15 +144,16 @@ class ArticleStore:
         # Filtres appliqués en SQL, avant LIMIT : filtrés après coup, les articles
         # les mieux notés d'autres domaines remplissaient la limite et ceux du
         # domaine demandé disparaissaient (#107)
+        # Noms de colonnes et marqueurs ? fixés ici : les valeurs passent en paramètres.
         for column, values in (("domains", domains), ("profiles", profiles)):
             if values:
                 placeholders = ", ".join("?" * len(values))
                 conditions.append(
-                    f"EXISTS (SELECT 1 FROM json_each(articles.{column}) WHERE value IN ({placeholders}))"
+                    f"EXISTS (SELECT 1 FROM json_each(articles.{column}) WHERE value IN ({placeholders}))"  # nosec B608
                 )
                 params.extend(values)
         query = (
-            f"SELECT * FROM articles WHERE {' AND '.join(conditions)} "
+            f"SELECT * FROM articles WHERE {' AND '.join(conditions)} "  # nosec B608
             "ORDER BY score DESC, published_at DESC LIMIT ?"
         )
         params.append(limit)
@@ -174,6 +175,7 @@ class ArticleStore:
         fts_query = to_fts_query(query)
         if not fts_query:
             return []
+        # Poids BM25 constants ; la requête de l'utilisateur passe en paramètre.
         sql = f"""
             SELECT articles.* FROM articles_fts
             JOIN articles ON articles.url = articles_fts.url
@@ -181,7 +183,7 @@ class ArticleStore:
             ORDER BY bm25(articles_fts, {", ".join(map(str, BM25_WEIGHTS))}),
                      articles.score DESC, articles.published_at DESC
             LIMIT ?
-        """
+        """  # nosec B608
         async with aiosqlite.connect(self.db_path) as db:
             db.row_factory = aiosqlite.Row
             async with db.execute(sql, [fts_query, limit]) as cursor:
