@@ -14,7 +14,7 @@ class RateLimiter:
 
     def __init__(self, default_delay: float = 1.0):
         self.default_delay = default_delay
-        self._last_request: dict[str, float] = defaultdict(float)
+        self._last_request: dict[str, float] = {}
         self._backoff_count: dict[str, int] = defaultdict(int)
         self._delays: dict[str, float] = {}
 
@@ -23,14 +23,20 @@ class RateLimiter:
         self._delays[domain] = delay
 
     async def wait(self, domain: str) -> None:
-        """Attend le délai requis avant d'autoriser une requête vers le domaine."""
+        """Attend le délai requis avant d'autoriser une requête vers le domaine.
+
+        Le créneau est réservé avant d'attendre : des requêtes lancées en même
+        temps vers un domaine sont espacées l'une après l'autre au lieu de
+        partir ensemble après la même attente.
+        """
         delay = self._delays.get(domain, self.default_delay)
-        elapsed = time.monotonic() - self._last_request[domain]
-        remaining = delay - elapsed
-        if remaining > 0:
-            logger.debug(f"[rate_limiter] Attente {remaining:.2f}s pour {domain}")
-            await asyncio.sleep(remaining)
-        self._last_request[domain] = time.monotonic()
+        now = time.monotonic()
+        last = self._last_request.get(domain)
+        slot = now if last is None else max(now, last + delay)
+        self._last_request[domain] = slot
+        if slot > now:
+            logger.debug(f"[rate_limiter] Attente {slot - now:.2f}s pour {domain}")
+            await asyncio.sleep(slot - now)
 
     def on_rate_limited(self, domain: str) -> float:
         """Appelé quand une erreur 429 est reçue. Retourne le délai de backoff."""
@@ -50,7 +56,8 @@ class RateLimiter:
 rate_limiter = RateLimiter(default_delay=1.0)
 
 # Délais spécifiques par source (respectant les politiques robots.txt)
-rate_limiter.set_delay("hacker-news.firebaseio.com", 0.2)  # API officielle, tolérant
+# API Firebase officielle, sans limite publiée : les items sont lus 10 par 10 (#90)
+rate_limiter.set_delay("hacker-news.firebaseio.com", 0.0)
 rate_limiter.set_delay("github.com", 2.0)  # Scraping HTML, prudent
 rate_limiter.set_delay("services.nvd.nist.gov", 6.0)  # NVD sans clé API = 1 req/6s
 rate_limiter.set_delay("export.arxiv.org", 3.0)  # arXiv recommande 3s min

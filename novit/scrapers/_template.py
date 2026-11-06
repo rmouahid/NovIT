@@ -10,10 +10,10 @@ docs/ADDING_A_SOURCE.md, il suffit d'ajouter une entrée à config/sources.yaml)
 5. Écrire les tests dans tests/test_ma_source.py
 """
 
-import httpx
 from loguru import logger
 
 from novit.scrapers.base import Article, BaseScraper
+from novit.scrapers.http import http_client
 
 
 class TemplateScraper(BaseScraper):
@@ -25,7 +25,7 @@ class TemplateScraper(BaseScraper):
 
     async def fetch(self) -> list[Article]:
         logger.debug(f"[{self.name}] fetch() démarré")
-        async with httpx.AsyncClient(timeout=10) as client:
+        async with http_client(timeout=10) as client:
             response = await client.get(self.BASE_URL)
             response.raise_for_status()
         # Parser la réponse ici et retourner une liste d'Article
@@ -33,7 +33,7 @@ class TemplateScraper(BaseScraper):
 
     async def health_check(self) -> bool:
         try:
-            async with httpx.AsyncClient(timeout=5) as client:
+            async with http_client(timeout=5) as client:
                 r = await client.head(self.BASE_URL)
                 return r.status_code < 500
         except Exception:

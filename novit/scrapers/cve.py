@@ -1,10 +1,10 @@
 from datetime import UTC, datetime, timedelta
 
-import httpx
 from loguru import logger
 
 from novit.scrapers.base import Article, BaseScraper
 from novit.scrapers.feeds import fetch_feed
+from novit.scrapers.http import http_client
 from novit.settings import get_settings
 
 NVD_API_URL = "https://services.nvd.nist.gov/rest/json/cves/2.0"
@@ -61,7 +61,7 @@ class CVEScraper(BaseScraper):
 
         logger.debug(f"[{self.name}] Requête NVD API (CVSS >= {self.min_cvss})")
 
-        async with httpx.AsyncClient(timeout=20) as client:
+        async with http_client(timeout=20) as client:
             r = await client.get(NVD_API_URL, params=params, headers=headers)
             r.raise_for_status()
             data = r.json()
@@ -118,7 +118,7 @@ class CVEScraper(BaseScraper):
 
     async def health_check(self) -> bool:
         try:
-            async with httpx.AsyncClient(timeout=5) as client:
+            async with http_client(timeout=5) as client:
                 r = await client.head(NVD_API_URL)
                 return r.status_code < 500
         except Exception:

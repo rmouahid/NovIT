@@ -10,9 +10,8 @@ puis analysé dans un thread pour ne pas bloquer les autres scrapers.
 import asyncio
 
 import feedparser
-import httpx
 
-from novit.settings import get_settings
+from novit.scrapers.http import http_client
 
 FEED_TIMEOUT = 20
 
@@ -25,12 +24,10 @@ async def fetch_feed(
     Suit les redirections, comme le faisait feedparser. Lève une exception
     httpx si la source est injoignable ou répond une erreur HTTP : le
     ScraperManager compte alors la source comme en échec. L'agent envoyé est
-    `NOVIT_USER_AGENT` : certains hébergeurs refusent celui d'httpx.
+    `NOVIT_USER_AGENT` : certains hébergeurs refusent celui d'httpx. Les
+    requêtes passent par le limiteur de débit du domaine (`http_client`).
     """
-    headers = {"User-Agent": get_settings().user_agent}
-    async with httpx.AsyncClient(
-        timeout=timeout, follow_redirects=True, headers=headers
-    ) as client:
+    async with http_client(timeout=timeout) as client:
         response = await client.get(url)
         response.raise_for_status()
     return await asyncio.to_thread(feedparser.parse, response.content)
