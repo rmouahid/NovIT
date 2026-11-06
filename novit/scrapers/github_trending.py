@@ -2,11 +2,11 @@ import random
 import re
 from datetime import UTC, datetime
 
-import httpx
 from bs4 import BeautifulSoup
 from loguru import logger
 
 from novit.scrapers.base import Article, BaseScraper
+from novit.scrapers.http import http_client
 
 GITHUB_TRENDING_URL = "https://github.com/trending"
 
@@ -73,7 +73,7 @@ class GitHubTrendingScraper(BaseScraper):
             f"[{self.name}] Scraping {url} (lang={self.language or 'all'}, period={self.period})"
         )
 
-        async with httpx.AsyncClient(timeout=15, follow_redirects=True) as client:
+        async with http_client(timeout=15, follow_redirects=True) as client:
             r = await client.get(url, params=params, headers=headers)
             r.raise_for_status()
 
@@ -155,7 +155,7 @@ class GitHubTrendingScraper(BaseScraper):
     async def health_check(self) -> bool:
         try:
             headers = {"User-Agent": USER_AGENTS[0]}
-            async with httpx.AsyncClient(timeout=5) as client:
+            async with http_client(timeout=5) as client:
                 r = await client.head(GITHUB_TRENDING_URL, headers=headers)
                 return r.status_code < 500
         except Exception:

@@ -16,6 +16,7 @@ projet adhérant au [Semantic Versioning](https://semver.org/lang/fr/).
 - Exemples de configuration pour Claude Desktop : `examples/claude_desktop_config.json` (paquet installé) et `examples/claude_desktop_config.source.json` (depuis un clone)
 
 ### Fixed
+- Le limiteur de débit par domaine n'était appelé par aucune source : toutes les requêtes passent désormais par `novit/scrapers/http.py`, qui impose le délai minimal du domaine (6 s pour NVD sans clé, 3 s pour arXiv…), relance sur 429 en respectant `Retry-After` (sinon attente croissante, 10 s au plus, 2 relances) et envoie `NOVIT_USER_AGENT` ; les requêtes simultanées vers un même domaine sont espacées au lieu de partir ensemble
 - arXiv et roadmap.sh répondaient 301 (passage en HTTPS, dépôt GitHub renommé) : URL à jour et redirections suivies ; leur `health_check` exige désormais une réponse sous 400 au lieu de 500, comme la collecte (#118)
 - Le tagger détecte les mots-clés en mots entiers : « norme » ne tague plus « énorme » ; les mots-clés trop génériques de `reglementation` (standard, policy, legal, governance, directive) sont retirés (#118)
 

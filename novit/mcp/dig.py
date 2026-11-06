@@ -4,6 +4,8 @@ import httpx
 from bs4 import BeautifulSoup
 from loguru import logger
 
+from novit.scrapers.http import http_client
+
 _BOILERPLATE_TAGS = {
     "nav",
     "footer",
@@ -63,7 +65,7 @@ async def dig_url(url: str) -> str:
         "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/125.0 Safari/537.36"
     }
     try:
-        async with httpx.AsyncClient(timeout=15, follow_redirects=True) as client:
+        async with http_client(timeout=15, follow_redirects=True) as client:
             r = await client.get(url, headers=headers)
             r.raise_for_status()
             content_type = r.headers.get("content-type", "")

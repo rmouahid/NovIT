@@ -2,10 +2,10 @@
 
 from datetime import datetime
 
-import httpx
 from loguru import logger
 
 from novit.scrapers.base import Article, BaseScraper
+from novit.scrapers.http import http_client
 from novit.scrapers.rss import RssScraper, load_rss_sources
 
 ROADMAP_RELEASES_URL = (
@@ -23,7 +23,7 @@ class RoadmapScraper(BaseScraper):
     async def fetch(self) -> list[Article]:
         logger.debug(f"[{self.name}] Récupération des releases GitHub")
         # Suit les redirections : GitHub répond 301 quand un dépôt change de nom (#118)
-        async with httpx.AsyncClient(timeout=10, follow_redirects=True) as client:
+        async with http_client(timeout=10, follow_redirects=True) as client:
             r = await client.get(ROADMAP_RELEASES_URL, params={"per_page": 10})
             r.raise_for_status()
             releases = r.json()
@@ -56,7 +56,7 @@ class RoadmapScraper(BaseScraper):
 
     async def health_check(self) -> bool:
         try:
-            async with httpx.AsyncClient(timeout=5, follow_redirects=True) as client:
+            async with http_client(timeout=5, follow_redirects=True) as client:
                 r = await client.head(ROADMAP_RELEASES_URL)
                 return r.status_code < 400
         except Exception:

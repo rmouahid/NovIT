@@ -5,6 +5,7 @@ import httpx
 from loguru import logger
 
 from novit.scrapers.base import Article, BaseScraper
+from novit.scrapers.http import http_client
 
 HN_API = "https://hacker-news.firebaseio.com/v0"
 HN_ITEM_URL = "https://news.ycombinator.com/item?id={id}"
@@ -86,7 +87,7 @@ class HackerNewsScraper(BaseScraper):
 
     async def fetch(self) -> list[Article]:
         logger.debug(f"[{self.name}] Récupération des top stories")
-        async with httpx.AsyncClient(timeout=10) as client:
+        async with http_client(timeout=10) as client:
             # Récupérer les IDs des top stories
             r = await client.get(f"{HN_API}/topstories.json")
             r.raise_for_status()
@@ -147,7 +148,7 @@ class HackerNewsScraper(BaseScraper):
 
     async def health_check(self) -> bool:
         try:
-            async with httpx.AsyncClient(timeout=5) as client:
+            async with http_client(timeout=5) as client:
                 r = await client.get(f"{HN_API}/topstories.json")
                 return r.status_code == 200
         except Exception:
