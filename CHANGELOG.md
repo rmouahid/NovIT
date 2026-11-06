@@ -9,6 +9,12 @@ projet adhérant au [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+### Added
+- Contenu structuré : `novit_get_news`, `novit_search` et `novit_get_by_domain` déclarent un schéma de sortie et renvoient les articles en `structuredContent`, avec un indicateur `offline` ([formats de réponse](docs/RESPONSE_FORMATS.md))
+- Annotations MCP sur chaque outil (`readOnlyHint`, `openWorldHint`)
+- Tests de bout en bout avec le client MCP du SDK sur le transport stdio, serveur lancé en sous-processus comme par un client de bureau
+- Exemples de configuration pour Claude Desktop : `examples/claude_desktop_config.json` (paquet installé) et `examples/claude_desktop_config.source.json` (depuis un clone)
+
 ---
 
 ## [1.0.0] — 2026-11-05

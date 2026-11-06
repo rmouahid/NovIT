@@ -3,6 +3,39 @@
 Ce document définit les templates de sortie que NovIT produit pour chaque type de réponse.
 Ces formats sont produits par les handlers Python et validés dans les tests.
 
+## Contenu structuré (`structuredContent`)
+
+En plus du Markdown, `novit_get_news`, `novit_search` et `novit_get_by_domain`
+déclarent un schéma de sortie (`outputSchema`, défini dans
+`novit/mcp/schemas.py`) et renvoient les articles affichés sous forme de
+données, pour les clients qui veulent les traiter sans relire le texte :
+
+```json
+{
+  "articles": [
+    {
+      "title": "Rust 2.0",
+      "url": "https://example.com/rust",
+      "source": "hacker_news",
+      "published_at": "2026-11-05T09:30:00+00:00",
+      "domains": ["dev"],
+      "summary": "Une nouvelle version majeure.",
+      "score": 0.8
+    }
+  ],
+  "offline": false
+}
+```
+
+`offline` vaut `true` quand aucune source n'a répondu et que les articles
+viennent de la base locale (voir le guide des erreurs). Le client MCP du SDK
+valide chaque réponse contre ce schéma : `tests/test_structured_output.py` et
+`tests/test_stdio_client.py` échouent si une réponse n'est pas conforme.
+
+Chaque outil porte aussi des annotations MCP : `readOnlyHint` vaut `true`
+sauf pour `novit_set_profile`, `novit_set_domains` et `novit_feedback`, les
+seuls à modifier un état.
+
 ---
 
 ## Format 1 — News unitaire

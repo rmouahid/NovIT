@@ -9,6 +9,7 @@ from mcp.types import (
     PaginatedRequestParams,
     TextContent,
     Tool,
+    ToolAnnotations,
 )
 
 from novit.mcp.daily import build_daily_summary
@@ -35,6 +36,8 @@ from novit.mcp.onboarding import start_novit
 from novit.mcp.profile_selector import select_profile
 from novit.mcp.related import find_related
 from novit.mcp.schemas import (
+    ARTICLES_OUTPUT_SCHEMA,
+    ArticlesText,
     GetByDomainInput,
     GetNewsInput,
     GetProfileInput,
@@ -322,6 +325,30 @@ TOOLS: list[Tool] = [
 ]
 
 
+# Outils qui renvoient des articles : Markdown pour le modèle et liste
+# structurée (structuredContent) conforme à ARTICLES_OUTPUT_SCHEMA.
+ARTICLE_TOOLS = frozenset({"novit_get_news", "novit_search", "novit_get_by_domain"})
+# Seuls outils qui modifient un état : préférences de l'utilisateur, retours.
+WRITE_TOOLS = frozenset({"novit_set_profile", "novit_set_domains", "novit_feedback"})
+
+
+def _with_contract(tool: Tool) -> Tool:
+    """Ajoute les annotations et, pour les outils d'articles, le schéma de sortie."""
+    update: dict = {
+        "annotations": ToolAnnotations(
+            read_only_hint=tool.name not in WRITE_TOOLS,
+            destructive_hint=False,
+            open_world_hint=tool.name not in WRITE_TOOLS,
+        )
+    }
+    if tool.name in ARTICLE_TOOLS:
+        update["output_schema"] = ARTICLES_OUTPUT_SCHEMA
+    return tool.model_copy(update=update)
+
+
+TOOLS = [_with_contract(tool) for tool in TOOLS]
+
+
 async def list_tools(
     ctx: ServerRequestContext, params: PaginatedRequestParams | None
 ) -> ListToolsResult:
@@ -423,8 +450,11 @@ async def _call_tool(params: CallToolRequestParams) -> CallToolResult:
 
 
 def _text_result(text: str, is_error: bool = False) -> CallToolResult:
+    structured = text.structured() if isinstance(text, ArticlesText) else None
     return CallToolResult(
-        content=[TextContent(type="text", text=text)], is_error=is_error
+        content=[TextContent(type="text", text=str(text))],
+        structured_content=structured,
+        is_error=is_error,
     )
 
 
