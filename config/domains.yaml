@@ -131,13 +131,8 @@ domains:
       - cnil
       - eur-lex
       - w3c
-      - standard
       - norme
-      - directive
       - legislation
-      - legal
-      - policy
-      - governance
 
   formation:
     label: "Formation & certifications"

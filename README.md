@@ -94,10 +94,10 @@ NovIT est un **serveur MCP (Model Context Protocol)** : il expose des outils que
 | Catégorie | Sources |
 |---|---|
 | Actualités tech | Hacker News, TechCrunch, The Verge, MIT Tech Review |
-| Intelligence artificielle | Anthropic Blog, OpenAI Blog, DeepMind, arXiv cs.AI, Papers With Code |
+| Intelligence artificielle | OpenAI Blog, DeepMind, arXiv cs.AI et cs.LG |
 | Ingénierie | GitHub Trending, Netflix Tech Blog, Google Eng Blog, Meta Eng Blog |
 | Sécurité | CVE/NVD, ANSSI Cert-FR |
-| Réglementation | CNIL, EUR-Lex (AI Act), W3C News |
+| Réglementation | CNIL, W3C News |
 | Formation | freeCodeCamp, Roadmap.sh, Stack Overflow Survey |
 
 Une source manque ? [Proposez-la](https://github.com/rmouahid/NovIT/issues/new?template=new_source.yml) ou ajoutez-la vous-même avec le [système de plugins](docs/PLUGINS.md).

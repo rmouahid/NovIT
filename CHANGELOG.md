@@ -15,6 +15,13 @@ projet adhérant au [Semantic Versioning](https://semver.org/lang/fr/).
 - Tests de bout en bout avec le client MCP du SDK sur le transport stdio, serveur lancé en sous-processus comme par un client de bureau
 - Exemples de configuration pour Claude Desktop : `examples/claude_desktop_config.json` (paquet installé) et `examples/claude_desktop_config.source.json` (depuis un clone)
 
+### Fixed
+- arXiv et roadmap.sh répondaient 301 (passage en HTTPS, dépôt GitHub renommé) : URL à jour et redirections suivies ; leur `health_check` exige désormais une réponse sous 400 au lieu de 500, comme la collecte (#118)
+- Le tagger détecte les mots-clés en mots entiers : « norme » ne tague plus « énorme » ; les mots-clés trop génériques de `reglementation` (standard, policy, legal, governance, directive) sont retirés (#118)
+
+### Removed
+- Sources `anthropic_blog` (plus de flux RSS, 404), `papers_with_code` (site fermé, redirigé vers Hugging Face) et `eurlex_ai` (page anti-robot au lieu du flux) : la collecte passe de 22 sources dont 5 sans article à 19 sources qui répondent toutes (#118)
+
 ---
 
 ## [1.0.0] — 2026-11-05

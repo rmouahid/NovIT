@@ -31,7 +31,6 @@ profiles:
       - google_eng
       - meta_eng
       - the_new_stack
-      - papers_with_code
     domaines_favoris:
       - securite
       - ingenierie

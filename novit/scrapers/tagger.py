@@ -1,3 +1,4 @@
+import re
 from pathlib import Path
 
 import yaml
@@ -18,6 +19,7 @@ class DomainTagger:
 
     def __init__(self, config_path: Path = _CONFIG_PATH):
         self._domains: dict[str, list[str]] = {}
+        self._patterns: dict[str, re.Pattern[str]] = {}
         self._load_config(config_path)
 
     def _load_config(self, path: Path) -> None:
@@ -27,7 +29,10 @@ class DomainTagger:
         with path.open(encoding="utf-8") as f:
             data = yaml.safe_load(f)
         for domain, info in data.get("domains", {}).items():
-            self._domains[domain] = [kw.lower() for kw in info.get("keywords", [])]
+            keywords = [kw.lower() for kw in info.get("keywords", [])]
+            self._domains[domain] = keywords
+            if keywords:
+                self._patterns[domain] = _whole_words(keywords)
         logger.debug(f"[tagger] {len(self._domains)} domaines chargés depuis {path}")
 
     def tag(self, article: Article) -> Article:
@@ -35,8 +40,8 @@ class DomainTagger:
         text = (article.title + " " + article.summary).lower()
         detected = set(article.domains)
 
-        for domain, keywords in self._domains.items():
-            if any(kw in text for kw in keywords):
+        for domain, pattern in self._patterns.items():
+            if pattern.search(text):
                 detected.add(domain)
 
         article.domains = sorted(detected)
@@ -47,6 +52,20 @@ class DomainTagger:
         for article in articles:
             self.tag(article)
         return articles
+
+
+def _whole_words(keywords: list[str]) -> re.Pattern[str]:
+    """Motif qui trouve un des mots-clés en mot entier (#118).
+
+    Une simple sous-chaîne collait des domaines à tort : « norme » dans
+    « énorme », « legal » dans « illegally ». Les mots-clés peuvent contenir
+    des symboles (« c++ », « .net ») : ils sont échappés, et la limite de mot
+    est une lettre ou un chiffre de part et d'autre, pas `\\b`.
+    """
+    alternatives = "|".join(
+        re.escape(kw) for kw in sorted(keywords, key=len, reverse=True)
+    )
+    return re.compile(rf"(?<![\w])(?:{alternatives})(?![\w])")
 
 
 # Instance globale
