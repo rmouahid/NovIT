@@ -1,4 +1,4 @@
-"""Scrapers réglementation : CNIL, EUR-Lex (AI Act), W3C News."""
+"""Scrapers réglementation : CNIL, W3C News."""
 
 from novit.scrapers.rss import RssScraper, load_rss_sources
 

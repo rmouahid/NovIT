@@ -9,7 +9,7 @@ from novit.scrapers.base import Article, BaseScraper
 from novit.scrapers.rss import RssScraper, load_rss_sources
 
 ROADMAP_RELEASES_URL = (
-    "https://api.github.com/repos/kamranahmedse/developer-roadmap/releases"
+    "https://api.github.com/repos/nilbuild/developer-roadmap/releases"
 )
 
 
@@ -22,7 +22,8 @@ class RoadmapScraper(BaseScraper):
 
     async def fetch(self) -> list[Article]:
         logger.debug(f"[{self.name}] Récupération des releases GitHub")
-        async with httpx.AsyncClient(timeout=10) as client:
+        # Suit les redirections : GitHub répond 301 quand un dépôt change de nom (#118)
+        async with httpx.AsyncClient(timeout=10, follow_redirects=True) as client:
             r = await client.get(ROADMAP_RELEASES_URL, params={"per_page": 10})
             r.raise_for_status()
             releases = r.json()
@@ -55,9 +56,9 @@ class RoadmapScraper(BaseScraper):
 
     async def health_check(self) -> bool:
         try:
-            async with httpx.AsyncClient(timeout=5) as client:
+            async with httpx.AsyncClient(timeout=5, follow_redirects=True) as client:
                 r = await client.head(ROADMAP_RELEASES_URL)
-                return r.status_code < 500
+                return r.status_code < 400
         except Exception:
             return False
 

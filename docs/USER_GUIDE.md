@@ -58,11 +58,11 @@ formation     Certifications & carrière
 
 | Domaine | Sources |
 |---|---|
-| IA | arXiv, Anthropic Blog, OpenAI Blog, DeepMind, Papers With Code |
+| IA | arXiv, OpenAI Blog, DeepMind |
 | Sécurité | NVD/CVE, ANSSI/Cert-FR |
 | Dev | Hacker News, GitHub Trending, dev.to, The Verge, TechCrunch |
 | Ingénierie | Netflix Tech Blog, Google Eng, Meta Eng, The New Stack |
-| Réglementation | CNIL, EUR-Lex, W3C |
+| Réglementation | CNIL, W3C |
 | Formation | freeCodeCamp, Roadmap.sh |
 
 ---

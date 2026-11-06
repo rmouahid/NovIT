@@ -1,4 +1,4 @@
-"""Scrapers pour les blogs IA : Anthropic, OpenAI, DeepMind, arXiv, Papers With Code."""
+"""Scrapers pour les blogs IA (flux RSS de config/sources.yaml) et arXiv."""
 
 import asyncio
 from datetime import UTC, datetime
@@ -10,7 +10,7 @@ from loguru import logger
 from novit.scrapers.base import Article, BaseScraper
 from novit.scrapers.rss import RssScraper, load_rss_sources
 
-ARXIV_API_URL = "http://export.arxiv.org/api/query"
+ARXIV_API_URL = "https://export.arxiv.org/api/query"
 
 
 class ArxivScraper(BaseScraper):
@@ -33,7 +33,7 @@ class ArxivScraper(BaseScraper):
             "max_results": self.max_results,
         }
         logger.debug(f"[{self.name}] Requête arXiv : {query}")
-        async with httpx.AsyncClient(timeout=20) as client:
+        async with httpx.AsyncClient(timeout=20, follow_redirects=True) as client:
             r = await client.get(ARXIV_API_URL, params=params)
             r.raise_for_status()
 
@@ -73,9 +73,9 @@ class ArxivScraper(BaseScraper):
 
     async def health_check(self) -> bool:
         try:
-            async with httpx.AsyncClient(timeout=5) as client:
+            async with httpx.AsyncClient(timeout=5, follow_redirects=True) as client:
                 r = await client.head(ARXIV_API_URL)
-                return r.status_code < 500
+                return r.status_code < 400
         except Exception:
             return False
 

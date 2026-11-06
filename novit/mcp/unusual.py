@@ -5,7 +5,6 @@ from novit.scrapers.storage import store
 
 _UNUSUAL_SOURCES = {
     "arxiv",
-    "papers_with_code",
     "mit_tech_review",
     "roadmap_sh",
     "w3c_news",
