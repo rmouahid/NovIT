@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "novit": {
+      "command": "/path/to/NovIT/.venv/bin/python",
+      "args": ["-m", "novit.mcp"],
+      "cwd": "/path/to/NovIT"
+    }
+  }
+}

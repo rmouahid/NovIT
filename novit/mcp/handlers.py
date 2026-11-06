@@ -4,6 +4,7 @@ from novit.mcp.cache import TTL_NEWS, TTL_SEARCH, cache
 from novit.mcp.errors import NovitError, NovitErrorCode
 from novit.mcp.offline import TTL_OFFLINE, all_sources_down, offline_banner, retry
 from novit.mcp.schemas import (
+    ArticlesText,
     GetByDomainInput,
     GetNewsInput,
     GetProfileInput,
@@ -76,7 +77,7 @@ def _format_articles(articles: list, profil: str, titre: str) -> str:
     return "\n".join(lines)
 
 
-async def handle_get_news(params: GetNewsInput) -> str:
+async def handle_get_news(params: GetNewsInput) -> ArticlesText:
     profile = get_profile(params.profil)
     hours = PERIODE_TO_HOURS.get(params.periode, 24)
     cache_key = (
@@ -133,12 +134,13 @@ async def handle_get_news(params: GetNewsInput) -> str:
     result_text = _format_articles(ranked, params.profil, titre)
     if banner:
         result_text = f"{banner}\n\n{result_text}"
+    result = ArticlesText(result_text, ranked, offline=bool(banner))
 
-    cache.set(cache_key, result_text, ttl=TTL_OFFLINE if banner else TTL_NEWS)
-    return result_text
+    cache.set(cache_key, result, ttl=TTL_OFFLINE if banner else TTL_NEWS)
+    return result
 
 
-async def handle_search(params: SearchInput) -> str:
+async def handle_search(params: SearchInput) -> ArticlesText:
     cache_key = f"search:{params.query}:{params.domaine}:{params.source}:{params.page}"
     cached = cache.get(cache_key)
     if cached:
@@ -158,7 +160,9 @@ async def handle_search(params: SearchInput) -> str:
     total = len(articles)
 
     if not page_articles:
-        return f"# Recherche NovIT : « {params.query} »\n\nAucun résultat trouvé."
+        return ArticlesText(
+            f"# Recherche NovIT : « {params.query} »\n\nAucun résultat trouvé.", []
+        )
 
     lines = [
         f"# Recherche : « {params.query} »",
@@ -172,12 +176,12 @@ async def handle_search(params: SearchInput) -> str:
             lines.append(f"{article.summary[:200]}")
         lines.append("")
 
-    result_text = "\n".join(lines)
-    cache.set(cache_key, result_text, ttl=TTL_SEARCH)
-    return result_text
+    result = ArticlesText("\n".join(lines), page_articles)
+    cache.set(cache_key, result, ttl=TTL_SEARCH)
+    return result
 
 
-async def handle_get_by_domain(params: GetByDomainInput) -> str:
+async def handle_get_by_domain(params: GetByDomainInput) -> ArticlesText:
     profil_name = params.profil or "INGENIEUR"
     profile = get_profile(profil_name)
     articles = await store.get_recent(
@@ -210,7 +214,9 @@ async def handle_get_by_domain(params: GetByDomainInput) -> str:
         articles, profile, domains=[params.domaine], limit=params.nb_articles
     )
     result_text = _format_articles(ranked, profil_name, f"Domaine : {params.domaine}")
-    return f"{banner}\n\n{result_text}" if banner else result_text
+    if banner:
+        result_text = f"{banner}\n\n{result_text}"
+    return ArticlesText(result_text, ranked, offline=bool(banner))
 
 
 async def handle_get_profile(params: GetProfileInput) -> str:

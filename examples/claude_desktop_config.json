@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "novit": {
+      "command": "novit",
+      "env": {
+        "NOVIT_DB_PATH": "/absolute/path/to/novit.db"
+      }
+    }
+  }
+}
