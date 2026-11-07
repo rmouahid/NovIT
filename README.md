@@ -1,250 +1,140 @@
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="docs/assets/logo-dark.png">
-    <img src="https://raw.githubusercontent.com/rmouahid/NovIT/main/docs/assets/logo-light.png" alt="NovIT — He knows. You know." width="560">
+    <img src="https://raw.githubusercontent.com/rmouahid/NovIT/main/docs/assets/logo-light.png" alt="NovIT" width="480">
   </picture>
 </p>
 
 <p align="center">
-  <strong>Il sait, il connaît l'IT.</strong><br>
-  La veille technologique en temps réel, directement dans Claude, grâce au protocole MCP.
-</p>
-
-<p align="center">
-  <a href="VERSION"><img alt="Version" src="https://img.shields.io/badge/version-1.0.0-1a56ff"></a>
-  <a href="https://github.com/rmouahid/NovIT/issues/93"><img alt="PyPI" src="https://img.shields.io/badge/PyPI-bient%C3%B4t-lightgrey?logo=pypi&logoColor=white"></a>
   <a href="https://github.com/rmouahid/NovIT/actions/workflows/ci.yml"><img alt="Tests" src="https://github.com/rmouahid/NovIT/actions/workflows/ci.yml/badge.svg?branch=main"></a>
   <a href="LICENSE"><img alt="Licence MIT" src="https://img.shields.io/badge/licence-MIT-green"></a>
-  <img alt="Python 3.11+" src="https://img.shields.io/badge/python-3.11%2B-3776ab?logo=python&logoColor=white">
-  <img alt="MCP" src="https://img.shields.io/badge/protocole-MCP-0b1f4d">
+  <img alt="Python 3.11+" src="https://img.shields.io/badge/python-3.11%2B-3776ab">
 </p>
 
-<p align="center">
-  <a href="#installation"><strong>🚀 Installer</strong></a> ·
-  <a href="#contribuer"><strong>🤝 Contribuer</strong></a> ·
-  <a href="https://github.com/rmouahid/NovIT/issues/new?template=bug_report.yml"><strong>🐛 Signaler un bug</strong></a> ·
-  <a href="docs/USER_GUIDE.md">📖 Guide utilisateur</a>
-</p>
+**NovIT est un serveur MCP qui donne à Claude, et à tout client MCP,
+l'actualité tech du jour : il collecte 19 sources (actualités, IA, sécurité,
+ingénierie, réglementation, formation), les classe selon le profil de
+l'utilisateur et renvoie des réponses citables, en Markdown et en données
+structurées.**
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/rmouahid/NovIT/main/docs/assets/demo.gif" alt="Session MCP réelle : novit_start, puis novit_get_news et novit_search sur les sources en direct" width="820">
   <br>
-  <sub>Session réelle enregistrée avec <a href="scripts/demo.py"><code>scripts/demo.py</code></a> : le serveur NovIT est lancé en stdio et interrogé comme le ferait Claude.</sub>
+  <sub>Session réelle enregistrée avec <a href="scripts/demo.py"><code>scripts/demo.py</code></a> : le serveur est lancé en stdio et interrogé par le client MCP du SDK, comme le ferait Claude Desktop.</sub>
 </p>
 
----
+## Fonctionnement
 
-## Pourquoi NovIT ?
+```mermaid
+flowchart LR
+    C[Client MCP<br/>Claude Desktop, IDE…] -->|stdio, ou HTTP<br/>+ jeton bearer| S[Serveur MCP<br/>14 outils, schémas<br/>d'entrée et de sortie]
+    S --> H[Handlers<br/>profil, domaines,<br/>pagination]
+    H --> K{Cache TTL<br/>en mémoire}
+    K -->|absent| M[ScraperManager<br/>19 sources en parallèle,<br/>timeout par source]
+    M --> RL[Client HTTP poli<br/>délai par domaine,<br/>relance sur 429]
+    RL --> W((Sources))
+    M --> T[Tagger par domaine<br/>et déduplication]
+    T --> DB[(SQLite<br/>index plein texte FTS5)]
+    DB --> H
+    DB -.->|toutes les sources<br/>injoignables| O[Mode hors-ligne :<br/>articles en base<br/>+ âge de la collecte]
+```
 
-Claude possède une date de coupure de connaissance. NovIT lui donne accès à l'actualité tech **en temps réel**, de manière structurée et personnalisée, sans que l'utilisateur ait à copier-coller des articles.
+- **14 outils MCP** : actualités par profil et par domaine, résumé du jour,
+  recherche plein texte, tendances, articles liés, lecture d'un article,
+  préférences, retours utilisateur et santé du serveur. Chaque outil déclare
+  son schéma d'entrée et ses annotations (lecture seule ou non) ; les trois
+  outils d'articles déclarent aussi un schéma de sortie et renvoient les
+  articles en `structuredContent`.
+- **Deux profils** : ETUDIANT (pédagogique) et INGENIEUR (technique et
+  concis), qui changent les sources prioritaires, les domaines et le ton.
+- **Respect des sources** : toutes les requêtes passent par un client qui
+  impose un délai minimal par domaine (6 s pour NVD sans clé, 3 s pour
+  arXiv), relance après un 429 en respectant `Retry-After` et s'identifie
+  avec `NOVIT_USER_AGENT`.
+- **Robuste aux pannes** : une source en erreur n'arrête pas la collecte ;
+  si toutes échouent, NovIT sert les articles en base avec la date de la
+  dernière collecte réussie et relance la collecte en arrière-plan.
 
-NovIT est un **serveur MCP (Model Context Protocol)** : il expose des outils que Claude appelle pour récupérer, filtrer et synthétiser l'information de plus de 20 sources (actualités, IA, sécurité, ingénierie, réglementation, formation), selon le profil de l'utilisateur.
+## Résultats
 
-- **Personnalisé** : un profil ETUDIANT (pédagogique) ou INGENIEUR (technique et concis), et vos domaines favoris
-- **Structuré** : des réponses Markdown homogènes (titre, lien, date, domaines, source) que Claude peut citer
-- **Local** : il tourne sur votre machine, sans compte ni clé d'API obligatoire
+| Mesure | Valeur |
+|---|---:|
+| Collecte complète des 19 sources, en parallèle (médiane de 3) | 2,0 s |
+| Sources qui répondent | 19 sur 19 |
+| Articles uniques collectés | 1 783 |
+| Tests automatisés (unitaires, intégration, client MCP réel sur stdio) | 352 |
 
----
-
-## NovIT en action
-
-<table>
-  <tr>
-    <td width="50%" valign="top"><img src="https://raw.githubusercontent.com/rmouahid/NovIT/main/docs/assets/screenshot-start.png" alt="Réponse de novit_start pour le profil INGENIEUR"></td>
-    <td width="50%" valign="top"><img src="https://raw.githubusercontent.com/rmouahid/NovIT/main/docs/assets/screenshot-news.png" alt="Réponse de novit_get_news pour le domaine IA sur 7 jours"></td>
-  </tr>
-  <tr>
-    <td align="center"><sub><code>novit_start</code> : accueil et domaines disponibles</sub></td>
-    <td align="center"><sub><code>novit_get_news</code> : dernières actualités IA, profil INGENIEUR</sub></td>
-  </tr>
-</table>
-
-<sub>Réponses réelles des outils, rendues en Markdown comme dans une conversation. Plus d'exemples par profil dans <a href="docs/EXAMPLES.md">docs/EXAMPLES.md</a>.</sub>
-
----
-
-## Fonctionnalités
-
-### Outils MCP exposés
-
-| Outil | Description |
-|---|---|
-| `novit_start` | Initialise NovIT : sélection du profil, menu de bienvenue personnalisé |
-| `novit_get_news` | Dernières actualités tech filtrées selon le profil et les domaines |
-| `novit_daily` | Résumé de veille quotidien, groupé par domaine |
-| `novit_search` | Recherche plein texte dans les articles en cache |
-| `novit_get_by_domain` | Articles filtrés par domaine technologique |
-| `novit_trends` | Sujets tendance et thèmes en montée rapide sur 7 jours |
-| `novit_unusual` | Articles insolites, hors des sentiers battus (profil ETUDIANT) |
-| `novit_related` | Articles similaires à un article donné (URL ou titre) |
-| `novit_dig` | Contenu complet d'un article à partir de son URL |
-| `novit_get_profile` | Informations et préférences d'un profil |
-| `novit_set_profile` | Change le profil actif et le persiste |
-| `novit_set_domains` | Définit les domaines actifs de la session |
-| `novit_feedback` | Enregistre un retour (bug, suggestion, avis) ; lien vers une issue pré-remplie pour un bug |
-| `novit_health` | État de santé du serveur (uptime, cache, sources) |
-
-### Profils utilisateur
-
-- **ETUDIANT** : ton pédagogique, vulgarisation, découvertes insolites, sources accessibles
-- **INGENIEUR** : ton technique, concision, CVE/sécurité, blogs d'ingénierie avancés
-
-### Sources couvertes
-
-| Catégorie | Sources |
-|---|---|
-| Actualités tech | Hacker News, TechCrunch, The Verge, MIT Tech Review |
-| Intelligence artificielle | OpenAI Blog, DeepMind, arXiv cs.AI et cs.LG |
-| Ingénierie | GitHub Trending, Netflix Tech Blog, Google Eng Blog, Meta Eng Blog |
-| Sécurité | CVE/NVD, ANSSI Cert-FR |
-| Réglementation | CNIL, W3C News |
-| Formation | freeCodeCamp, Roadmap.sh, Stack Overflow Survey |
-
-Une source manque ? [Proposez-la](https://github.com/rmouahid/NovIT/issues/new?template=new_source.yml) ou ajoutez-la vous-même avec le [système de plugins](docs/PLUGINS.md).
-
----
-
-## Installation
-
-### Prérequis
-
-- Python 3.11+
-- [Claude Desktop](https://claude.ai/download) avec support MCP
-- Git
-
-### Étapes
+Mesures du 6 novembre 2026 sur un VPS à 1 vCPU. Pour les reproduire :
 
 ```bash
-# 1. Cloner le dépôt
-git clone https://github.com/rmouahid/NovIT.git
-cd NovIT
-
-# 2. Créer l'environnement virtuel
-python -m venv .venv
-source .venv/bin/activate        # Linux/macOS
-# .venv\Scripts\activate         # Windows
-
-# 3. Installer les dépendances
-pip install -r requirements.txt  # production
-# ou
-pip install -r requirements-dev.txt  # développement
-
-# 4. Configurer les variables d'environnement
-cp .env.example .env
-# Éditer .env avec vos valeurs (optionnel pour commencer)
-
-# 5. Vérifier l'installation : session de démonstration sur les sources en direct
-python scripts/demo.py
+python scripts/profile_scrapers.py --top 10   # temps total, état et volume par source
+pytest -q                                     # dont tests/test_stdio_client.py
 ```
 
-> Le paquet Python est prêt : `pip install .` installe la commande `novit`, avec la configuration YAML par défaut embarquée. Sa publication sur PyPI (`pip install novit`) est suivie dans [#93](https://github.com/rmouahid/NovIT/issues/93) ; la procédure est décrite dans [docs/PUBLISHING.md](docs/PUBLISHING.md).
+La collecte complète prenait 6 à 9 s avant le passage des flux RSS en
+asynchrone ([docs/PERFORMANCE.md](docs/PERFORMANCE.md)).
 
-### Connecter à Claude Desktop
+## Choix techniques et limites
 
-Ajouter dans la configuration MCP de Claude Desktop :
+**Choix**
 
-```json
-{
-  "mcpServers": {
-    "novit": {
-      "command": "python",
-      "args": ["-m", "novit.mcp"],
-      "cwd": "/chemin/vers/NovIT"
-    }
-  }
-}
-```
+- **Le protocole MCP plutôt qu'une API maison.** Le même serveur sert
+  Claude Desktop, les IDE et tout client MCP, sans intégration spécifique ;
+  le schéma de chaque outil documente le contrat, et les tests valident
+  chaque réponse contre lui avec le client du SDK.
+- **Des sources ouvertes (RSS, API publiques) plutôt que du scraping
+  HTML.** Moins de casse et pas de contournement des protections des
+  sites ; une source qui n'a plus de flux est retirée plutôt que scrapée.
+- **SQLite et FTS5.** Un seul fichier, une recherche par mots entiers
+  classée par pertinence, aucun service à installer ni à héberger.
+- **Un cache TTL en mémoire.** Une heure pour les actualités, trente
+  minutes pour les recherches : la plupart des appels ne touchent pas le
+  réseau ([ADR-003](docs/ADR/0003-strategie-cache-ttl.md)).
+- **stdio par défaut, HTTP en option.** En local, le client lance le
+  serveur lui-même ; pour un déploiement distant, `novit --transport http`
+  sert `/mcp` derrière un jeton bearer, avec des préférences séparées par
+  utilisateur.
 
-Le guide complet (configuration, vérification, dépannage, Docker) est dans [docs/INSTALLATION_GUIDE.md](docs/INSTALLATION_GUIDE.md).
+**Limites**
 
----
+- Pas d'instance publique : le déploiement sur Fly.io est préparé
+  (`fly.toml`, [docs/CLOUD_DEPLOYMENT.md](docs/CLOUD_DEPLOYMENT.md)) mais
+  pas en ligne.
+- Le classement par profil repose sur des mots-clés et des scores de
+  source, pas sur un modèle : un article mal tagué remonte dans le mauvais
+  domaine.
+- Des sources de référence n'ont pas de flux ouvert (blog d'Anthropic,
+  EUR-Lex) et ne sont donc pas couvertes.
+- Le cache est en mémoire : il repart de zéro à chaque redémarrage du
+  serveur.
 
-## Quickstart
+## Démarrage rapide
 
-Une fois le serveur connecté à Claude :
-
-```
-Vous : Lance NovIT, je suis ingénieur
-Claude : [utilise novit_start avec profil=INGENIEUR]
-
-Vous : Quelles sont les dernières news en IA ?
-Claude : [utilise novit_get_news avec profil=INGENIEUR, domaines=["ia"]]
-
-Vous : Creuse cet article sur les LLMs
-Claude : [utilise novit_dig avec l'URL de l'article]
-
-Vous : Y a-t-il des CVE critiques cette semaine ?
-Claude : [utilise novit_get_by_domain avec domaine=securite]
-```
-
----
-
-## Architecture
-
-```
-NovIT/
-├── novit/          # Package Python `novit` (settings.py : configuration .env)
-│   ├── mcp/        # Serveur MCP (SDK `mcp`, transport stdio) + handlers
-│   ├── scrapers/   # Un scraper par source (HN, GitHub, CVE…)
-│   ├── profiles/   # Logique de filtrage par profil
-│   └── prompts/    # Prompts système et templates
-├── tests/          # Tests unitaires et d'intégration
-├── docs/           # Documentation technique
-├── config/         # Configuration YAML (sources, profils, domaines)
-└── scripts/        # Scripts utilitaires (démo, déploiement)
-```
-
-Voir [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) pour la vue détaillée.
-
----
-
-## Contribuer
-
-NovIT est open source et les contributions sont les bienvenues, du signalement de bug à l'ajout d'une source.
-
-| Vous voulez… | Par où commencer |
-|---|---|
-| 🐛 Signaler un bug | [Ouvrir un rapport de bug](https://github.com/rmouahid/NovIT/issues/new?template=bug_report.yml) |
-| ✨ Proposer une fonctionnalité | [Ouvrir une proposition](https://github.com/rmouahid/NovIT/issues/new?template=feature_request.yml) |
-| 📡 Ajouter une source | [Proposer une source](https://github.com/rmouahid/NovIT/issues/new?template=new_source.yml) · [Guide](docs/ADDING_A_SOURCE.md) · [Plugins](docs/PLUGINS.md) |
-| 💬 Poser une question | [Discussions](https://github.com/rmouahid/NovIT/discussions) · [délais de réponse](.github/SUPPORT.md) |
-| 🔒 Signaler une faille | [Signalement privé](https://github.com/rmouahid/NovIT/security/advisories/new) · [politique de sécurité](SECURITY.md) |
-| 🧑‍💻 Écrire du code | [Guide de contribution](CONTRIBUTING.md) · [issues « good first issue »](https://github.com/rmouahid/NovIT/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) |
-
-### Développement
+Prérequis : Python 3.11 ou plus.
 
 ```bash
-# Installer les hooks pre-commit
-pip install pre-commit
-pre-commit install
-
-# Lancer les tests
-pytest
-
-# Vérifier le formatage
-black novit/ tests/
-ruff check novit/ tests/
+git clone https://github.com/rmouahid/NovIT.git && cd NovIT
+python -m venv .venv && .venv/bin/pip install .   # installe la commande novit
+.venv/bin/python scripts/demo.py                  # session MCP réelle sur les sources en direct
 ```
 
----
+Pour l'utiliser dans Claude Desktop, copier
+[`examples/claude_desktop_config.json`](examples/claude_desktop_config.json)
+dans sa configuration MCP (Settings → Developer → Edit Config), puis
+redémarrer l'application. Avec Docker : `docker compose up -d`. Détails et
+dépannage : [docs/INSTALLATION_GUIDE.md](docs/INSTALLATION_GUIDE.md).
 
 ## Documentation
 
-- [Guide d'installation complet](docs/INSTALLATION_GUIDE.md)
-- [Guide utilisateur](docs/USER_GUIDE.md)
-- [Documentation technique](docs/TECHNICAL_DOCUMENTATION.md) (modules, outils MCP, débogage)
-- [Exemples de requêtes](docs/EXAMPLES.md) (par profil, question → réponse attendue)
-- [Système de plugins de scrapers](docs/PLUGINS.md) (ajouter une source sans toucher au dépôt)
-- [Déploiement cloud](docs/CLOUD_DEPLOYMENT.md) (préparation — Fly.io, non déployable à ce jour)
-- [Guide de prompting](docs/PROMPTING_GUIDE.md)
-- [Architecture](docs/ARCHITECTURE.md) · [Décisions d'architecture (ADR)](docs/ADR/)
-- [Guide de contribution](CONTRIBUTING.md) · [Gouvernance](GOVERNANCE.md) · [Code de conduite](CODE_OF_CONDUCT.md)
-- [Wiki](https://github.com/rmouahid/NovIT/wiki) : FAQ technique, index des ADR, journal des changements importants (source : [docs/wiki/](docs/wiki/))
-- [Roadmap](docs/ROADMAP.md)
-- [Changelog](CHANGELOG.md)
-
----
+| Document | Contenu |
+|---|---|
+| [docs/USER_GUIDE.md](docs/USER_GUIDE.md) | outils, profils, sources, exemples de questions |
+| [docs/TECHNICAL_DOCUMENTATION.md](docs/TECHNICAL_DOCUMENTATION.md) | modules, outils MCP, débogage |
+| [docs/RESPONSE_FORMATS.md](docs/RESPONSE_FORMATS.md) | formats de réponse et schéma de sortie |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) · [docs/ADR/](docs/ADR/) | architecture et décisions |
+| [docs/PLUGINS.md](docs/PLUGINS.md) | ajouter une source sans modifier le dépôt |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | contribuer, tests, conventions |
 
 ## Licence
 
-MIT — voir [LICENSE](LICENSE)
+[MIT](LICENSE)
