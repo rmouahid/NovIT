@@ -10,7 +10,7 @@ pytest-benchmark>=4.0.0
 
 # Qualité de code
 black>=24.4.0
-ruff>=0.4.0
+ruff>=0.17.3
 isort>=5.13.0
 mypy>=1.10.0
 
