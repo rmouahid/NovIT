@@ -1,13 +1,13 @@
 name: 🐛 Signalement de bug
 description: Un comportement de NovIT ne correspond pas à ce qui est attendu
 title: "bug: "
-labels: ["bug"]
+labels: ["bug", "a-trier"]
 body:
   - type: markdown
     attributes:
       value: |
         Merci de signaler ce bug ! Voir aussi le
-        [guide de débogage](https://github.com/LePhyX/NovIT/blob/main/docs/TECHNICAL_DOCUMENTATION.md#4-guide-de-débogage)
+        [guide de débogage](https://github.com/rmouahid/NovIT/blob/main/docs/TECHNICAL_DOCUMENTATION.md#4-guide-de-débogage)
         avant d'ouvrir l'issue, la réponse s'y trouve peut-être déjà.
 
   - type: input
@@ -15,7 +15,7 @@ body:
     attributes:
       label: Version de NovIT
       description: Contenu du fichier `VERSION` à la racine du dépôt
-      placeholder: "0.1.0"
+      placeholder: "1.1.0"
     validations:
       required: true
 

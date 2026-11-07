@@ -5,7 +5,7 @@
 
 ## Contexte
 
-`ArticleStore` (`src/scrapers/storage.py`) doit persister les articles scrapés avec des requêtes
+`ArticleStore` (`novit/scrapers/storage.py`) doit persister les articles scrapés avec des requêtes
 simples (récence, filtres domaine/profil, recherche plein texte basique) et une rétention
 courte (7 jours par défaut). Le projet vise un usage local (Claude Desktop) mais garde en tête
 un déploiement distant multi-utilisateur futur (#86, #87).
@@ -28,7 +28,7 @@ un déploiement distant multi-utilisateur futur (#86, #87).
 
 ## Conséquences
 
-- **État réel du code à ce jour :** `config/settings.py` expose déjà `database_url` (vide par
+- **État réel du code à ce jour :** `novit/settings.py` expose déjà `database_url` (vide par
   défaut), mais **rien ne le consomme** — `ArticleStore` est câblé en dur sur SQLite. Le volet
   PostgreSQL de cette ADR est une intention documentée, pas un fait acquis. Toute doc ou
   discussion qui présente NovIT comme « supportant PostgreSQL en prod » est actuellement

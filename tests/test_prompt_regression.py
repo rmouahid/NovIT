@@ -14,18 +14,23 @@ import pytest
 import respx
 from httpx import Response
 
-from src.mcp.dig import dig_url
-from src.mcp.errors import NovitError, NovitErrorCode
-from src.mcp.handlers import (
+from novit.mcp.dig import dig_url
+from novit.mcp.errors import NovitError, NovitErrorCode
+from novit.mcp.handlers import (
     handle_get_by_domain,
     handle_get_news,
     handle_get_profile,
     handle_search,
 )
-from src.mcp.related import find_related
-from src.mcp.schemas import GetByDomainInput, GetNewsInput, GetProfileInput, SearchInput
-from src.scrapers.base import Article
-from src.scrapers.manager import FetchResult
+from novit.mcp.related import find_related
+from novit.mcp.schemas import (
+    GetByDomainInput,
+    GetNewsInput,
+    GetProfileInput,
+    SearchInput,
+)
+from novit.scrapers.base import Article
+from novit.scrapers.manager import FetchResult
 
 
 def make_article(title="Test", url="https://example.com/1", domains=None, score=0.6):
@@ -43,7 +48,7 @@ def make_article(title="Test", url="https://example.com/1", domains=None, score=
 
 @pytest.fixture(autouse=True)
 def clear_cache():
-    from src.mcp.cache import cache
+    from novit.mcp.cache import cache
 
     cache.clear()
     yield
@@ -58,7 +63,7 @@ class TestGetNewsFormatByProfile:
         articles = [
             make_article(f"Article {i}", url=f"https://x.com/{i}") for i in range(5)
         ]
-        with patch("src.mcp.handlers.store") as mock_store:
+        with patch("novit.mcp.handlers.store") as mock_store:
             mock_store.get_recent = AsyncMock(return_value=articles)
             result = await handle_get_news(
                 GetNewsInput(profil=profil, domaines=["ia"], nb_articles=5)
@@ -73,9 +78,9 @@ class TestGetNewsFormatByProfile:
 
     async def test_empty_result_format(self):
         with (
-            patch("src.mcp.handlers.store") as mock_store,
-            patch("src.mcp.handlers._manager") as mock_manager,
-            patch("src.mcp.handlers.tagger") as mock_tagger,
+            patch("novit.mcp.handlers.store") as mock_store,
+            patch("novit.mcp.handlers._manager") as mock_manager,
+            patch("novit.mcp.handlers.tagger") as mock_tagger,
         ):
             mock_store.get_recent = AsyncMock(return_value=[])
             mock_store.save = AsyncMock()
@@ -93,7 +98,7 @@ class TestSearchFormat:
         articles = [
             make_article(f"Résultat {i}", url=f"https://x.com/{i}") for i in range(3)
         ]
-        with patch("src.mcp.handlers.store") as mock_store:
+        with patch("novit.mcp.handlers.store") as mock_store:
             mock_store.search = AsyncMock(return_value=articles)
             result = await handle_search(SearchInput(query="python"))
 
@@ -103,7 +108,7 @@ class TestSearchFormat:
         assert "### 1." in result
 
     async def test_empty_result_format(self):
-        with patch("src.mcp.handlers.store") as mock_store:
+        with patch("novit.mcp.handlers.store") as mock_store:
             mock_store.search = AsyncMock(return_value=[])
             result = await handle_search(SearchInput(query="zzz"))
 
@@ -118,8 +123,8 @@ class TestGetByDomainFormat:
             for i in range(3)
         ]
         with (
-            patch("src.mcp.handlers.store") as mock_store,
-            patch("src.mcp.handlers.cache") as mock_cache,
+            patch("novit.mcp.handlers.store") as mock_store,
+            patch("novit.mcp.handlers.cache") as mock_cache,
         ):
             mock_store.get_recent = AsyncMock(return_value=articles)
             mock_cache.get.return_value = None
@@ -142,7 +147,7 @@ class TestGetProfileFormat:
     async def test_invalid_profile_raises_documented_error_code(self):
         with pytest.raises(NovitError) as exc:
             with patch(
-                "src.mcp.handlers.get_profile",
+                "novit.mcp.handlers.get_profile",
                 side_effect=ValueError("Profil inconnu"),
             ):
                 await handle_get_profile(GetProfileInput(profil="ETUDIANT"))
@@ -156,7 +161,7 @@ class TestRelatedFormat:
                 "Article proche du sujet", url="https://x.com/1", domains=["ia"]
             ),
         ]
-        with patch("src.mcp.related.store") as mock_store:
+        with patch("novit.mcp.related.store") as mock_store:
             mock_store.get_recent = AsyncMock(return_value=candidates)
             result = await find_related(
                 url="https://x.com/ref",
@@ -170,7 +175,7 @@ class TestRelatedFormat:
         assert "similarité" in result
 
     async def test_no_match_format(self):
-        with patch("src.mcp.related.store") as mock_store:
+        with patch("novit.mcp.related.store") as mock_store:
             mock_store.get_recent = AsyncMock(return_value=[])
             result = await find_related(
                 url="https://x.com/ref", title="Sujet inédit", domains=["ia"]

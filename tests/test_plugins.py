@@ -4,12 +4,12 @@ from pathlib import Path
 import httpx
 import respx
 
-from src.scrapers.base import BaseScraper
-from src.scrapers.manager import ScraperManager
-from src.scrapers.plugins import discover_plugin_scrapers
+from novit.scrapers.base import BaseScraper
+from novit.scrapers.manager import ScraperManager
+from novit.scrapers.plugins import discover_plugin_scrapers
 
 VALID_PLUGIN = """
-from src.scrapers.base import Article, BaseScraper
+from novit.scrapers.base import Article, BaseScraper
 
 
 class DummyPluginScraper(BaseScraper):
@@ -27,7 +27,7 @@ class DummyPluginScraper(BaseScraper):
 BROKEN_IMPORT_PLUGIN = "import ceci_n_existe_pas\n"
 
 MULTI_CLASS_PLUGIN = """
-from src.scrapers.base import BaseScraper
+from novit.scrapers.base import BaseScraper
 
 
 class FirstScraper(BaseScraper):
@@ -51,7 +51,7 @@ class SecondScraper(BaseScraper):
 """
 
 REQUIRES_ARGS_PLUGIN = """
-from src.scrapers.base import BaseScraper
+from novit.scrapers.base import BaseScraper
 
 
 class NeedsArgScraper(BaseScraper):
@@ -113,7 +113,7 @@ class TestDiscoverPluginScrapers:
 class TestScraperManagerPluginIntegration:
     def test_reload_sources_picks_up_new_plugin(self, tmp_path, monkeypatch):
         monkeypatch.setattr(
-            "src.scrapers.manager.get_settings",
+            "novit.scrapers.manager.get_settings",
             lambda: type("S", (), {"plugins_dir": str(tmp_path)})(),
         )
         manager = ScraperManager()

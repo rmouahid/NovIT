@@ -1,11 +1,8 @@
 #!/usr/bin/env bash
 # Déploiement NovIT sur Fly.io — voir docs/CLOUD_DEPLOYMENT.md.
 #
-# Prérequis non satisfait à ce jour (ADR-001) : le serveur ne parle que
-# stdio, pas HTTP/SSE. Ce script prépare le pipeline de déploiement (checks
-# + flyctl) pour le jour où le transport HTTP+SSE sera implémenté ; il
-# échouera au health check tant que ce n'est pas le cas. Ne pas exécuter en
-# prod avant que #86 (volet transport HTTP) soit résolu.
+# Le serveur tourne en transport HTTP (ADR-005) : définir le secret
+# NOVIT_API_TOKEN avant le premier déploiement.
 
 set -euo pipefail
 
@@ -19,9 +16,9 @@ if ! command -v flyctl >/dev/null 2>&1; then
 fi
 
 echo "==> Lint (black, isort, ruff)"
-black --check src tests
-isort --check-only --profile black src tests
-ruff check src tests
+black --check novit tests
+isort --check-only --profile black novit tests
+ruff check novit tests
 
 echo "==> Tests (hors benchmarks)"
 pytest tests/ --benchmark-skip

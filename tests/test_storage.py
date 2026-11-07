@@ -2,8 +2,8 @@ from datetime import UTC, datetime
 
 import pytest
 
-from src.scrapers.base import Article
-from src.scrapers.storage import ArticleStore
+from novit.scrapers.base import Article
+from novit.scrapers.storage import ArticleStore
 
 
 def make_article(
@@ -109,6 +109,103 @@ async def test_search_empty(store):
     assert len(results) == 0
 
 
+async def test_search_matches_whole_words_only(store):
+    await store.save(
+        [
+            make_article(
+                "How Fyxer built an assistant people trust", url="https://x.com/1"
+            ),
+            make_article("Rust 1.90 is out", url="https://x.com/2"),
+        ]
+    )
+    results = await store.search("rust")
+    assert [a.title for a in results] == ["Rust 1.90 is out"]
+
+
+async def test_search_ignores_case_and_accents(store):
+    await store.save(
+        [make_article("Régulation de l'IA en Europe", url="https://x.com/1")]
+    )
+    assert len(await store.search("REGULATION")) == 1
+
+
+async def test_search_requires_every_term(store):
+    await store.save(
+        [
+            make_article("Rust and Python interop", url="https://x.com/1"),
+            make_article("Python packaging news", url="https://x.com/2"),
+        ]
+    )
+    results = await store.search("python rust")
+    assert [a.url for a in results] == ["https://x.com/1"]
+
+
+async def test_search_ranks_by_relevance_before_score(store):
+    low = make_article(
+        "Kubernetes 1.34: kubernetes networking", url="https://x.com/1", score=0.1
+    )
+    low.summary = "Everything about kubernetes clusters"
+    high = make_article("Weekly cloud digest", url="https://x.com/2", score=0.9)
+    high.summary = "A short note on kubernetes"
+    await store.save([high, low])
+    results = await store.search("kubernetes")
+    assert [a.url for a in results] == ["https://x.com/1", "https://x.com/2"]
+
+
+@pytest.mark.parametrize("query", ['"', "c++", "AND", "title:rust", "(", "*", ""])
+async def test_search_tolerates_query_syntax(store, query):
+    await store.save([make_article("C++ and Rust", url="https://x.com/1")])
+    await store.search(query)  # must not raise an FTS5 syntax error
+
+
+async def test_search_supports_dotted_and_plus_terms(store):
+    await store.save(
+        [
+            make_article("C++26 draft approved", url="https://x.com/1"),
+            make_article("Node.js 24 released", url="https://x.com/2"),
+        ]
+    )
+    assert [a.url for a in await store.search("c++26")] == ["https://x.com/1"]
+    assert [a.url for a in await store.search("node.js")] == ["https://x.com/2"]
+
+
+async def test_search_index_follows_purge(tmp_path):
+    store = ArticleStore(db_path=str(tmp_path / "test.db"), retention_days=0)
+    await store.init()
+    await store.save([make_article("Rust news")])
+    await store.purge_expired()
+    assert await store.search("rust") == []
+
+
+async def test_existing_database_is_indexed_on_init(tmp_path):
+    import sqlite3
+
+    from novit.scrapers.storage import SCHEMA
+
+    db = tmp_path / "old.db"
+    legacy = SCHEMA.split("CREATE VIRTUAL TABLE")[0]
+    with sqlite3.connect(db) as conn:
+        conn.executescript(legacy)
+        conn.execute(
+            "INSERT INTO articles VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            (
+                "https://x.com/old",
+                "Rust before the index",
+                "",
+                "2026-10-01T00:00:00+00:00",
+                "s",
+                "[]",
+                "[]",
+                0.5,
+                "{}",
+                "2026-10-01T00:00:00+00:00",
+            ),
+        )
+    store = ArticleStore(db_path=str(db))
+    await store.init()
+    assert [a.url for a in await store.search("rust")] == ["https://x.com/old"]
+
+
 async def test_purge_expired(tmp_path):
     store = ArticleStore(db_path=str(tmp_path / "test.db"), retention_days=0)
     await store.init()
@@ -140,3 +237,66 @@ async def test_article_roundtrip_preserves_fields(store):
     assert restored.url == original.url
     assert set(restored.domains) == set(original.domains)
     assert restored.score == original.score
+
+
+async def test_domain_filter_is_applied_before_the_limit(store):
+    """Les articles bien notés d'autres domaines ne doivent pas évincer ceux du
+    domaine demandé (#107 : `securite` vide derrière github_trending et openai_blog)."""
+    popular = [
+        make_article(
+            f"IA {i}", url=f"https://example.com/ia/{i}", domains=["ia"], score=0.9
+        )
+        for i in range(20)
+    ]
+    security = [
+        make_article(
+            f"CVE {i}",
+            url=f"https://example.com/cve/{i}",
+            domains=["securite"],
+            score=0.4,
+        )
+        for i in range(3)
+    ]
+    await store.save(popular + security)
+
+    recent = await store.get_recent(domains=["securite"], limit=10)
+
+    assert sorted(a.title for a in recent) == ["CVE 0", "CVE 1", "CVE 2"]
+
+
+async def test_profile_filter_is_applied_before_the_limit(store):
+    others = [
+        make_article(
+            f"Ingé {i}",
+            url=f"https://example.com/inge/{i}",
+            profiles=["INGENIEUR"],
+            score=0.9,
+        )
+        for i in range(20)
+    ]
+    students = [
+        make_article(
+            "Étudiant",
+            url="https://example.com/etudiant",
+            profiles=["ETUDIANT"],
+            score=0.3,
+        )
+    ]
+    await store.save(others + students)
+
+    recent = await store.get_recent(profiles=["ETUDIANT"], limit=5)
+
+    assert [a.title for a in recent] == ["Étudiant"]
+
+
+async def test_limit_still_applies_after_filtering(store):
+    await store.save(
+        [
+            make_article(
+                f"S {i}", url=f"https://example.com/s/{i}", domains=["securite"]
+            )
+            for i in range(8)
+        ]
+    )
+
+    assert len(await store.get_recent(domains=["securite"], limit=5)) == 5

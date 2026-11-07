@@ -9,9 +9,9 @@ comment vérifier que le service continue de fonctionner pendant l'opération.
 
 | Secret | Utilisé par | Optionnel ? |
 |---|---|---|
-| `NVD_API_KEY` | `CVEScraper` (`src/scrapers/cve.py`) — augmente le rate limit NVD (50 req/30s au lieu de 5) | Oui — fonctionne sans, juste plus lentement |
+| `NVD_API_KEY` | `CVEScraper` (`novit/scrapers/cve.py`) — augmente le rate limit NVD (50 req/30s au lieu de 5) | Oui — fonctionne sans, juste plus lentement |
 | `GITHUB_TOKEN` | Réservé pour un futur usage de l'API GitHub (le scraper `GitHubTrendingScraper` actuel scrape la page HTML, pas l'API) | Oui, non consommé actuellement |
-| `SENTRY_DSN` | Monitoring d'erreurs (`src/mcp/sentry_config.py`) | Oui — désactive Sentry si absent |
+| `SENTRY_DSN` | Monitoring d'erreurs (`novit/mcp/sentry_config.py`) | Oui — désactive Sentry si absent |
 
 Ces secrets vivent dans `.env` (jamais committé — voir `.env.example` pour le nom exact des
 variables) ou dans le gestionnaire de secrets de l'environnement de déploiement.
@@ -25,7 +25,7 @@ variables) ou dans le gestionnaire de secrets de l'environnement de déploiement
 2. **Mettre à jour la valeur** : éditer `.env` (dev) ou la variable d'environnement / le secret
    manager du déploiement (prod), puis recharger la configuration :
    ```python
-   from config.settings import reload_settings
+   from novit.settings import reload_settings
    reload_settings()   # invalide le cache lru_cache de get_settings() et relit .env/l'env
    ```
    En pratique : ce reload peut être déclenché depuis un shell Python attaché au processus, ou

@@ -1,7 +1,7 @@
 # Sources RSS/Atom déclaratives de NovIT.
 #
 # Ajouter une source ici ne nécessite aucun code (voir docs/ADDING_A_SOURCE.md) : elle est
-# chargée par src.scrapers.rss.load_rss_sources() et transformée en RssScraper générique.
+# chargée par novit.scrapers.rss.load_rss_sources() et transformée en RssScraper générique.
 #
 # `category` est purement organisationnel (regroupement dans ce fichier et dans les tests),
 # sans effet sur le comportement du scraper.
@@ -44,13 +44,6 @@ sources:
     base_score: 0.7
 
   # --- Blogs IA (labos, recherche) ---
-  - name: anthropic_blog
-    category: ia
-    url: "https://www.anthropic.com/rss.xml"
-    domains: [ia]
-    profiles: [ETUDIANT, INGENIEUR]
-    base_score: 0.9
-
   - name: openai_blog
     category: ia
     url: "https://openai.com/news/rss.xml"
@@ -64,13 +57,6 @@ sources:
     domains: [ia]
     profiles: [INGENIEUR]
     base_score: 0.85
-
-  - name: papers_with_code
-    category: ia
-    url: "https://paperswithcode.com/latest/rss"
-    domains: [ia]
-    profiles: [INGENIEUR]
-    base_score: 0.75
 
   # --- Blogs d'ingénierie (tech companies) ---
   - name: netflix_tech
@@ -108,13 +94,6 @@ sources:
     domains: [reglementation]
     profiles: [ETUDIANT, INGENIEUR]
     base_score: 0.8
-
-  - name: eurlex_ai
-    category: reglementation
-    url: "https://eur-lex.europa.eu/rss/legal-act/en/new.rss"
-    domains: [reglementation, ia]
-    profiles: [INGENIEUR]
-    base_score: 0.75
 
   - name: w3c_news
     category: reglementation

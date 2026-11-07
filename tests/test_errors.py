@@ -1,6 +1,6 @@
 import pytest
 
-from src.mcp.errors import NovitError, NovitErrorCode
+from novit.mcp.errors import NovitError, NovitErrorCode
 
 
 def test_error_str():

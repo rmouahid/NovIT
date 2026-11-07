@@ -2,9 +2,9 @@ from datetime import UTC, datetime
 
 import pytest
 
-from src.profiles.filter import filter_and_rank, score_article
-from src.profiles.profile import get_profile
-from src.scrapers.base import Article
+from novit.profiles.filter import filter_and_rank, score_article
+from novit.profiles.profile import get_profile
+from novit.scrapers.base import Article
 
 
 def make_article(

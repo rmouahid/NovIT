@@ -1,6 +1,6 @@
 from datetime import UTC, datetime, timedelta
 
-from src.mcp.circuit_breaker import (
+from novit.mcp.circuit_breaker import (
     CircuitBreaker,
     CircuitBreakerRegistry,
     CircuitState,

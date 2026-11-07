@@ -1,12 +1,12 @@
 name: 📡 Nouvelle source de scraping
 description: Proposer l'ajout d'une nouvelle source (flux RSS, API...) à NovIT
 title: "feat: ajouter le scraper "
-labels: ["feature"]
+labels: ["feature", "a-trier"]
 body:
   - type: markdown
     attributes:
       value: |
-        Voir le guide complet : [docs/ADDING_A_SOURCE.md](https://github.com/LePhyX/NovIT/blob/main/docs/ADDING_A_SOURCE.md).
+        Voir le guide complet : [docs/ADDING_A_SOURCE.md](https://github.com/rmouahid/NovIT/blob/main/docs/ADDING_A_SOURCE.md).
         La plupart des sources sont de simples flux RSS déclarés en quelques lignes, sans code.
 
   - type: input

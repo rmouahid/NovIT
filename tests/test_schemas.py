@@ -1,7 +1,7 @@
 import pytest
 from pydantic import ValidationError
 
-from src.mcp.schemas import (
+from novit.mcp.schemas import (
     GetByDomainInput,
     GetNewsInput,
     GetProfileInput,

@@ -49,7 +49,7 @@ MCP supporte deux modes de transport :
 | **HTTP + SSE** | HTTP POST + Server-Sent Events | Déploiement cloud, remote |
 
 Pour NovIT en développement local : **stdio** (plus simple, aucun réseau).
-Pour le déploiement cloud (M8) : **HTTP + SSE**.
+Pour le déploiement cloud (M8) : **Streamable HTTP**, successeur de HTTP + SSE dans la spécification (le flux SSE passe par un seul endpoint `/mcp`), voir [ADR-005](ADR/0005-transport-http-authentification.md).
 
 ---
 
@@ -207,4 +207,4 @@ Le SDK `mcp` fournit :
 - `@server.resource()` : décorateur pour une ressource
 - Gestion automatique du handshake et du transport stdio/HTTP
 
-Voir `src/mcp/server.py` pour l'implémentation NovIT.
+Voir `novit/mcp/server.py` pour l'implémentation NovIT.

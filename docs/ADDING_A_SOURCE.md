@@ -32,7 +32,7 @@ sources:
     base_score: 0.5                           # pertinence de base 0.0–1.0 (0.5 = neutre)
 ```
 
-C'est tout : `load_rss_sources()` (`src/scrapers/rss.py`) charge et valide le fichier au
+C'est tout : `load_rss_sources()` (`novit/scrapers/rss.py`) charge et valide le fichier au
 démarrage (échec net si un champ requis manque ou si un `name` est dupliqué), `RssScraper`
 (classe partagée) gère le fetch, le parsing (`feedparser`) et la conversion en `Article`. Aucun
 nouveau fichier Python, aucune modification de `ScraperManager`. Le rechargement est possible
@@ -47,7 +47,7 @@ Pour une source qui n'expose pas de flux RSS exploitable (API JSON, HTML à pars
 
 ### Étapes
 
-1. **Copier le template** : `cp src/scrapers/_template.py src/scrapers/ma_source.py`
+1. **Copier le template** : `cp novit/scrapers/_template.py novit/scrapers/ma_source.py`
 2. **Implémenter le contrat `BaseScraper`** :
    ```python
    class MaSourceScraper(BaseScraper):
@@ -63,7 +63,7 @@ Pour une source qui n'expose pas de flux RSS exploitable (API JSON, HTML à pars
      source qui échoue systématiquement dégradera son `ScraperReport` en continu.
    - `health_check()` doit être rapide (< 5s) et ne pas dépendre de `fetch()`.
 3. **Enregistrer le scraper** dans `ScraperManager._build_all_scrapers()`
-   (`src/scrapers/manager.py`) :
+   (`novit/scrapers/manager.py`) :
    ```python
    scrapers: list[BaseScraper] = [
        HackerNewsScraper(),
@@ -80,7 +80,7 @@ Pour une source qui n'expose pas de flux RSS exploitable (API JSON, HTML à pars
 
 ```bash
 # Tester le scraper isolément (appel réseau réel, pour valider le parsing) :
-python -c "import asyncio; from src.scrapers.ma_source import MaSourceScraper; print(asyncio.run(MaSourceScraper().fetch()))"
+python -c "import asyncio; from novit.scrapers.ma_source import MaSourceScraper; print(asyncio.run(MaSourceScraper().fetch()))"
 
 # Puis tests automatisés (mockés, dans la suite CI) :
 pytest tests/test_ma_source.py -v
@@ -105,7 +105,7 @@ pytest tests/test_integration.py -v
       pour la liste).
 - [ ] Tests unitaires avec HTTP mocké (`respx`), couvrant : cas nominal, réponse vide,
       erreur HTTP.
-- [ ] Pas de clé API en dur dans le code — passer par `config/settings.py`/`.env` si la source
+- [ ] Pas de clé API en dur dans le code — passer par `novit/settings.py`/`.env` si la source
       en nécessite une.
 - [ ] Enregistré dans `ScraperManager._build_all_scrapers()` (cas 2 uniquement).
 - [ ] `black`, `isort`, `ruff` passent (`pre-commit run --all-files`).
@@ -115,6 +115,6 @@ pytest tests/test_integration.py -v
 ## Cas 3 — Plugin externe (sans contribuer au dépôt)
 
 Même contrat `BaseScraper` que le Cas 2, mais déposé dans un dossier local
-(`NOVIT_PLUGINS_DIR`, `plugins/` par défaut) plutôt que dans `src/scrapers/` — chargé
+(`NOVIT_PLUGINS_DIR`, `plugins/` par défaut) plutôt que dans `novit/scrapers/` — chargé
 dynamiquement, sans PR ni modification du dépôt NovIT. Voir le guide complet :
 [PLUGINS.md](PLUGINS.md).

@@ -5,7 +5,7 @@ body:
     attributes:
       value: |
         Pour une proposition déjà concrète et prête à être planifiée, ouvrir plutôt une
-        [issue de fonctionnalité](https://github.com/LePhyX/NovIT/issues/new/choose). Cette
+        [issue de fonctionnalité](https://github.com/rmouahid/NovIT/issues/new/choose). Cette
         catégorie sert aux idées à discuter avant de les cadrer.
 
   - type: textarea

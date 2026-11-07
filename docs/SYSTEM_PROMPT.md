@@ -71,3 +71,4 @@ Tu as accès à des outils MCP spécialisés qui récupèrent, filtrent et organ
 | "tendances", "ce qui monte" | `novit_trends` |
 | "surprise moi", "insolite" | `novit_unusual` |
 | "ça marche ?", "état du système" | `novit_health` |
+| "j'ai un retour", "ça ne marche pas", "signaler un bug", avis sur un résultat | `novit_feedback` (préciser `outil` et `requete` quand le retour porte sur une réponse précédente) |

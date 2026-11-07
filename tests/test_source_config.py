@@ -2,16 +2,16 @@ from pathlib import Path
 
 import pytest
 
-from src.scrapers.ai_blogs import build_ai_scrapers
-from src.scrapers.eng_blogs import build_eng_scrapers
-from src.scrapers.manager import ScraperManager
-from src.scrapers.regulation import build_regulation_scrapers
-from src.scrapers.rss import (
+from novit.scrapers.ai_blogs import build_ai_scrapers
+from novit.scrapers.eng_blogs import build_eng_scrapers
+from novit.scrapers.manager import ScraperManager
+from novit.scrapers.regulation import build_regulation_scrapers
+from novit.scrapers.rss import (
     SourcesConfigError,
     build_rss_scrapers,
     load_rss_sources,
 )
-from src.scrapers.training import build_training_scrapers
+from novit.scrapers.training import build_training_scrapers
 
 
 def write_yaml(tmp_path: Path, content: str) -> Path:
@@ -23,19 +23,16 @@ def write_yaml(tmp_path: Path, content: str) -> Path:
 class TestLoadRssSources:
     def test_loads_real_config(self):
         sources = load_rss_sources()
-        assert len(sources) == 16
+        assert len(sources) == 13
         names = {s.name for s in sources}
         assert "dev_to" in names
-        assert "anthropic_blog" in names
+        assert "openai_blog" in names
+        # Flux morts retirés (#118)
+        assert not names & {"anthropic_blog", "papers_with_code", "eurlex_ai"}
 
     def test_filters_by_category(self):
         sources = load_rss_sources(category="ia")
-        assert {s.name for s in sources} == {
-            "anthropic_blog",
-            "openai_blog",
-            "deepmind_blog",
-            "papers_with_code",
-        }
+        assert {s.name for s in sources} == {"openai_blog", "deepmind_blog"}
 
     def test_missing_file_raises(self, tmp_path):
         with pytest.raises(SourcesConfigError, match="introuvable"):
@@ -103,7 +100,7 @@ class TestCategoryBuilders:
 
     def test_build_regulation_scrapers(self):
         names = {s.name for s in build_regulation_scrapers()}
-        assert names == {"cnil", "eurlex_ai", "w3c_news"}
+        assert names == {"cnil", "w3c_news"}
 
     def test_build_training_scrapers_includes_roadmap(self):
         names = {s.name for s in build_training_scrapers()}
@@ -112,7 +109,7 @@ class TestCategoryBuilders:
 
     def test_build_ai_scrapers_includes_arxiv(self):
         names = {s.name for s in build_ai_scrapers()}
-        assert "anthropic_blog" in names
+        assert "openai_blog" in names
         assert "arxiv" in names  # scraper code, pas déclaratif
 
 
@@ -129,7 +126,7 @@ class TestScraperManagerReload:
                 profiles: [ETUDIANT]
             """,
         )
-        monkeypatch.setattr("src.scrapers.rss.SOURCES_CONFIG_PATH", config_path)
+        monkeypatch.setattr("novit.scrapers.rss.SOURCES_CONFIG_PATH", config_path)
 
         manager = ScraperManager()
         assert "source_v1" in {s.name for s in manager._scrapers}
@@ -170,7 +167,7 @@ class TestScraperManagerReload:
                 profiles: [ETUDIANT]
             """,
         )
-        monkeypatch.setattr("src.scrapers.rss.SOURCES_CONFIG_PATH", config_path)
+        monkeypatch.setattr("novit.scrapers.rss.SOURCES_CONFIG_PATH", config_path)
         manager = ScraperManager()
         before = {s.name for s in manager._scrapers}
 

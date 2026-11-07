@@ -7,7 +7,7 @@ Merci de vouloir contribuer à NovIT ! Ce guide explique comment soumettre des b
 ## Avant de commencer
 
 1. **Lisez le [README](README.md)** pour comprendre le projet.
-2. **Cherchez dans les [issues](https://github.com/LePhyX/NovIT/issues)** si votre sujet n'existe pas déjà.
+2. **Cherchez dans les [issues](https://github.com/rmouahid/NovIT/issues)** si votre sujet n'existe pas déjà.
 3. Pour les changements importants, **ouvrez d'abord une issue** pour en discuter.
 4. Ce projet suit un [Code de conduite](CODE_OF_CONDUCT.md) — merci de le respecter dans tous
    les échanges (issues, PR, discussions).
@@ -40,7 +40,7 @@ Ouvrez une issue avec le label `feature` en décrivant :
 ## Ajouter une nouvelle source de scraping
 
 Voir [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md#ajouter-une-source) pour le guide complet.
-En résumé : copiez `src/scrapers/_template.py`, implémentez `BaseScraper`, ajoutez des tests.
+En résumé : copiez `novit/scrapers/_template.py`, implémentez `BaseScraper`, ajoutez des tests.
 
 ---
 
@@ -51,7 +51,7 @@ En résumé : copiez `src/scrapers/_template.py`, implémentez `BaseScraper`, aj
 ```bash
 git clone https://github.com/VOTRE_USERNAME/NovIT.git
 cd NovIT
-git remote add upstream https://github.com/LePhyX/NovIT.git
+git remote add upstream https://github.com/rmouahid/NovIT.git
 ```
 
 ### 2. Créer une branche
@@ -82,9 +82,9 @@ pre-commit install
 pytest
 
 # Formatage (appliqué automatiquement par pre-commit)
-black src/ tests/
-isort src/ tests/
-ruff check src/ tests/
+black novit/ tests/
+isort novit/ tests/
+ruff check novit/ tests/
 ```
 
 Les tests doivent passer à 100% avant d'ouvrir une PR.
@@ -118,9 +118,10 @@ test: ajouter les tests d'intégration MCP (#65)
 - Linting : **ruff**
 - Typage : annotations de type sur toutes les fonctions publiques
 - Couverture de tests : 80% minimum
+- Dépendances : bornes basses (`>=`), `requirements.txt` et `pyproject.toml` identiques, voir [docs/DEPENDENCIES.md](docs/DEPENDENCIES.md)
 
 ---
 
 ## Questions ?
 
-Ouvrez une [Discussion GitHub](https://github.com/LePhyX/NovIT/discussions) ou une issue avec le label `question`.
+Ouvrez une [Discussion GitHub](https://github.com/rmouahid/NovIT/discussions) (catégorie Q&A). Les canaux, les délais de réponse et le triage des issues sont décrits dans [.github/SUPPORT.md](.github/SUPPORT.md) ; une faille de sécurité se signale en privé ([SECURITY.md](SECURITY.md)).

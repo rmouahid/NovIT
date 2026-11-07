@@ -8,13 +8,13 @@ dans le temps via `pytest --benchmark-compare`.
 
 from datetime import UTC, datetime
 
-from src.mcp.cache import TTLCache
-from src.mcp.metrics import MetricsCollector
-from src.profiles.filter import filter_and_rank
-from src.profiles.profile import get_profile
-from src.scrapers.base import Article
-from src.scrapers.deduplication import Deduplicator
-from src.scrapers.tagger import DomainTagger
+from novit.mcp.cache import TTLCache
+from novit.mcp.metrics import MetricsCollector
+from novit.profiles.filter import filter_and_rank
+from novit.profiles.profile import get_profile
+from novit.scrapers.base import Article
+from novit.scrapers.deduplication import Deduplicator
+from novit.scrapers.tagger import DomainTagger
 
 N = 500
 

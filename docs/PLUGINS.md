@@ -12,10 +12,10 @@ en amont.
 
 ## Contrat d'interface
 
-Un plugin est une classe Python qui hérite de `BaseScraper` (`src/scrapers/base.py`) :
+Un plugin est une classe Python qui hérite de `BaseScraper` (`novit/scrapers/base.py`) :
 
 ```python
-from src.scrapers.base import Article, BaseScraper
+from novit.scrapers.base import Article, BaseScraper
 
 class MonScraper(BaseScraper):
     name = "mon_scraper"                     # identifiant unique
@@ -54,7 +54,7 @@ dépôt NovIT.
 
 ## Chargement dynamique
 
-`discover_plugin_scrapers()` (`src/scrapers/plugins.py`) scanne `NOVIT_PLUGINS_DIR` à chaque
+`discover_plugin_scrapers()` (`novit/scrapers/plugins.py`) scanne `NOVIT_PLUGINS_DIR` à chaque
 appel (pas de cache) :
 
 - Chaque fichier `*.py` non préfixé par `_` est importé dynamiquement (`importlib`).

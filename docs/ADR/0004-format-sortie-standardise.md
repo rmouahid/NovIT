@@ -12,9 +12,9 @@ autorise plusieurs types de contenu (`text`, `image`, `resource`...) — voir
 
 ## Décision
 
-Tous les handlers NovIT (`src/mcp/handlers.py`, `daily.py`, `trends.py`, `dig.py`, `related.py`)
+Tous les handlers NovIT (`novit/mcp/handlers.py`, `daily.py`, `trends.py`, `dig.py`, `related.py`)
 retournent une **chaîne de texte markdown**, encapsulée en `TextContent` côté serveur
-(`src/mcp/server.py`). Structure commune : titre `#`/`##`, listes numérotées ou à puces, emoji
+(`novit/mcp/server.py`). Structure commune : titre `#`/`##`, listes numérotées ou à puces, emoji
 comme repères visuels rapides (🔗 lien, 📅 date, 🏷 domaines, 📰 source) — voir
 [RESPONSE_FORMATS.md](../RESPONSE_FORMATS.md) pour le détail par outil, gelé par
 `tests/test_prompt_regression.py`.
