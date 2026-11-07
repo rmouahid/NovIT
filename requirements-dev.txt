@@ -19,4 +19,4 @@ pre-commit>=3.7.0
 detect-secrets>=1.5.0
 
 # Dev
-ipython>=8.24.0
+ipython>=9.18.1
