@@ -9,6 +9,8 @@ projet adhérant au [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+## [1.1.0] — 2026-11-07
+
 ### Added
 - Contenu structuré : `novit_get_news`, `novit_search` et `novit_get_by_domain` déclarent un schéma de sortie et renvoient les articles en `structuredContent`, avec un indicateur `offline` ([formats de réponse](docs/RESPONSE_FORMATS.md))
 - Annotations MCP sur chaque outil (`readOnlyHint`, `openWorldHint`)
@@ -105,6 +107,7 @@ profil et par domaine et les expose à un assistant à travers 13 outils.
 - Branches `main` et `dev`
 - 98 issues et 10 milestones créés sur GitHub
 
-[Unreleased]: https://github.com/rmouahid/NovIT/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/rmouahid/NovIT/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/rmouahid/NovIT/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/rmouahid/NovIT/compare/v0.1.0...v1.0.0
 [0.1.0]: https://github.com/rmouahid/NovIT/releases/tag/v0.1.0

@@ -5,7 +5,7 @@
 
 ---
 
-## État au 5 novembre 2026
+## État au 7 novembre 2026
 
 | Milestone | Objectif | Statut |
 |---|---|---|
@@ -18,28 +18,27 @@
 | [M6 — Tests & monitoring](https://github.com/rmouahid/NovIT/milestone/7) | Robustesse et CI/CD | ✅ Terminé |
 | [M7 — Documentation](https://github.com/rmouahid/NovIT/milestone/8) | Onboarding complet | ✅ Terminé |
 | [M8 — Collaboration](https://github.com/rmouahid/NovIT/milestone/9) | Contributeurs et scalabilité | ✅ Terminé |
-| [M9 — Release v1.0](https://github.com/rmouahid/NovIT/milestone/10) | Publication publique | 🔄 Release prête (#92), PyPI (#93), registre MCP (#94) |
+| [M9 — Release v1.0](https://github.com/rmouahid/NovIT/milestone/10) | Publication publique | 🔄 v1.0.0 et v1.1.0 publiées ; PyPI (#93), registre MCP (#94) |
 
 ---
 
 ## v1.0 — Publication publique
 
-Reste à faire avant de couper la v1.0 :
+La v1.0.0 est taguée et `main` porte la v1.1.0 (#92). Reste à faire :
 
 1. Publier le paquet sur PyPI (#93), puis la fiche du registre MCP officiel (#94).
-2. Préparer la release (#92) : CHANGELOG, `VERSION`, merge `dev` → `main`, tag `v1.0.0`.
-3. Annoncer la sortie (#96), puis faire le bilan (#98).
+2. Annoncer la sortie (#96), puis faire le bilan (#98).
 
 Le support après la sortie (canaux, délais de réponse, triage) est décrit dans
 [.github/SUPPORT.md](../.github/SUPPORT.md) et [SECURITY.md](../SECURITY.md).
 
 ## v1.1 — Qualité des résultats
 
-Priorités relevées lors des essais réels, à traiter juste après la v1.0 :
+Priorités relevées lors des essais réels :
 
 | Sujet | Issue |
 |---|---|
-| Tagger par mots entiers, redirections suivies, flux morts remplacés | #118 |
+| Tagger par mots entiers, redirections suivies, flux morts retirés (fait en v1.1.0) | #118 |
 | `novit_trends` : mots vides français et vocabulaire répétitif des CVE | #115 |
 | Captures de NovIT dans un client MCP de bureau pour la documentation | #111 |
 

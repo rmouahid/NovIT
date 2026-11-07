@@ -40,7 +40,7 @@ class Settings(BaseSettings):
     # Scraping
     scraper_delay: float = Field(default=1.0, ge=0)
     scraper_timeout: int = Field(default=10, ge=1)
-    user_agent: str = "NovIT/1.0.0 (veille technologique MCP)"
+    user_agent: str = "NovIT/1.1.0 (veille technologique MCP)"
     retention_days: int = Field(default=7, ge=1)
 
     # Dossier de scrapers plugin (voir docs/PLUGINS.md) — vide/inexistant = aucun plugin chargé.

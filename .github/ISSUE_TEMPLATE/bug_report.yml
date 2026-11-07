@@ -15,7 +15,7 @@ body:
     attributes:
       label: Version de NovIT
       description: Contenu du fichier `VERSION` à la racine du dépôt
-      placeholder: "1.0.0"
+      placeholder: "1.1.0"
     validations:
       required: true
 

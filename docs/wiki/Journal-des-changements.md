@@ -4,6 +4,15 @@ Le détail de chaque version est dans le
 [CHANGELOG](https://github.com/rmouahid/NovIT/blob/dev/CHANGELOG.md). Ce journal
 ne retient que ce qui change la façon d'installer, d'utiliser ou de contribuer.
 
+## v1.1.0 — 7 novembre 2026
+
+- **Réponses structurées** : les outils d'articles déclarent un schéma de
+  sortie et renvoient les articles en `structuredContent`.
+- **Sources respectées** : délai minimal par domaine, relance sur 429 selon
+  `Retry-After`, `NOVIT_USER_AGENT` envoyé partout.
+- **19 sources** : trois sources mortes retirées, arXiv et roadmap.sh
+  réparées (#118).
+
 ## v1.0.0 — 5 novembre 2026
 
 Première version publique.
