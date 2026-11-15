@@ -1,4 +1,5 @@
 import re
+import unicodedata
 from collections import Counter
 from datetime import UTC, datetime, timedelta
 
@@ -65,18 +66,52 @@ _STOP_WORDS = {
 
 _MIN_WORD_LENGTH = 4
 
+# Mots de liaison, dates et gabarits des bulletins de sécurité. Les noms de
+# produits (OpenSSL, Windows, etc.) restent des sujets utiles.
+_STOP_WORDS.update(
+    "dans avec pour plus moins cette ceci cela ces sont etre être était étaient "
+    "aussi comme leur leurs nous vous votre vos notre nos tout tous toute toutes "
+    "sans sous entre chez depuis après avant lors dont ainsi encore fait faire "
+    "vers selon plusieurs multiples nouveau nouveaux nouvelle nouvelles "
+    "janvier février fevrier mars avril mai juin juillet août aout septembre "
+    "octobre novembre décembre decembre january february march april june july "
+    "august september october november december today yesterday update updates "
+    "these those they them their there here were being does did than then which "
+    "while some such only also over under through could would should just "
+    "cvss cve certfr high critical medium low critique critiques élevée élevées "
+    "vulnérabilité vulnérabilités vulnerabilite vulnerabilites vulnerability "
+    "vulnerabilities bulletin bulletins avis alerte alertes".split()
+)
+
+_BULLETIN_ID = re.compile(
+    r"\b(?:CVE-\d{4}-\d+|CERTFR-\d{4}-[A-Z]+-\d+)\b", re.IGNORECASE
+)
+
 
 def _extract_keywords(title: str) -> list[str]:
-    words = re.findall(r"[a-zA-ZÀ-ÿ]+", title.lower())
+    title = unicodedata.normalize("NFC", _BULLETIN_ID.sub(" ", title)).casefold()
+    words = re.findall(r"[^\W\d_]+", title)
     return [w for w in words if len(w) >= _MIN_WORD_LENGTH and w not in _STOP_WORDS]
 
 
-def _count_keywords_by_window(articles: list[Article], days: int) -> Counter:
-    cutoff = datetime.now(tz=UTC) - timedelta(days=days)
-    recent = [a for a in articles if a.published_at and a.published_at > cutoff]
+def _count_keywords_by_window(
+    articles: list[Article], days: int, *, now: datetime | None = None
+) -> Counter:
+    now = now or datetime.now(tz=UTC)
+    cutoff = now - timedelta(days=days)
+    recent = [a for a in articles if a.published_at and cutoff < a.published_at <= now]
     counter: Counter = Counter()
+    seen: set[tuple[str, str, str]] = set()
     for article in recent:
-        counter.update(_extract_keywords(article.title))
+        # Une rafale de CVE d'une source ne pèse pas davantage qu'une autre
+        # source qui mentionne le même sujet le même jour (date en UTC).
+        day = article.published_at.astimezone(UTC).date().isoformat()
+        source = article.source.strip().casefold() or article.url
+        for term in sorted(set(_extract_keywords(article.title))):
+            key = (source, day, term)
+            if key not in seen:
+                seen.add(key)
+                counter[term] += 1
     return counter
 
 
@@ -91,8 +126,9 @@ async def detect_trends(days: int = 7, top_k: int = 10, min_count: int = 3) -> s
     if not all_articles:
         return "Pas assez d'articles en base pour détecter des tendances. Lancez une veille d'abord."
 
-    count_7d = _count_keywords_by_window(all_articles, days=days)
-    count_24h = _count_keywords_by_window(all_articles, days=1)
+    now = datetime.now(tz=UTC)
+    count_7d = _count_keywords_by_window(all_articles, days=days, now=now)
+    count_24h = _count_keywords_by_window(all_articles, days=1, now=now)
 
     # Termes avec au moins min_count occurrences sur la période
     trending = [
@@ -100,7 +136,7 @@ async def detect_trends(days: int = 7, top_k: int = 10, min_count: int = 3) -> s
     ]
 
     if not trending:
-        return f"Aucune tendance significative détectée sur les {days} derniers jours (seuil : {min_count} occurrences)."
+        return f"Aucune tendance significative détectée sur les {days} derniers jours (seuil : {min_count} mentions source/jour)."
 
     # Détection des sujets en montée (ratio 24h/7d élevé)
     rising: list[tuple[str, int, float]] = []
@@ -111,11 +147,11 @@ async def detect_trends(days: int = 7, top_k: int = 10, min_count: int = 3) -> s
             rising.append((term, count_recent, ratio))
     rising.sort(key=lambda x: x[2], reverse=True)
 
-    now = datetime.now(tz=UTC)
     lines = [
         f"# Tendances NovIT — {days} derniers jours",
         f"_Analysé à {now.strftime('%H:%M')} UTC · {len(all_articles)} articles_\n",
         "## Sujets les plus fréquents",
+        "_Un sujet compte au plus une fois par source et par jour UTC._",
     ]
     for term, count in trending[:top_k]:
         bar = "█" * min(count, 20)

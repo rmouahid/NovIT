@@ -42,11 +42,10 @@ async def test_trends_handle_articles_from_sources_with_and_without_offsets(
     monkeypatch,
 ):
     now = datetime.now(tz=UTC)
+    same_day = now.replace(hour=0, minute=0, second=0, microsecond=0)
     mixed = [
-        article(now - timedelta(hours=2), "Rust async runtime released"),
-        article(
-            (now - timedelta(hours=3)).replace(tzinfo=None), "Rust compiler speedup"
-        ),
+        article(same_day, "Rust async runtime released"),
+        article(same_day.replace(tzinfo=None), "Rust compiler speedup"),
         article(now - timedelta(days=2), "Rust memory safety report"),
     ]
 
@@ -55,6 +54,7 @@ async def test_trends_handle_articles_from_sources_with_and_without_offsets(
 
     monkeypatch.setattr(trends.store, "get_recent", get_recent)
 
-    report = await trends.detect_trends(days=7, min_count=3)
+    report = await trends.detect_trends(days=7, min_count=2)
 
-    assert "**rust** (3×)" in report
+    # Les deux articles récents de la même source/journée comptent une fois.
+    assert "**rust** (2×)" in report
