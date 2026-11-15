@@ -78,7 +78,7 @@ _STOP_WORDS.update(
     "august september october november december today yesterday update updates "
     "these those they them their there here were being does did than then which "
     "while some such only also over under through could would should just "
-    "cvss cve certfr high critical medium low critique critiques élevée élevées "
+    "cvss cve cert certfr high critical medium low critique critiques élevée élevées "
     "vulnérabilité vulnérabilités vulnerabilite vulnerabilites vulnerability "
     "vulnerabilities bulletin bulletins avis alerte alertes".split()
 )
