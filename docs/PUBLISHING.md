@@ -91,3 +91,23 @@ cd /tmp && /tmp/novit-wheel/bin/novit < /dev/null
 ```
 
 Le job CI `package` exécute ces étapes à chaque push et chaque pull request.
+
+## Blocage observé sur v1.1.0
+
+Le [workflow v1.1.0](https://github.com/rmouahid/NovIT/actions/runs/42323818530)
+a construit et vérifié la wheel et la sdist avec succès. L'envoi TestPyPI a
+ensuite échoué avec `invalid-publisher` : le jeton OIDC est valide, mais
+TestPyPI ne trouve aucun éditeur de confiance correspondant. Le job PyPI a
+donc été ignoré. Ce succès de build ne prouve pas une publication.
+
+Sur le compte propriétaire de TestPyPI, enregistrer l'éditeur décrit plus
+haut avec **owner `rmouahid`, dépôt `NovIT`, workflow `publish.yml`,
+environnement `testpypi`**. Configurer séparément l'éditeur PyPI avec
+l'environnement `pypi`. Il s'agit d'une configuration de compte externe ;
+modifier le YAML seul ne crée pas ces éditeurs.
+
+Après correction, relancer les jobs échoués du workflow de la version
+concernée, puis vérifier la présence des distributions sur chaque index.
+Ne pas recréer ni déplacer le tag existant. La
+[documentation PyPI de diagnostic](https://docs.pypi.org/trusted-publishers/troubleshooting/)
+détaille les écarts de claims possibles.
