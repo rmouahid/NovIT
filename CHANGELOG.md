@@ -9,6 +9,13 @@ projet adhérant au [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+### Fixed
+- Les tendances filtrent les mots vides FR/EN, les mois et les gabarits CVE/CERT-FR ; chaque sujet compte au plus une fois par source et par jour UTC, avec tests sur un corpus figé (#115).
+
+### Documentation
+- Bilan v1 fondé sur les livrables, limites d'évaluation et décisions à réexaminer pour la v2 (#98).
+- Préparation du registre MCP : manifeste et marqueur d'identité PyPI, cohérence de version testée et procédure de publication ; inscription effective encore à effectuer (#94).
+
 ## [1.1.0] — 2026-11-07
 
 ### Added
