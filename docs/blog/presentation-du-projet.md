@@ -1,5 +1,5 @@
 <!--
-Brouillon de post de blog (dev.to / Medium) — voir #81.
+Brouillon de post de blog (dev.to / Medium) — voir #96.
 À publier manuellement : ce dépôt ne publie rien automatiquement sur un compte externe.
 -->
 
@@ -16,7 +16,7 @@ pas encore. Pour quelqu'un qui utilise Claude comme point d'entrée quotidien ve
 ## La solution : un serveur MCP de veille
 
 NovIT est un serveur [MCP (Model Context Protocol)](https://modelcontextprotocol.io/docs/) —
-le protocole ouvert d'Anthropic pour connecter des outils externes à Claude. Concrètement :
+un protocole ouvert pour connecter des outils externes aux assistants. Concrètement :
 Claude Desktop lance NovIT comme sous-processus local, lui pose des questions structurées
 (« donne-moi les news IA des 6 dernières heures »), NovIT scrape/filtre/score et répond en
 markdown prêt à être présenté.
@@ -25,7 +25,7 @@ Pas de compte à créer, pas de cloud requis pour l'usage de base : tout tourne 
 
 ### Ce que NovIT couvre
 
-22 sources à ce jour : Hacker News, GitHub Trending, CVE/NVD, ANSSI, arXiv, blogs des grands
+19 sources à ce jour : Hacker News, GitHub Trending, CVE/NVD, ANSSI, arXiv, blogs des grands
 labos IA (OpenAI, DeepMind, Anthropic), blogs d'ingénierie (Netflix, Google, Meta), veille
 réglementaire (CNIL, EUR-Lex/AI Act), sources de formation. Chaque article est tagué par domaine
 (IA, sécurité, dev, ingénierie, réglementation, formation) et scoré selon un profil utilisateur.
@@ -42,21 +42,23 @@ un même article n'a pas le même poids pour les deux profils.
 ## Architecture en 5 minutes
 
 ```
-Claude Desktop ──(MCP, stdio)──▶ Serveur NovIT ──(HTTP)──▶ 22 sources externes
+Claude Desktop ──(MCP, stdio)──▶ Serveur NovIT ──(HTTP)──▶ 19 sources externes
                                        │
                           TTLCache (mémoire) + SQLite (aiosqlite)
 ```
 
-- **`ScraperManager`** lance les 22 scrapers en parallèle (`asyncio.gather`), avec timeout
+- **`ScraperManager`** lance les 19 scrapers en parallèle (`asyncio.gather`), avec timeout
   individuel — un scraper cassé ne bloque jamais les autres.
 - **Déduplication** par URL exacte, hash de titre, et similarité de Jaccard fuzzy (pour capter
   les reprises du même événement par plusieurs sources avec des titres légèrement différents).
-- **13 outils MCP** exposés : récupération de news, recherche, résumé quotidien, détection de
+- **14 outils MCP** exposés : récupération de news, recherche, résumé quotidien, détection de
   tendances, extraction d'article complet, articles similaires, health check...
-- **Cache TTL** en mémoire (1h pour les news) pour éviter de re-scraper à chaque appel.
+- **Cache TTL**, stockage SQLite/FTS5 et mode hors-ligne explicite : une panne de source ne transforme pas des données anciennes en actualités du jour.
+- **Réponses structurées** pour les outils d’articles : le Markdown reste lisible et les données sont aussi disponibles en `structuredContent`.
+- **Deux transports** : stdio en local, Streamable HTTP avec authentification pour un déploiement distant.
 
-Détails complets : [docs/TECHNICAL_DOCUMENTATION.md](../TECHNICAL_DOCUMENTATION.md) et les
-[ADR](../ADR/) pour le pourquoi de chaque choix (y compris les compromis assumés).
+Détails complets : [docs/TECHNICAL_DOCUMENTATION.md](https://github.com/rmouahid/NovIT/blob/main/docs/TECHNICAL_DOCUMENTATION.md) et les
+[ADR](https://github.com/rmouahid/NovIT/blob/main/docs/ADR/) pour le pourquoi de chaque choix (y compris les compromis assumés).
 
 ## Comment l'utiliser
 
@@ -64,16 +66,16 @@ Détails complets : [docs/TECHNICAL_DOCUMENTATION.md](../TECHNICAL_DOCUMENTATION
 git clone https://github.com/rmouahid/NovIT.git
 cd NovIT
 python3 -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
+pip install -e .
 ```
 
 Puis ajouter NovIT à la config MCP de Claude Desktop — le
-[guide d'installation complet](../INSTALLATION_GUIDE.md) détaille chaque étape, y compris les
+[guide d'installation complet](https://github.com/rmouahid/NovIT/blob/main/docs/INSTALLATION_GUIDE.md) détaille chaque étape, y compris les
 pièges concrets (chemin absolu vers l'interpréteur du venv, `cwd` sur la racine du dépôt).
 
 Ensuite, en conversation avec Claude : *« Quelles sont les dernières news IA pour un
 ingénieur ? »*, *« Y a-t-il des CVE critiques cette semaine ? »*, *« Creuse cet article »*. Plus
-d'exemples dans [docs/EXAMPLES.md](../EXAMPLES.md).
+d'exemples dans [docs/EXAMPLES.md](https://github.com/rmouahid/NovIT/blob/main/docs/EXAMPLES.md).
 
 ## Comment contribuer
 
@@ -82,13 +84,21 @@ Le projet est jeune et le backlog est public (voir les
 première contribution :
 
 - **Ajouter une source** : la majorité sont des flux RSS déclarés en quelques lignes, pas de
-  code à écrire — voir [docs/ADDING_A_SOURCE.md](../ADDING_A_SOURCE.md).
+  code à écrire — voir [docs/ADDING_A_SOURCE.md](https://github.com/rmouahid/NovIT/blob/main/docs/ADDING_A_SOURCE.md).
 - **Ajouter un domaine** : enrichir `config/domains.yaml` avec de nouveaux mots-clés — voir
-  [docs/ADDING_A_DOMAIN.md](../ADDING_A_DOMAIN.md).
+  [docs/ADDING_A_DOMAIN.md](https://github.com/rmouahid/NovIT/blob/main/docs/ADDING_A_DOMAIN.md).
 
-Le [guide de contribution](../../CONTRIBUTING.md) couvre le workflow complet (branches,
-commits, PR). La CI (lint + 161 tests) tourne sur chaque PR.
+Le [guide de contribution](https://github.com/rmouahid/NovIT/blob/main/CONTRIBUTING.md) couvre le workflow complet (branches,
+commits, PR). La CI (lint, tests unitaires et client MCP réel sur stdio) tourne sur chaque PR.
 
 ---
 
 *NovIT est un projet en développement actif — retours et contributions bienvenus.*
+
+
+## Limites et prochaines étapes
+
+Les temps de collecte dépendent des sources et de leurs limites de débit. Les
+critères d’évaluation manuelle restent à mesurer dans le client, et les preuves
+de publication PyPI et registre MCP doivent être vérifiées séparément du code
+de publication. Le suivi est disponible dans les issues #93, #94 et #111 du dépôt.
