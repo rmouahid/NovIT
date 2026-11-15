@@ -1,3 +1,5 @@
+<!-- mcp-name: io.github.rmouahid/novit -->
+
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="docs/assets/logo-dark.png">
@@ -138,3 +140,9 @@ dépannage : [docs/INSTALLATION_GUIDE.md](docs/INSTALLATION_GUIDE.md).
 ## Licence
 
 [MIT](LICENSE)
+
+## Publication et bilan
+
+- [Publication TestPyPI puis PyPI](docs/PUBLISHING.md)
+- [Préparation de l’inscription au registre MCP](docs/MCP_REGISTRY.md)
+- [Rétrospective v1](docs/RETROSPECTIVE_V1.md)
