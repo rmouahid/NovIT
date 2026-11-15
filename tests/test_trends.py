@@ -13,6 +13,7 @@ def test_security_templates_and_dates_do_not_become_topics():
     titles = [
         "CVE-2026-12345 — HIGH · CVSS 8.1 — OpenSSL",
         "CERTFR-2026-AVI-123 : multiples vulnérabilités dans OpenSSL",
+        "CERT-FR : multiples vulnérabilités dans OpenSSL",
         "Septembre : les nouvelles des agents OpenAI",
         "September critical vulnerabilities with Windows",
         "Fe\u0301vrier : vulne\u0301rabilite\u0301s critiques dans Linux",
