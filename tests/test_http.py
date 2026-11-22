@@ -76,13 +76,17 @@ def test_mcp_endpoint_rejects_a_missing_or_wrong_token(base_url, headers):
     assert response.headers["www-authenticate"] == "Bearer"
 
 
-def test_health_is_public_and_makes_no_network_call(base_url, monkeypatch):
+async def test_health_is_public_and_makes_no_network_call(monkeypatch):
     async def must_not_run():
         raise AssertionError("la sonde de vie ne doit pas vérifier les sources")
 
     monkeypatch.setattr("novit.mcp.http.get_health", must_not_run)
 
-    response = httpx.get(f"{base_url}/health")
+    app = create_http_app(server.app, "127.0.0.1", TOKEN)
+    async with httpx.AsyncClient(
+        transport=httpx.ASGITransport(app=app), base_url="http://localhost"
+    ) as client:
+        response = await client.get("/health")
 
     assert response.status_code == 200
     body = response.json()
@@ -91,7 +95,36 @@ def test_health_is_public_and_makes_no_network_call(base_url, monkeypatch):
     assert body["uptime_seconds"] >= 0
 
 
-def test_health_with_sources_reuses_the_health_report(base_url, monkeypatch):
+@pytest.mark.parametrize("sources", ["1", "true"])
+@pytest.mark.parametrize("token", ["", TOKEN])
+async def test_health_with_sources_rejects_repeated_anonymous_calls(
+    monkeypatch, sources, token
+):
+    async def must_not_run():
+        raise AssertionError(
+            "un appel non authentifié ne doit pas vérifier les sources"
+        )
+
+    monkeypatch.setattr("novit.mcp.http.get_health", must_not_run)
+    app = create_http_app(server.app, "127.0.0.1", token)
+    async with httpx.AsyncClient(
+        transport=httpx.ASGITransport(app=app), base_url="http://localhost"
+    ) as client:
+        for _ in range(10):
+            response = await client.get("/health", params={"sources": sources})
+            assert response.status_code == 401
+            assert response.headers["www-authenticate"] == "Bearer"
+
+        response = await client.get(
+            "/health",
+            params={"sources": sources},
+            headers={"Authorization": "Bearer mauvais"},
+        )
+        assert response.status_code == 401
+
+
+@pytest.mark.parametrize("sources", ["1", "true"])
+async def test_health_with_sources_reuses_the_health_report(monkeypatch, sources):
     report = health.HealthReport(
         status="degraded",
         uptime_seconds=12.0,
@@ -104,7 +137,15 @@ def test_health_with_sources_reuses_the_health_report(base_url, monkeypatch):
 
     monkeypatch.setattr("novit.mcp.http.get_health", fake_get_health)
 
-    response = httpx.get(f"{base_url}/health", params={"sources": "1"})
+    app = create_http_app(server.app, "127.0.0.1", TOKEN)
+    async with httpx.AsyncClient(
+        transport=httpx.ASGITransport(app=app), base_url="http://localhost"
+    ) as client:
+        response = await client.get(
+            "/health",
+            params={"sources": sources},
+            headers={"Authorization": f"Bearer {TOKEN}"},
+        )
 
     assert response.status_code == 200
     assert response.json()["status"] == "degraded"

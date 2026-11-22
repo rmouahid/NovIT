@@ -19,11 +19,12 @@ d'accès.
    même endpoint. Sélection par `novit --transport http` ou `NOVIT_TRANSPORT=http` ; stdio reste
    le défaut.
 2. **Authentification** : un jeton bearer statique, `NOVIT_API_TOKEN`, exigé sur tout chemin
-   sauf `/health`, comparé en temps constant (`hmac.compare_digest`). Le serveur refuse de
+   sauf pour la sonde de vie `/health`, comparé en temps constant (`hmac.compare_digest`). Le serveur refuse de
    démarrer sans jeton dès qu'il écoute ailleurs qu'en local.
 3. **Santé** : `GET /health` est une sonde de vie sans appel réseau (statut, version, uptime),
-   en 200 tant que le processus répond. `GET /health?sources=1` renvoie le rapport complet de
-   `get_health()`, toujours en 200 : une source tierce en panne ne justifie pas un redémarrage.
+   en 200 tant que le processus répond. Avec un jeton valide, `GET /health?sources=1`
+   (ou `sources=true`) renvoie le rapport complet de `get_health()` en 200, même si
+   une source tierce est en panne.
 
 ## Alternatives considérées
 
