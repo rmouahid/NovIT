@@ -13,10 +13,10 @@ serveur en **Streamable HTTP** ([ADR-005](ADR/0005-transport-http-authentificati
 |---|---|---|
 | `/mcp` | endpoint MCP (requêtes POST, réponses et notifications en flux SSE) | `Authorization: Bearer $NOVIT_API_TOKEN` |
 | `/health` | sonde de vie (statut, version, uptime), sans appel réseau | public |
-| `/health?sources=1` | rapport complet de `get_health()`, état de chaque source | public |
+| `/health?sources=1` ou `/health?sources=true` | rapport complet de `get_health()`, état de chaque source | jeton Bearer (global ou par utilisateur) |
 
 Sans `NOVIT_API_TOKEN` ni `NOVIT_API_TOKENS`, le serveur refuse de démarrer s'il écoute
-ailleurs qu'en local.
+ailleurs qu'en local. Le rapport détaillé exige un jeton même en local.
 
 **Plusieurs utilisateurs** ([ADR-006](ADR/0006-multi-utilisateurs-jetons.md)) : donner à chacun
 son jeton avec `NOVIT_API_TOKENS="alice:$(openssl rand -hex 32),bob:$(openssl rand -hex 32)"`.
@@ -28,6 +28,7 @@ Essai en local :
 ```bash
 NOVIT_API_TOKEN=essai novit --transport http   # http://127.0.0.1:8000/mcp
 curl http://127.0.0.1:8000/health
+curl -H 'Authorization: Bearer essai' 'http://127.0.0.1:8000/health?sources=1'
 ```
 
 Côté client, déclarer l'URL `https://<app>.fly.dev/mcp` et l'en-tête `Authorization`.

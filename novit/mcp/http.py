@@ -2,8 +2,8 @@
 
 Le endpoint MCP (Streamable HTTP, réponses en flux SSE) est servi sur `/mcp`
 et protégé par un jeton bearer : le jeton unique `NOVIT_API_TOKEN`, ou un jeton
-par utilisateur (`NOVIT_API_TOKENS`, #87). `/health` reste public pour les
-sondes de la plateforme d'hébergement.
+par utilisateur (`NOVIT_API_TOKENS`, #87). Le rapport détaillé de `/health`
+exige aussi un jeton. La sonde de vie reste publique.
 """
 
 import hmac
@@ -27,8 +27,12 @@ LOOPBACK_HOSTS = ("127.0.0.1", "localhost", "::1")
 USER_STATE_KEY = "novit_user"
 
 
+def _wants_sources(request: Request) -> bool:
+    return request.query_params.get("sources") in ("1", "true")
+
+
 class BearerTokenMiddleware:
-    """Refuse toute requête vers le endpoint MCP sans un jeton connu, et note
+    """Exige un jeton connu pour les requêtes protégées, et note
     l'utilisateur auquel appartient le jeton présenté."""
 
     def __init__(self, app: ASGIApp, tokens: dict[str, str]) -> None:
@@ -47,7 +51,7 @@ class BearerTokenMiddleware:
         return user
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
-        if scope["type"] == "http" and scope["path"] != HEALTH_PATH:
+        if scope["type"] == "http" and self._requires_token(scope):
             provided = dict(scope["headers"]).get(b"authorization", b"")
             user = self._authenticate(provided)
             if user is None:
@@ -61,6 +65,11 @@ class BearerTokenMiddleware:
             scope.setdefault("state", {})[USER_STATE_KEY] = user
         await self.app(scope, receive, send)
 
+    def _requires_token(self, scope: Scope) -> bool:
+        if scope["path"] == HEALTH_PATH:
+            return _wants_sources(Request(scope))
+        return bool(self._expected)
+
 
 async def health(request: Request) -> JSONResponse:
     """Sonde de vie, sans appel réseau ; `?sources=1` ajoute l'état des sources.
@@ -68,7 +77,7 @@ async def health(request: Request) -> JSONResponse:
     Le code HTTP reste 200 même si des sources sont en panne : l'instance
     répond, la redémarrer ne réparerait pas un site tiers indisponible.
     """
-    if request.query_params.get("sources") in ("1", "true"):
+    if _wants_sources(request):
         report = await get_health()
         return JSONResponse(asdict(report))
     return JSONResponse(
@@ -105,9 +114,8 @@ def create_http_app(
         host=host,
         custom_starlette_routes=[Route(HEALTH_PATH, health, methods=["GET"])],
     )
-    if tokens:
-        app.add_middleware(BearerTokenMiddleware, tokens=tokens)
-    else:
+    app.add_middleware(BearerTokenMiddleware, tokens=tokens)
+    if not tokens:
         logger.warning("Transport HTTP sans jeton : écoute limitée à la machine locale")
     return app
 
